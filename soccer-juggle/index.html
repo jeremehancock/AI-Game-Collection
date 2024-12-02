@@ -1,0 +1,520 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <script>
+        // Immediately apply the saved theme before any content renders
+        const savedTheme = localStorage.getItem('theme') || 'light';
+        document.documentElement.setAttribute('data-theme', savedTheme);
+    </script>
+<style>
+    :root {
+        --bg-color: #2E7D32;
+        --text-color: #fff;
+        --ball-shadow: rgba(0, 0, 0, 0.3);
+        --line-color: rgba(255, 255, 255, 0.9);
+    }
+
+    :root[data-theme="dark"] {
+        --bg-color: #172727;
+        --text-color: #fff;
+        --ball-shadow: rgba(0, 0, 0, 0.5);
+        --line-color: rgba(255, 255, 255, 0.9);
+    }
+
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        touch-action: none;
+    }
+
+    html, body {
+        height: 100%;
+        overflow: hidden;
+    }
+
+    body {
+        background: var(--bg-color);
+        color: var(--text-color);
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        display: flex;
+        flex-direction: column;
+        transition: background-color 0.3s ease;
+        visibility: hidden;
+    }
+
+    body.theme-ready {
+        visibility: visible;
+    }
+
+    #game-container {
+        position: relative;
+        flex: 1;
+        border: 2px solid var(--line-color);
+        overflow: hidden;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        margin: 60px auto 10px auto;
+        width: 90%;
+        max-height: calc(100vh - 80px);
+    }
+
+    @media (min-width: 768px) {
+        #game-container {
+            width: 60%;
+            max-width: 500px;
+            margin: 60px auto 10px auto;
+        }
+    }
+
+    #game-container::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: 
+            radial-gradient(circle 60px at center, transparent 58px, var(--line-color) 58px, var(--line-color) 60px, transparent 60px),
+            linear-gradient(to right, transparent calc(50% - 1px), var(--line-color) calc(50% - 1px), var(--line-color) calc(50% + 1px), transparent calc(50% + 1px));
+    }
+
+    #game-container::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        z-index: -1;
+        background:
+            linear-gradient(var(--line-color), var(--line-color)) top center/min(120px, 30vmin) 2px no-repeat,
+            linear-gradient(var(--line-color), var(--line-color)) top center/2px min(60px, 15vmin) no-repeat,
+            linear-gradient(var(--line-color), var(--line-color)) top min(60px, 15vmin) center/min(240px, 60vmin) 2px no-repeat,
+            linear-gradient(var(--line-color), var(--line-color)) top left calc(50% - min(120px, 30vmin))/2px min(60px, 15vmin) no-repeat,
+            linear-gradient(var(--line-color), var(--line-color)) top right calc(50% - min(120px, 30vmin))/2px min(60px, 15vmin) no-repeat,
+            linear-gradient(var(--line-color), var(--line-color)) bottom center/min(120px, 30vmin) 2px no-repeat,
+            linear-gradient(var(--line-color), var(--line-color)) bottom center/2px min(60px, 15vmin) no-repeat,
+            linear-gradient(var(--line-color), var(--line-color)) bottom min(60px, 15vmin) center/min(240px, 60vmin) 2px no-repeat,
+            linear-gradient(var(--line-color), var(--line-color)) bottom left calc(50% - min(120px, 30vmin))/2px min(60px, 15vmin) no-repeat,
+            linear-gradient(var(--line-color), var(--line-color)) bottom right calc(50% - min(120px, 30vmin))/2px min(60px, 15vmin) no-repeat;
+    }
+
+    #ball {
+        width: 80px;
+        height: 80px;
+        position: absolute;
+        left: 50%;
+        top: 50%;
+        transform: translate(-50%, -50%);
+        background: url('data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22500%22%20height%3D%22500%22%20viewBox%3D%22-2500%20-2500%205000%205000%22%3E%3Ctitle%3Esoccer%20ball%3C%2Ftitle%3E%3Cg%20stroke%3D%22%23000%22%20stroke-width%3D%2224%22%3E%3Ccircle%20fill%3D%22%23fff%22%20r%3D%222376%22%2F%3E%3Cpath%20fill%3D%22none%22%20d%3D%22m-1643-1716%20155%20158m-550%202364c231%20231%20538%20195%20826%20202m-524-2040c-491%20351-610%201064-592%201060m1216-1008c-51%20373%2084%20783%20364%201220m-107-2289c157-157%20466-267%20873-329m-528%204112c-50%20132-37%20315-8%20510m62-3883c282%2032%20792%2074%201196%20303m-404%202644c310%20173%20649%20247%201060%20180m-340-2008c-242%20334-534%20645-872%20936m1109-2119c-111-207-296-375-499-534m1146%201281c100%203%20197%2044%20290%20141m-438%20495c158%20297%20181%20718%20204%201140%22%2F%3E%3C%2Fg%3E%3Cpath%20fill%3D%22%23000%22%20d%3D%22m-1624-1700c243-153%20498-303%20856-424%20141%20117%20253%20307%20372%20492-288%20275-562%20544-724%20756-274-25-410-2-740-60%203-244%2084-499%20236-764zm2904-40c271%20248%20537%20498%20724%20788-55%20262-105%20553-180%20704-234-35-536-125-820-200-138-357-231-625-340-924%20210-156%20417-296%20616-368zm-3273%203033a2376%202376%200%200%201-378-1392l59-7c54%20342%20124%20674%20311%20928-36%20179-2%20323%2051%20458zm1197-1125c365%2060%20717%20120%201060%20180%20106%20333%20120%20667%20156%201000-263%20218-625%20287-944%20420-372-240-523-508-736-768%20122-281%20257-561%20464-832zm3013%20678a2376%202376%200%200%201-925%201147l-116-5c84-127%20114-297%20118-488%20232-111%20464-463%20696-772%2086%2030%20159%2072%20227%20118zm-2287%201527a2376%202376%200%200%201-993-251c199%2074%20367%20143%20542%2083%2053%2075%20176%20134%20451%20168z%22%2F%3E%3C%2Fsvg%3E') center/contain no-repeat;
+        filter: drop-shadow(0 4px 4px var(--ball-shadow));
+        transform-origin: center;
+        will-change: transform;
+    }
+
+    .header {
+        position: fixed;
+        left: 0;
+        right: 0;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 20px;
+        z-index: 100;
+        top: 10px;
+        padding: 0 10px;
+    }
+
+    #score-container {
+        background: rgba(0, 0, 0, 0.6);
+        padding: 5px 20px;
+        border-radius: 20px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        display: flex;
+        align-items: center;
+        font-weight: bold;
+        font-size: 24px;
+    }
+
+    .theme-toggle {
+        cursor: pointer;
+        width: 40px;
+        height: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+        background: rgba(0, 0, 0, 0.6);
+        box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        transition: transform 0.3s;
+        position: relative;
+    }
+
+    .theme-toggle:hover {
+        transform: scale(1.1);
+    }
+
+    .theme-toggle svg {
+        width: 20px;
+        height: 20px;
+        stroke: var(--text-color);
+        fill: none;
+        stroke-width: 2;
+        transition: transform 0.5s, opacity 0.3s;
+        position: absolute;
+    }
+
+    [data-theme="dark"] .sun-icon {
+        transform: rotate(180deg);
+        opacity: 0;
+    }
+
+    [data-theme="light"] .moon-icon {
+        transform: rotate(-180deg);
+        opacity: 0;
+    }
+
+    button {
+        background: #4CAF50;
+        color: white;
+        border: none;
+        padding: 8px 16px;
+        border-radius: 20px;
+        cursor: pointer;
+        font-weight: bold;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        transition: transform 0.1s;
+        font-size: 18px;
+    }
+
+    button:active {
+        transform: scale(0.95);
+    }
+
+    .message {
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        font-weight: bold;
+        opacity: 0;
+        transition: opacity 0.3s;
+        text-align: center;
+        pointer-events: none;
+        z-index: 1000;
+    }
+
+    .message.show {
+        opacity: 1;
+        pointer-events: all;
+    }
+
+    #game-over {
+        font-size: 36px;
+        background: rgba(0, 0, 0, 0.8);
+        padding: 20px 30px;
+        border-radius: 20px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 20px;
+        width: 80%;
+    }
+    
+    @media (min-width: 768px) {
+        #game-over {
+            width: unset;
+        }
+    }
+
+    .message .final-score {
+        font-size: 24px;
+        opacity: 0.8;
+    }
+
+    #restart {
+        display: none;
+        padding: 12px 24px;
+        font-size: 20px;
+        min-width: 140px;
+    }
+
+    .message.show #restart {
+        display: block;
+    }
+
+    .tap-hint {
+        position: fixed;
+        left: 50%;
+        transform: translateX(-50%);
+        font-size: 24px;
+        opacity: 0.6;
+        animation: pulse 2s infinite;
+        text-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        background: rgba(0, 0, 0, 0.6);
+        padding: 8px 16px;
+        border-radius: 16px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        bottom: 90px;
+        z-index: 1000;
+        text-align: center;
+        width: 85%;
+    }
+    
+    @media (min-width: 768px) {
+        .tap-hint {
+            width: unset;
+        }
+    }
+
+    @keyframes pulse {
+        0% { opacity: 0.6; transform: translateX(-50%) scale(1); }
+        50% { opacity: 0.8; transform: translateX(-50%) scale(1.1); }
+        100% { opacity: 0.6; transform: translateX(-50%) scale(1); }
+    }
+</style>
+</head>
+<body>
+<div class="header">
+        <div id="score-container">Score:&nbsp;<span id="score">0</span></div>
+        <div class="theme-toggle" id="themeToggle">
+            <svg class="sun-icon" viewBox="0 0 24 24">
+                <circle cx="12" cy="12" r="5"></circle>
+                <line x1="12" y1="1" x2="12" y2="3"></line>
+                <line x1="12" y1="21" x2="12" y2="23"></line>
+                <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                <line x1="1" y1="12" x2="3" y2="12"></line>
+                <line x1="21" y1="12" x2="23" y2="12"></line>
+                <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+            </svg>
+            <svg class="moon-icon" viewBox="0 0 24 24">
+                <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+            </svg>
+        </div>
+    </div>
+    <div id="game-container">
+        <div id="ball"></div>
+    </div>
+    <div class="message" id="game-over">
+        Game Over!
+        <div class="final-score">Final Score: <span>0</span></div>
+        <button id="restart">Play Again</button>
+    </div>
+    <div class="message" id="start"></div>
+    <div class="tap-hint">Tap to keep the ball in the air!</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        document.body.classList.add('theme-ready');
+    });
+
+    const ball = document.getElementById('ball');
+    const scoreElement = document.getElementById('score');
+    const gameOverElement = document.getElementById('game-over');
+    const startElement = document.getElementById('start');
+    const tapHintElement = document.querySelector('.tap-hint');
+    const restartButton = document.getElementById('restart');
+    const themeToggle = document.getElementById('themeToggle');
+
+    let x = 0;
+    let y = 0;
+    let vx = 0;
+    let vy = 0;
+    let score = 0;
+    let gameOver = false;
+    let gameStarted = false;
+    let rotation = 0;
+    let lastBounceTime = 0;
+    let lastPointLossTime = 0;
+
+    const GRAVITY = 0.6;
+    const BOUNCE_DAMPING = 0.65;
+    const DRAG = 0.995;
+    const TAP_FORCE = -18;
+    const MAX_SPEED = 30;
+    const BALL_SIZE = 80;
+    const BALL_RADIUS = BALL_SIZE / 2;
+    const MIN_BOUNCE_VELOCITY = 3;
+    const BOUNCE_ANIMATION_COOLDOWN = 300;
+    const POINT_LOSS_COOLDOWN = 500;
+
+    function toggleTheme() {
+        const html = document.documentElement;
+        const currentTheme = html.getAttribute('data-theme');
+        const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+        html.setAttribute('data-theme', newTheme);
+        localStorage.setItem('theme', newTheme);
+    }
+
+    themeToggle.addEventListener('click', toggleTheme);
+
+    function updateBallPosition() {
+        if (!gameStarted) {
+            ball.style.transform = `translate(-50%, calc(-50% + ${Math.sin(Date.now() / 1000) * 10}px))`;
+        } else {
+            ball.style.transform = `translate(calc(-50% + ${x}px), calc(-50% + ${y}px)) rotate(${rotation}deg)`;
+        }
+    }
+
+    function playBounceAnimation() {
+        const now = Date.now();
+        if (now - lastBounceTime > BOUNCE_ANIMATION_COOLDOWN) {
+            ball.classList.remove('bounce');
+            void ball.offsetWidth;
+            ball.classList.add('bounce');
+            lastBounceTime = now;
+        }
+    }
+
+    function deductPoint() {
+        const now = Date.now();
+        if (now - lastPointLossTime > POINT_LOSS_COOLDOWN) {
+            score = Math.max(0, score - 1);
+            scoreElement.textContent = score;
+            lastPointLossTime = now;
+        }
+    }
+
+    function endGame() {
+        gameOver = true;
+        gameOverElement.querySelector('.final-score span').textContent = score;
+        gameOverElement.classList.add('show');
+        tapHintElement.style.display = 'none';
+    }
+
+    function updateBall() {
+        if (gameOver || !gameStarted) return;
+
+        vy += GRAVITY;
+        vx *= DRAG;
+        vy *= DRAG;
+
+        const speed = Math.sqrt(vx * vx + vy * vy);
+        if (speed > MAX_SPEED) {
+            vx = (vx / speed) * MAX_SPEED;
+            vy = (vy / speed) * MAX_SPEED;
+        }
+
+        const nextX = x + vx;
+        const nextY = y + vy;
+
+        const container = document.getElementById('game-container');
+        const bounds = container.getBoundingClientRect();
+        const maxX = (bounds.width - BALL_SIZE) / 2;
+        const maxY = (bounds.height - BALL_SIZE) / 2;
+
+        if (nextX < -maxX) {
+            x = -maxX;
+            vx = Math.abs(vx) * BOUNCE_DAMPING;
+        } else if (nextX > maxX) {
+            x = maxX;
+            vx = -Math.abs(vx) * BOUNCE_DAMPING;
+        } else {
+            x = nextX;
+        }
+
+        if (nextY > maxY) {
+            if (Math.abs(vy) > MIN_BOUNCE_VELOCITY) {
+                y = maxY;
+                vy = -Math.abs(vy) * BOUNCE_DAMPING;
+                playBounceAnimation();
+                deductPoint();
+            } else {
+                endGame();
+                return;
+            }
+        } else if (nextY < -maxY) {
+            y = -maxY;
+            vy = Math.abs(vy) * BOUNCE_DAMPING;
+        } else {
+            y = nextY;
+        }
+
+        rotation += vx * 2;
+        updateBallPosition();
+        requestAnimationFrame(updateBall);
+    }
+
+    function tap(event) {
+        event.preventDefault();
+        if (gameOver) return;
+
+        const container = document.getElementById('game-container');
+        const bounds = container.getBoundingClientRect();
+        const touch = event.touches ? event.touches[0] : event;
+        
+        const touchX = touch.clientX - (bounds.left + bounds.width/2);
+        const touchY = touch.clientY - (bounds.top + bounds.height/2);
+
+        const dx = touchX - x;
+        const dy = touchY - y;
+        const distance = Math.sqrt(dx * dx + dy * dy);
+
+        if (distance < BALL_SIZE * 1.5) {
+            if (!gameStarted) {
+                startGame();
+                return;
+            }
+            
+            vy = TAP_FORCE;
+            vx += dx * 0.05;
+            
+            score++;
+            scoreElement.textContent = score;
+            tapHintElement.style.display = 'none';
+        }
+    }
+    
+    function startGame() {
+        gameStarted = true;
+        startElement.classList.remove('show');
+        requestAnimationFrame(updateBall);
+    }
+
+    function restart() {
+        x = 0;
+        y = 0;
+        vx = 0;
+        vy = 0;
+        score = 0;
+        rotation = 0;
+        gameOver = false;
+        gameStarted = false;
+        lastPointLossTime = 0;
+        scoreElement.textContent = '0';
+        gameOverElement.classList.remove('show');
+        startElement.classList.add('show');
+        tapHintElement.style.display = 'block';
+        ball.classList.remove('bounce');
+        updateBallPosition();
+    }
+
+    document.addEventListener('touchstart', tap);
+    document.addEventListener('mousedown', tap);
+    restartButton.addEventListener('click', restart);
+
+    window.addEventListener('resize', () => {
+        if (!gameStarted) {
+            updateBallPosition();
+        }
+    });
+
+    function floatBall() {
+        if (!gameStarted && !gameOver) {
+            updateBallPosition();
+            requestAnimationFrame(floatBall);
+        }
+    }
+
+    startElement.classList.add('show');
+    restart();
+    floatBall();
+</script>
+</body>
+</html>

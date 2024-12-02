@@ -1,0 +1,527 @@
+<!DOCTYPE html>
+<html lang="en" class="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Memory Match Game</title>
+    <script>
+        // Immediately check and apply theme before page renders
+        if (localStorage.getItem('memoryGameTheme') === 'dark') {
+            document.documentElement.classList.add('dark');
+        }
+    </script>
+<style>
+:root {
+    --bg-primary: #f0f2f5;
+    --bg-secondary: #fff;
+    --bg-tertiary: #f8f9fa;
+    --text-primary: #374151;
+    --card-front: #10B981;
+    --card-back: #3B82F6;
+    --card-matched: #8B5CF6;
+    --shadow-color: rgb(0 0 0 / 0.1);
+}
+
+.dark {
+    --bg-primary: #1a1a1a;
+    --bg-secondary: #2d2d2d;
+    --bg-tertiary: #3d3d3d;
+    --text-primary: #e5e7eb;
+    --card-front: #047857;
+    --card-back: #1d4ed8;
+    --card-matched: #7c3aed;
+    --shadow-color: rgb(0 0 0 / 0.3);
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: -apple-system, system-ui, sans-serif;
+    background: var(--bg-primary);
+    min-height: 100vh;
+    padding: 2rem 1rem;
+    transition: .3s ease;
+}
+
+.game-container {
+    background: var(--bg-secondary);
+    padding: 2rem;
+    border-radius: 12px;
+    box-shadow: 0 4px 6px -1px var(--shadow-color);
+    width: 100%;
+    max-width: 600px;
+    margin: 0 auto;
+    transition: .3s ease;
+}
+
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+    padding: 1rem;
+    background: var(--bg-tertiary);
+    border-radius: 8px;
+    transition: .3s ease;
+}
+
+.stats {
+    font-size: 1.125rem;
+    color: var(--text-primary);
+    transition: .3s ease;
+}
+
+.theme-toggle {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: .5rem;
+    color: var(--text-primary);
+    display: grid;
+    place-items: center;
+    transition: .3s ease;
+}
+
+.theme-toggle svg {
+    width: 24px;
+    height: 24px;
+    stroke-width: 2;
+}
+
+.sun-icon, .dark .moon-icon {
+    display: none;
+}
+
+.moon-icon, .dark .sun-icon {
+    display: block;
+}
+
+.action-button {
+    display: flex;
+    align-items: center;
+    gap: .5rem;
+    padding: .75rem;
+    background: var(--card-front);
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: .3s ease;
+}
+
+.action-button:hover {
+    filter: brightness(110%);
+    transform: translateY(-1px);
+}
+
+.action-button:active {
+    transform: translateY(0);
+}
+
+.action-button svg {
+    width: 20px;
+    height: 20px;
+}
+
+.button-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.card {
+    aspect-ratio: 1;
+    position: relative;
+    cursor: pointer;
+    transform-style: preserve-3d;
+    transition: transform .6s;
+}
+
+.card:hover {
+    transform: scale(1.05);
+}
+
+.card.flipped {
+    transform: rotateY(180deg);
+}
+
+.card-face {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    backface-visibility: hidden;
+    display: grid;
+    place-items: center;
+    font-size: 2rem;
+    font-weight: bold;
+    color: #fff;
+    border-radius: 8px;
+    user-select: none;
+    transition: .3s ease;
+}
+
+.card-front {
+    background: var(--card-front);
+}
+
+.card-back {
+    background: var(--card-back);
+    transform: rotateY(180deg);
+}
+
+.card.matched .card-back {
+    background: var(--card-matched);
+}
+
+.card.matched {
+    cursor: default;
+}
+
+.modal {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: var(--bg-secondary);
+    padding: 2rem;
+    border-radius: 12px;
+    box-shadow: 0 20px 25px -5px var(--shadow-color);
+    text-align: center;
+    display: none;
+    z-index: 20;
+    transition: .3s ease;
+    min-width: 280px;
+}
+
+.modal h2 {
+    margin-bottom: 1rem;
+    color: var(--text-primary);
+}
+
+.modal p {
+    margin-bottom: .5rem;
+    color: var(--text-primary);
+}
+
+.modal button {
+    margin: 1.5rem auto 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: .5rem;
+    padding: .75rem 1.5rem;
+    width: fit-content;
+}
+
+.modal button .button-icon {
+    display: inline-flex;
+    align-items: center;
+}
+
+.overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, .5);
+    display: none;
+    z-index: 10;
+}
+
+.visible {
+    display: block;
+}
+
+@media (max-width: 480px) {
+    .game-container {
+        padding: 1rem;
+    }
+
+    .grid {
+        gap: .5rem;
+    }
+
+    .card-face {
+        font-size: 1.5rem;
+    }
+
+    .header {
+        flex-wrap: wrap;
+        gap: .5rem;
+    }
+
+    .stats {
+        font-size: 1rem;
+    }
+
+    .action-button {
+        padding: .5rem;
+    }
+
+    .action-button svg {
+        width: 16px;
+        height: 16px;
+    }
+}
+</style>
+</head>
+<body>
+    <div class="game-container">
+        <div class="header">
+            <div class="stats">Time: <span id="timer">0:00</span></div>
+            <div class="stats">Moves: <span id="moves">0</span></div>
+            <button class="theme-toggle" id="themeToggle" aria-label="Toggle theme">
+                <svg class="sun-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+                </svg>
+                <svg class="moon-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+                </svg>
+            </button>
+            <button class="action-button" id="restart" aria-label="Restart game">
+                <span class="button-icon">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                    </svg>
+                </span>
+            </button>
+        </div>
+        <div class="grid" id="grid"></div>
+    </div>
+
+    <div class="modal" id="modal">
+        <h2>Congratulations! 🎉</h2>
+        <p>Time: <span id="finalTime">0:00</span></p>
+        <p>Moves: <span id="finalMoves">0</span></p>
+        <button class="action-button" id="playAgain">
+            <span class="button-icon">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                </svg>
+            </span>
+            Play Again
+        </button>
+    </div>
+
+    <div class="overlay" id="overlay"></div>
+
+    <script>
+        class MemoryGame {
+            constructor() {
+                this.cards = [];
+                this.flippedCards = [];
+                this.matchedPairs = 0;
+                this.moves = 0;
+                this.timer = 0;
+                this.gameStarted = false;
+                this.timerInterval = null;
+                this.isLocked = false;
+                
+                // Initialize theme from localStorage
+                this.isDarkMode = localStorage.getItem('memoryGameTheme') === 'dark';
+                
+                // DOM elements
+                this.gridElement = document.getElementById('grid');
+                this.timerElement = document.getElementById('timer');
+                this.movesElement = document.getElementById('moves');
+                this.modalElement = document.getElementById('modal');
+                this.overlayElement = document.getElementById('overlay');
+                this.finalTimeElement = document.getElementById('finalTime');
+                this.finalMovesElement = document.getElementById('finalMoves');
+                this.themeToggle = document.getElementById('themeToggle');
+
+                // Apply initial theme
+                this.applyTheme();
+                
+                this.initGame();
+                this.setupEventListeners();
+            }
+
+            initGame() {
+                const numbers = Array.from({ length: 8 }, (_, i) => i + 1);
+                this.cards = [...numbers, ...numbers];
+                this.shuffleCards();
+                this.renderGrid();
+            }
+
+            shuffleCards() {
+                for (let i = this.cards.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [this.cards[i], this.cards[j]] = [this.cards[j], this.cards[i]];
+                }
+            }
+
+            renderGrid() {
+                this.gridElement.innerHTML = '';
+                this.cards.forEach((number, index) => {
+                    const card = document.createElement('div');
+                    card.className = 'card';
+                    card.dataset.index = index;
+                    card.dataset.value = number;
+                    
+                    const front = document.createElement('div');
+                    front.className = 'card-face card-front';
+                    front.textContent = '?';
+                    
+                    const back = document.createElement('div');
+                    back.className = 'card-face card-back';
+                    back.textContent = number;
+                    
+                    card.appendChild(front);
+                    card.appendChild(back);
+                    this.gridElement.appendChild(card);
+                });
+            }
+
+            startTimer() {
+                if (!this.gameStarted) {
+                    this.gameStarted = true;
+                    this.timerInterval = setInterval(() => {
+                        this.timer++;
+                        this.updateTimerDisplay();
+                    }, 1000);
+                }
+            }
+
+            updateTimerDisplay() {
+                const minutes = Math.floor(this.timer / 60);
+                const seconds = this.timer % 60;
+                const formattedTime = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+                this.timerElement.textContent = formattedTime;
+            }
+
+            flipCard(card) {
+                if (
+                    this.isLocked || 
+                    this.flippedCards.length === 2 || 
+                    card.classList.contains('matched') || 
+                    card.classList.contains('flipped')
+                ) {
+                    return;
+                }
+
+                this.startTimer();
+                card.classList.add('flipped');
+                this.flippedCards.push(card);
+
+                if (this.flippedCards.length === 2) {
+                    this.moves++;
+                    this.movesElement.textContent = this.moves;
+                    this.checkMatch();
+                }
+            }
+
+            checkMatch() {
+                this.isLocked = true;
+                const [firstCard, secondCard] = this.flippedCards;
+                const isMatch = firstCard.dataset.value === secondCard.dataset.value;
+
+                if (isMatch) {
+                    this.handleMatch(firstCard, secondCard);
+                } else {
+                    this.handleMismatch(firstCard, secondCard);
+                }
+            }
+
+            handleMatch(firstCard, secondCard) {
+                setTimeout(() => {
+                    firstCard.classList.add('matched');
+                    secondCard.classList.add('matched');
+                    this.matchedPairs++;
+
+                    if (this.matchedPairs === 8) {
+                        this.endGame();
+                    }
+
+                    this.resetFlippedCards();
+                }, 500);
+            }
+
+            handleMismatch(firstCard, secondCard) {
+                setTimeout(() => {
+                    firstCard.classList.remove('flipped');
+                    secondCard.classList.remove('flipped');
+                    this.resetFlippedCards();
+                }, 1000);
+            }
+
+            resetFlippedCards() {
+                this.flippedCards = [];
+                this.isLocked = false;
+            }
+
+            endGame() {
+                clearInterval(this.timerInterval);
+                this.finalTimeElement.textContent = this.timerElement.textContent;
+                this.finalMovesElement.textContent = this.moves;
+                this.modalElement.classList.add('visible');
+                this.overlayElement.classList.add('visible');
+            }
+
+            resetGame() {
+                clearInterval(this.timerInterval);
+                this.cards = [];
+                this.flippedCards = [];
+                this.matchedPairs = 0;
+                this.moves = 0;
+                this.timer = 0;
+                this.gameStarted = false;
+                this.isLocked = false;
+
+                this.timerElement.textContent = '0:00';
+                this.movesElement.textContent = '0';
+                this.modalElement.classList.remove('visible');
+                this.overlayElement.classList.remove('visible');
+
+                this.initGame();
+            }
+
+            toggleTheme() {
+                this.isDarkMode = !this.isDarkMode;
+                localStorage.setItem('memoryGameTheme', this.isDarkMode ? 'dark' : 'light');
+                this.applyTheme();
+            }
+
+            applyTheme() {
+                document.documentElement.classList.toggle('dark', this.isDarkMode);
+            }
+
+            setupEventListeners() {
+                this.gridElement.addEventListener('click', (e) => {
+                    const clickedCard = e.target.closest('.card');
+                    if (clickedCard) {
+                        this.flipCard(clickedCard);
+                    }
+                });
+
+                document.getElementById('restart').addEventListener('click', () => {
+                    this.resetGame();
+                });
+
+                document.getElementById('playAgain').addEventListener('click', () => {
+                    this.resetGame();
+                });
+
+                this.themeToggle.addEventListener('click', () => {
+                    this.toggleTheme();
+                });
+            }
+        }
+
+        // Initialize game once DOM is fully loaded
+        window.addEventListener('load', () => {
+            new MemoryGame();
+        });
+    </script>
+</body>
+</html>
