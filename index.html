@@ -4,6 +4,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AI Game Collection</title>
+	<link rel="icon" type="image/png" href="images/icons/favicon-96x96.png" sizes="96x96" />
+	<link rel="icon" type="image/svg+xml" href="images/icons/favicon.svg" />
+	<link rel="shortcut icon" href="images/icons/favicon.ico" />
+	<link rel="apple-touch-icon" sizes="180x180" href="images/icons/apple-touch-icon.png" />
+	<meta name="apple-mobile-web-app-title" content="AI Game Collection" />
+	<link rel="manifest" href="site.webmanifest" />
     <style>
         * {
             margin: 0;
@@ -197,6 +203,41 @@
                 font-size: 2rem;
             }
         }
+        .github-link {
+            position: fixed;
+            top: 2rem;
+            right: 2rem;
+            opacity: 0.7;
+            transition: all 0.3s ease;
+            background: rgba(255, 255, 255, 0.05);
+            padding: 0.75rem;
+            border-radius: 50%;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+        }
+
+        .github-link:hover {
+            opacity: 1;
+            background: rgba(255, 255, 255, 0.1);
+            border-color: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+        }
+
+        @media (max-width: 768px) {
+            .github-link {
+                top: .5rem;
+                right: .5rem;
+                padding: 0.5rem;
+                transform: scale(0.9);
+            }
+            
+            .github-link:hover {
+                transform: scale(0.9) translateY(-2px);
+            }
+        }
     </style>
 </head>
 <body>
@@ -204,6 +245,11 @@
         <header>
             <h1>AI Game Collection</h1>
             <p class="subtitle">This site and all games were built using AI with minimal code changes.</p>
+            <a href="https://github.com/jeremehancock/AI-Game-Collection" target="_blank" class="github-link">
+                <svg height="24" width="24" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"></path>
+                </svg>
+            </a>
         </header>
         <div class="games-grid" id="gamesContainer">
             <!-- Games will be dynamically inserted here -->
@@ -410,6 +456,14 @@
             createGameCards();
             document.getElementById('backButton').addEventListener('click', goBack);
         });
+        
+    if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('service-worker.js')
+        .then(registration => console.log('Service Worker registered with scope:', registration.scope))
+        .catch(error => console.error('Service Worker registration failed:', error));
+    });
+  }
     </script>
 </body>
 </html>
