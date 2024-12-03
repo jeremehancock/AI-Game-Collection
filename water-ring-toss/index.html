@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width,initial-scale=1" />
+        <title>Water Ring Toss</title>
+        <link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400&display=swap" rel="stylesheet" />
+        <style>
+            * {
+                margin: 0;
+                padding: 0;
+                box-sizing: border-box;
+            }
+            html,
+            body {
+                min-height: 100vh;
+                height: 100%;
+                background: #000;
+                overflow: hidden;
+            }
+			#game-container {
+				position: relative;
+				margin: 20px auto;
+				height: calc(100dvh - 40px);
+				max-height: calc(100% - 40px);
+				background: #f0f8ff;
+				border: 8px solid #f44;
+				border-radius: 20px;
+				display: flex;
+				flex-direction: column;
+				touch-action: none;
+				overflow: hidden;
+			}
+			@media (min-width: 751px) {
+				#game-container {
+				    max-width: 550px;
+				}
+			}
+            #overlay {
+                display: none;
+                position: fixed;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background: rgba(0, 0, 0, 0.7);
+                justify-content: center;
+                align-items: center;
+                flex-direction: column;
+                gap: 20px;
+                z-index: 1000;
+            }
+            #overlay.show {
+                display: flex;
+            }
+            #overlay h1 {
+                color: #fff;
+                font-size: 48px;
+                text-shadow: 2px 2px 4px #0007;
+            }
+            #playAgain {
+                padding: 15px 30px;
+                font-size: 24px;
+                background: #f44;
+                color: #fff;
+                border: none;
+                border-radius: 25px;
+                cursor: pointer;
+                box-shadow: 0 4px 8px #0003;
+                transition: transform 0.2s;
+            }
+            #playAgain:hover {
+                transform: scale(1.05);
+            }
+            #c {
+                flex: 1;
+                width: 100%;
+                background: #f0f8ff;
+                touch-action: none;
+                display: block;
+            }
+            .controls {
+                min-height: 80px;
+                background: #f44;
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                padding: 10px 20px;
+                gap: 10px;
+                flex-wrap: wrap;
+                border-bottom-left-radius: 11px;
+                border-bottom-right-radius: 11px;
+                position: relative;
+                overflow: hidden;
+            }
+            .game-title {
+                color: #000;
+                font-size: 32px;
+                font-family: Rubik, sans-serif;
+                text-transform: uppercase;
+                letter-spacing: 1px;
+                font-weight: bold;
+                margin-left: 70px;
+            }
+            .b {
+                width: 60px;
+                height: 60px;
+                border-radius: 50%;
+                background: #fff;
+                border: none;
+                box-shadow: 0 2px 4px #0003;
+                cursor: pointer;
+                position: relative;
+                -webkit-tap-highlight-color: transparent;
+            }
+            @media (max-height: 500px) {
+                .controls {
+                    min-height: 60px;
+                }
+                .b {
+                    width: 45px;
+                    height: 45px;
+                }
+                .game-title {
+                    font-size: 24px;
+                }
+            }
+            @media (max-width: 500px) {
+                .game-title {
+                    font-size: 22px;
+                }
+            }
+        </style>
+    </head>
+    <body>
+        <div id="game-container">
+            <div id="overlay">
+                <h1>You Won!</h1>
+                <button id="playAgain">Play Again</button>
+            </div>
+            <canvas id="c"></canvas>
+            <div class="controls">
+                <div class="game-title">Water Ring Toss</div>
+                <button class="b" id="m"></button>
+            </div>
+        </div>
+        <script>
+            const c = document.getElementById("c"),
+                ctx = c.getContext("2d"),
+                g = { r: [], p: [], w: [], b: [], pressed: 0 };
+            let G = { x: 0, y: 0.3 },
+                t = 0;
+            function getPlayArea() {
+                const controls = document.querySelector(".controls");
+                return { width: c.width, height: c.height - controls.offsetHeight, bottom: c.height };
+            }
+            function z() {
+                c.width = c.clientWidth;
+                c.height = c.clientHeight;
+                i();
+            }
+            function P(x, y) {
+                this.x = x;
+                this.y = y;
+                this.h = 0;
+                this.r = [];
+                this.d = function () {
+                    ctx.beginPath();
+                    ctx.arc(this.x, this.y, 10, 0, Math.PI * 2);
+                    ctx.fillStyle = "#444";
+                    ctx.fill();
+                    ctx.beginPath();
+                    ctx.arc(this.x - 3, this.y - 3, 4, 0, Math.PI * 2);
+                    ctx.fillStyle = "#fff8";
+                    ctx.fill();
+                    this.r.forEach((r, i) => {
+                        let a = Math.atan2(G.x, Math.abs(G.y)),
+                            m = Math.PI / 4,
+                            C = Math.max(-m, Math.min(m, a)),
+                            o = 0.1 / (i + 1),
+                            f = 1.5,
+                            O = Math.sin(t * f) * o,
+                            F = C + O,
+                            L = 12 + i * 8;
+                        r.x = this.x + Math.sin(F) * L;
+                        r.y = this.y + Math.cos(F) * L;
+                    });
+                };
+            }
+            function R(x, y, c) {
+                this.x = x;
+                this.y = y;
+                this.vx = 0;
+                this.vy = -15 - Math.random() * 5;
+                this.r = 25;
+                this.c = c;
+                this.p = null;
+                this.w = 0;
+                this.i = 0;
+                this.u = function () {
+                    if (this.p) return;
+                    this.vy += G.y;
+                    this.vx += G.x;
+                    this.w += (Math.random() - 0.5) * 0.1;
+                    this.w *= 0.95;
+                    this.x += this.vx + Math.sin(this.w) * 2;
+                    this.y += this.vy;
+                    let s = Math.sqrt(this.vx * this.vx + this.vy * this.vy);
+                    if (s > 0) {
+                        let d = 0.98 - Math.min(0.1, s * 0.001);
+                        this.vx *= d;
+                        this.vy *= d;
+                    }
+                    s < 2 && ((this.vx += (Math.random() - 0.5) * 0.2), (this.vy -= Math.random() * 0.1));
+                    const area = getPlayArea();
+                    this.x < this.r ? ((this.x = this.r), (this.vx *= -0.6), (this.vy *= 0.9)) : this.x > area.width - this.r && ((this.x = area.width - this.r), (this.vx *= -0.6), (this.vy *= 0.9));
+                    this.y > area.bottom - this.r ? ((this.y = area.bottom - this.r), (this.vy *= -0.6), (this.vx *= 0.9)) : this.y < this.r && ((this.y = this.r), (this.vy *= -0.6), (this.vx *= 0.9));
+                    for (let i = 0; i < g.p.length; i++) {
+                        let p = g.p[i];
+                        if (p.r.length < 3) {
+                            let d = this.x - p.x,
+                                y = this.y - p.y,
+                                t = Math.sqrt(d * d + y * y);
+                            if (t < this.r * 1.2) {
+                                this.p = p;
+                                this.i = p.r.length;
+                                p.r.push(this);
+                                this.vx = 0;
+                                this.vy = 0;
+                                break;
+                            }
+                        }
+                    }
+                };
+                this.d = function () {
+                    ctx.save();
+                    const X = Math.round(this.x),
+                        Y = Math.round(this.y);
+                    if (this.p) {
+                        ctx.beginPath();
+                        ctx.arc(X, Y + 2, this.r, 0, Math.PI * 2);
+                        ctx.fillStyle = "rgba(0,0,0,0.1)";
+                        ctx.fill();
+                    }
+                    ctx.beginPath();
+                    ctx.arc(X, Y, this.r, 0, Math.PI * 2);
+                    ctx.arc(X, Y, this.r - 6, 0, Math.PI * 2, true);
+                    ctx.fillStyle = this.c;
+                    ctx.fill();
+                    if (this.p) {
+                        ctx.beginPath();
+                        ctx.arc(X - this.r * 0.3, Y - this.r * 0.3, this.r * 0.2, 0, Math.PI * 2);
+                        ctx.fillStyle = "rgba(255,255,255,0.2)";
+                        ctx.fill();
+                    }
+                    ctx.restore();
+                };
+            }
+            function B(x) {
+                this.x = x;
+                this.y = getPlayArea().bottom;
+                this.vy = -4 - Math.random() * 2;
+                this.r = Math.random() * 2 + 1.5;
+                this.l = 1;
+                this.w = Math.random() * 7;
+                this.s = Math.random() * 0.1 + 0.05;
+                this.u = function () {
+                    this.w += this.s;
+                    this.x += Math.sin(this.w) * 0.5;
+                    this.y += this.vy;
+                    this.vy *= 0.99;
+                    this.y < getPlayArea().bottom - 200 && (this.l *= 0.95);
+                    return this.l > 0.1;
+                };
+                this.d = function () {
+                    ctx.beginPath();
+                    ctx.arc(this.x, this.y, this.r, 0, Math.PI * 2);
+                    let g = ctx.createRadialGradient(this.x - this.r * 0.3, this.y - this.r * 0.3, 0, this.x, this.y, this.r);
+                    g.addColorStop(0, `rgba(200,220,255,${this.l * 0.8})`);
+                    g.addColorStop(1, `rgba(150,200,255,${this.l * 0.4})`);
+                    ctx.fillStyle = g;
+                    ctx.fill();
+                };
+            }
+            function W(x, y, a, s) {
+                this.x = x;
+                this.y = y;
+                this.vx = Math.cos(a) * s;
+                this.vy = Math.sin(a) * s;
+                this.r = Math.random() * 3 + 2;
+                this.l = 1;
+                this.w = Math.random() * 7;
+                this.s = Math.random() * 0.1 + 0.05;
+                this.f = s * 0.2;
+                this.u = function () {
+                    this.w += this.s;
+                    this.x += Math.sin(this.w) * 0.2 + this.vx;
+                    this.y += this.vy;
+                    this.vy += G.y;
+                    this.vx += G.x;
+                    this.vx *= 0.985;
+                    this.vy *= 0.985;
+                    const area = getPlayArea();
+                    this.x < this.r ? ((this.vx *= -0.5), (this.vy += Math.random() - 0.5), (this.x = this.r)) : this.x > area.width - this.r && ((this.vx *= -0.5), (this.vy += Math.random() - 0.5), (this.x = area.width - this.r));
+                    this.y < this.r && ((this.vy *= -0.5), (this.vx += Math.random() - 0.5), (this.y = this.r));
+                    for (let i = 0; i < g.r.length; i++) {
+                        let r = g.r[i];
+                        if (!r.p) {
+                            let d = r.x - this.x,
+                                y = r.y - this.y,
+                                t = Math.sqrt(d * d + y * y),
+                                ri = r.r * 3;
+                            if (t < ri) {
+                                let f = (1 - t / ri) * this.f,
+                                    l = Math.max(0, -this.vy) * 0.03;
+                                r.vx += (d / t) * f * 0.1;
+                                r.vy += ((y / t) * f - l) * 0.1;
+                                r.vx += (Math.random() - 0.5) * f * 0.03;
+                                r.vy += (Math.random() - 0.5) * f * 0.03;
+                            }
+                        }
+                    }
+                    this.l *= 0.98;
+                    return this.l > 0.1;
+                };
+                this.d = function () {
+                    ctx.beginPath();
+                    ctx.arc(Math.round(this.x), Math.round(this.y), this.r, 0, Math.PI * 2);
+                    let g = ctx.createRadialGradient(this.x - this.r * 0.3, this.y - this.r * 0.3, 0, this.x, this.y, this.r);
+                    g.addColorStop(0, `rgba(200,220,255,${this.l * 0.8})`);
+                    g.addColorStop(1, `rgba(150,200,255,${this.l * 0.4})`);
+                    ctx.fillStyle = g;
+                    ctx.fill();
+                };
+            }
+            function j(x) {
+                const area = getPlayArea();
+                for (let i = 0; i < 3; i++) g.b.push(new B(x + (Math.random() - 0.5) * 40));
+                for (let i = 0; i < 25; i++) {
+                    let s = Math.pow(Math.random(), 2) * 1.2,
+                        a = -1.7 - 0.2 + (Math.random() - 0.5) * s,
+                        f = 1 - Math.abs(a + 1.7) / 1.5,
+                        v = (10 + Math.random() * 6) * f;
+                    g.w.push(new W(x + (Math.random() - 0.5) * 30, area.bottom, a, v));
+                }
+            }
+            function u() {
+                if (g.pressed) j(c.width * 0.5);
+                if (g.pressed) requestAnimationFrame(u);
+            }
+            function i() {
+                const area = getPlayArea();
+                let h = area.height * 0.3,
+                    s = area.width / 6;
+                g.p = [new P(s, h * 1.2), new P(s * 2, h * 0.8), new P(s * 3, h * 1.2), new P(s * 4, h * 0.8), new P(s * 5, h * 1.2)];
+                g.r = [];
+                const C = ["#FFD700", "#22AA22", "#4444FF", "#FF4444", "#AA44AA", "#44AAAA", "#FF8800", "#88FF00"];
+                for (let i = 0; i < 8; i++) g.r.push(new R(area.width * (0.2 + i * 0.1), area.bottom, C[i]));
+                g.w = [];
+                g.b = [];
+                document.getElementById("overlay").classList.remove("show");
+                G = { x: 0, y: 0.3 };
+            }
+            function p() {
+                t += 0.016;
+                g.w = g.w.filter((p) => p.u());
+                g.b = g.b.filter((p) => p.u());
+                for (let i = 0; i < g.r.length; i++) g.r[i].u();
+            }
+            function d() {
+                ctx.clearRect(0, 0, c.width, c.height);
+                for (let i = 0; i < g.p.length; i++) g.p[i].d();
+                for (let i = 0; i < g.r.length; i++) g.r[i].d();
+                for (let i = 0; i < g.w.length; i++) g.w[i].d();
+                for (let i = 0; i < g.b.length; i++) g.b[i].d();
+            }
+            function w() {
+                return g.r.every((r) => r.p);
+            }
+            function v() {
+                document.getElementById("overlay").classList.add("show");
+            }
+            function l() {
+                p();
+                d();
+                if (w()) v();
+                requestAnimationFrame(l);
+            }
+            function h(e) {
+                let x = e.gamma,
+                    y = e.beta;
+                if (!x || !y) return;
+                x = Math.max(-90, Math.min(90, x));
+                y = Math.max(-90, Math.min(90, y));
+                G.x = x * 0.01;
+                G.y = 0.3 + y * 0.01;
+            }
+            function n() {
+                typeof DeviceOrientationEvent.requestPermission == "function"
+                    ? DeviceOrientationEvent.requestPermission()
+                          .then((p) => {
+                              p == "granted" && window.addEventListener("deviceorientation", h);
+                          })
+                          .catch(console.error)
+                    : window.addEventListener("deviceorientation", h);
+            }
+            window.onload = function () {
+                z();
+                window.addEventListener("resize", z);
+                l();
+                n();
+                document.getElementById("playAgain").addEventListener("click", z);
+            };
+            const m = document.getElementById("m");
+            function s(e) {
+                e.preventDefault();
+                g.pressed = 1;
+                u();
+            }
+            function T() {
+                g.pressed = 0;
+            }
+            m.addEventListener("mousedown", s);
+            m.addEventListener("mouseup", T);
+            m.addEventListener("touchstart", s);
+            m.addEventListener("touchend", T);
+        </script>
+    </body>
+</html>
+

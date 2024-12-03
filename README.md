@@ -12,12 +12,16 @@ A classic card-matching game that helps improve concentration and recall abiliti
 ### Soccer Juggle
 Keep the soccer ball in the air for as long as possible. Challenge yourself to achieve your highest juggling streak in this addictive skill-based game.
 
+### Water Ring Toss
+Test your skill and patience in this classic water game! Use precision to land all the rings onto the pegs. How many can you score?
+
 ## 📸 Screenshots
 <div align="center">
     <img src="https://jereme.dev/games/images/screenshots/landing.png" width="300" alt="Game Menu"/>
     <img src="https://jereme.dev/games/images/screenshots/pipes-puzzle.png" width="300" alt="Pipes Puzzle Game"/>
     <img src="https://jereme.dev/games/images/screenshots/memory.png" width="300" alt="Memory Game"/>
     <img src="https://jereme.dev/games/images/screenshots/soccer-juggle.png" width="300" alt="Soccer Juggle Game"/>
+    <img src="https://jereme.dev/games/images/screenshots/water-ring-toss.png" width="300" alt="Water Ring Toss"/>
 </div>
 
 ## 🚀 Features
