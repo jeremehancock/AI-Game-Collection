@@ -26,7 +26,6 @@
   },
   "theme_color": "#ffffff",	
   "background_color": "#ffffff",
-  "display": "standalone",
     "display_override": [
     "fullscreen",
     "window-controls-overlay"
