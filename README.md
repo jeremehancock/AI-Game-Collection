@@ -21,7 +21,7 @@ Test your skill and patience in this classic water game! Use precision to land a
     <img src="https://jereme.dev/games/images/screenshots/pipes-puzzle.png" width="300" alt="Pipes Puzzle Game"/>
     <img src="https://jereme.dev/games/images/screenshots/memory.png" width="300" alt="Memory Game"/>
     <img src="https://jereme.dev/games/images/screenshots/soccer-juggle.png" width="300" alt="Soccer Juggle Game"/>
-    <img src="https://jereme.dev/games/images/screenshots/water-ring-toss.png" width="300" alt="Water Ring Toss"/>
+    <img src="https://jereme.dev/games/images/screenshots/water-ring-toss-game.png" width="300" alt="Water Ring Toss"/>
 </div>
 
 ## 🚀 Features
