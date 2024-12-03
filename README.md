@@ -80,7 +80,7 @@ Install the collection as a PWA for a native app-like experience:
 ### 📲 Android App
 For Android users preferring a native experience:
 
-Coming soon!
+[![Get it on Google Play](https://play.google.com/intl/en_us/badges/static/images/badges/en_badge_web_generic.png)](https://play.google.com/store/apps/details?id=dev.jereme.games.twa)
 
 ## 🤖 AI Development
 This project showcases the possibilities of AI-assisted development, with all games and the main interface being primarily built using AI tools, requiring minimal manual code adjustments.
