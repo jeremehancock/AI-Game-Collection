@@ -42,7 +42,6 @@ The site is built using:
 
 ## 🎨 Design Features
 - Gradient backgrounds
-- Glass-morphism effects
 - Hover animations
 - Responsive card layout
 - Adaptive spacing and sizing
