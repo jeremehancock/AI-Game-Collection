@@ -40,11 +40,14 @@
 }
 
 body {
+    display: flex;
     font-family: -apple-system, system-ui, sans-serif;
     background: var(--bg-primary);
     min-height: 100vh;
     padding: 2rem 1rem;
     transition: .3s ease;
+    justify-content: center;  /* Center horizontally */
+    align-items: center;      /* Center vertically */
 }
 
 .game-container {
@@ -56,6 +59,7 @@ body {
     max-width: 600px;
     margin: 0 auto;
     transition: .3s ease;
+    box-sizing: border-box; 
 }
 
 .header {

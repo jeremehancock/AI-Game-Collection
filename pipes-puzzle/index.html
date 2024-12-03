@@ -37,27 +37,27 @@
             box-sizing: border-box;
         }
 
-        body {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            background: var(--bg-color);
-            font-family: system-ui, sans-serif;
-            color: var(--text-color);
-            transition: background-color 0.3s;
-            min-height: 100vh;
-            padding: 16px;
-        }
+		body {
+			display: flex;
+			justify-content: center;  /* Center horizontally */
+			align-items: center;      /* Center vertically */
+			background: var(--bg-color);
+			font-family: system-ui, sans-serif;
+			color: var(--text-color);
+			transition: background-color 0.3s;
+			min-height: 100vh;         /* Ensure body takes full height */
+			padding: 16px;
+		}
 
-        .game-container {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 16px;
-            width: 100%;
-            max-width: min(400px, 100%);
-            padding-top: 20px;
-        }
+		.game-container {
+			display: flex;
+			flex-direction: column;
+			align-items: center;
+			gap: 16px;
+			width: 100%;
+			max-width: min(400px, 100%);
+			box-sizing: border-box;    /* Ensure padding does not affect the centering */
+		}
 
         .header {
             width: 100%;

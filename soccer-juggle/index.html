@@ -8,297 +8,301 @@
         document.documentElement.setAttribute('data-theme', savedTheme);
     </script>
 <style>
-    :root {
-        --bg-color: #2E7D32;
-        --text-color: #fff;
-        --ball-shadow: rgba(0, 0, 0, 0.3);
-        --line-color: rgba(255, 255, 255, 0.9);
-    }
+	:root {
+		--bg-color: #2E7D32;
+		--text-color: #fff;
+		--ball-shadow: rgba(0, 0, 0, 0.3);
+		--line-color: rgba(255, 255, 255, 0.9);
+	}
 
-    :root[data-theme="dark"] {
-        --bg-color: #172727;
-        --text-color: #fff;
-        --ball-shadow: rgba(0, 0, 0, 0.5);
-        --line-color: rgba(255, 255, 255, 0.9);
-    }
+	:root[data-theme="dark"] {
+		--bg-color: #172727;
+		--text-color: #fff;
+		--ball-shadow: rgba(0, 0, 0, 0.5);
+		--line-color: rgba(255, 255, 255, 0.9);
+	}
 
-    * {
-        margin: 0;
-        padding: 0;
-        box-sizing: border-box;
-        touch-action: none;
-    }
+	* {
+		margin: 0;
+		padding: 0;
+		box-sizing: border-box;
+		touch-action: none;
+	}
 
-    html, body {
-        height: 100%;
-        overflow: hidden;
-    }
+	html, body {
+		height: 100%;
+		overflow: hidden;
+	}
 
-    body {
-        background: var(--bg-color);
-        color: var(--text-color);
-        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-        display: flex;
-        flex-direction: column;
-        transition: background-color 0.3s ease;
-        visibility: hidden;
-    }
+	body {
+		background: var(--bg-color);
+		color: var(--text-color);
+		font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+		display: flex;
+		flex-direction: column;
+		transition: background-color 0.3s ease;
+		visibility: hidden;
+	}
 
-    body.theme-ready {
-        visibility: visible;
-    }
+	body.theme-ready {
+		visibility: visible;
+	}
 
-    #game-container {
-        position: relative;
-        flex: 1;
-        border: 2px solid var(--line-color);
-        overflow: hidden;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        margin: 60px auto 10px auto;
-        width: 90%;
-        max-height: calc(100vh - 80px);
-    }
+	.game-wrapper {
+		position: relative;
+		width: 90%;
+		max-width: 500px;
+		margin: 60px auto 10px auto;
+	}
 
-    @media (min-width: 768px) {
-        #game-container {
-            width: 60%;
-            max-width: 500px;
-            margin: 60px auto 10px auto;
-        }
-    }
+	@media (min-width: 768px) {
+		.game-wrapper {
+		    width: 60%;
+		}
+	}
 
-    #game-container::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        background: 
-            radial-gradient(circle 60px at center, transparent 58px, var(--line-color) 58px, var(--line-color) 60px, transparent 60px),
-            linear-gradient(to right, transparent calc(50% - 1px), var(--line-color) calc(50% - 1px), var(--line-color) calc(50% + 1px), transparent calc(50% + 1px));
-    }
+	.header {
+		position: absolute;
+		width: 100%;
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		z-index: 100;
+		top: -50px;
+	}
 
-    #game-container::after {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        z-index: -1;
-        background:
-            linear-gradient(var(--line-color), var(--line-color)) top center/min(120px, 30vmin) 2px no-repeat,
-            linear-gradient(var(--line-color), var(--line-color)) top center/2px min(60px, 15vmin) no-repeat,
-            linear-gradient(var(--line-color), var(--line-color)) top min(60px, 15vmin) center/min(240px, 60vmin) 2px no-repeat,
-            linear-gradient(var(--line-color), var(--line-color)) top left calc(50% - min(120px, 30vmin))/2px min(60px, 15vmin) no-repeat,
-            linear-gradient(var(--line-color), var(--line-color)) top right calc(50% - min(120px, 30vmin))/2px min(60px, 15vmin) no-repeat,
-            linear-gradient(var(--line-color), var(--line-color)) bottom center/min(120px, 30vmin) 2px no-repeat,
-            linear-gradient(var(--line-color), var(--line-color)) bottom center/2px min(60px, 15vmin) no-repeat,
-            linear-gradient(var(--line-color), var(--line-color)) bottom min(60px, 15vmin) center/min(240px, 60vmin) 2px no-repeat,
-            linear-gradient(var(--line-color), var(--line-color)) bottom left calc(50% - min(120px, 30vmin))/2px min(60px, 15vmin) no-repeat,
-            linear-gradient(var(--line-color), var(--line-color)) bottom right calc(50% - min(120px, 30vmin))/2px min(60px, 15vmin) no-repeat;
-    }
+	#score-container {
+		background: rgba(0, 0, 0, 0.6);
+		padding: 5px 20px;
+		border-radius: 20px;
+		box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+		display: flex;
+		align-items: center;
+		font-weight: bold;
+		font-size: 24px;
+	}
 
-    #ball {
-        width: 80px;
-        height: 80px;
-        position: absolute;
-        left: 50%;
-        top: 50%;
-        transform: translate(-50%, -50%);
-        background: url('data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22500%22%20height%3D%22500%22%20viewBox%3D%22-2500%20-2500%205000%205000%22%3E%3Ctitle%3Esoccer%20ball%3C%2Ftitle%3E%3Cg%20stroke%3D%22%23000%22%20stroke-width%3D%2224%22%3E%3Ccircle%20fill%3D%22%23fff%22%20r%3D%222376%22%2F%3E%3Cpath%20fill%3D%22none%22%20d%3D%22m-1643-1716%20155%20158m-550%202364c231%20231%20538%20195%20826%20202m-524-2040c-491%20351-610%201064-592%201060m1216-1008c-51%20373%2084%20783%20364%201220m-107-2289c157-157%20466-267%20873-329m-528%204112c-50%20132-37%20315-8%20510m62-3883c282%2032%20792%2074%201196%20303m-404%202644c310%20173%20649%20247%201060%20180m-340-2008c-242%20334-534%20645-872%20936m1109-2119c-111-207-296-375-499-534m1146%201281c100%203%20197%2044%20290%20141m-438%20495c158%20297%20181%20718%20204%201140%22%2F%3E%3C%2Fg%3E%3Cpath%20fill%3D%22%23000%22%20d%3D%22m-1624-1700c243-153%20498-303%20856-424%20141%20117%20253%20307%20372%20492-288%20275-562%20544-724%20756-274-25-410-2-740-60%203-244%2084-499%20236-764zm2904-40c271%20248%20537%20498%20724%20788-55%20262-105%20553-180%20704-234-35-536-125-820-200-138-357-231-625-340-924%20210-156%20417-296%20616-368zm-3273%203033a2376%202376%200%200%201-378-1392l59-7c54%20342%20124%20674%20311%20928-36%20179-2%20323%2051%20458zm1197-1125c365%2060%20717%20120%201060%20180%20106%20333%20120%20667%20156%201000-263%20218-625%20287-944%20420-372-240-523-508-736-768%20122-281%20257-561%20464-832zm3013%20678a2376%202376%200%200%201-925%201147l-116-5c84-127%20114-297%20118-488%20232-111%20464-463%20696-772%2086%2030%20159%2072%20227%20118zm-2287%201527a2376%202376%200%200%201-993-251c199%2074%20367%20143%20542%2083%2053%2075%20176%20134%20451%20168z%22%2F%3E%3C%2Fsvg%3E') center/contain no-repeat;
-        filter: drop-shadow(0 4px 4px var(--ball-shadow));
-        transform-origin: center;
-        will-change: transform;
-    }
+	.theme-toggle {
+		cursor: pointer;
+		width: 40px;
+		height: 40px;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		border-radius: 50%;
+		background: rgba(0, 0, 0, 0.6);
+		box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+		transition: transform 0.3s;
+		position: relative;
+	}
 
-    .header {
-        position: fixed;
-        left: 0;
-        right: 0;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        z-index: 100;
-        top: 10px;
-        padding: 0 20px;
-    }
+	.theme-toggle:hover {
+		transform: scale(1.1);
+	}
 
-    #score-container {
-        background: rgba(0, 0, 0, 0.6);
-        padding: 5px 20px;
-        border-radius: 20px;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.3);
-        display: flex;
-        align-items: center;
-        font-weight: bold;
-        font-size: 24px;
-    }
+	.theme-toggle svg {
+		width: 20px;
+		height: 20px;
+		stroke: var(--text-color);
+		fill: none;
+		stroke-width: 2;
+		transition: transform 0.5s, opacity 0.3s;
+		position: absolute;
+	}
 
-    .theme-toggle {
-        cursor: pointer;
-        width: 40px;
-        height: 40px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        border-radius: 50%;
-        background: rgba(0, 0, 0, 0.6);
-        box-shadow: 0 2px 4px rgba(0,0,0,0.3);
-        transition: transform 0.3s;
-        position: relative;
-    }
+	[data-theme="dark"] .sun-icon {
+		transform: rotate(180deg);
+		opacity: 0;
+	}
 
-    .theme-toggle:hover {
-        transform: scale(1.1);
-    }
+	[data-theme="light"] .moon-icon {
+		transform: rotate(-180deg);
+		opacity: 0;
+	}
 
-    .theme-toggle svg {
-        width: 20px;
-        height: 20px;
-        stroke: var(--text-color);
-        fill: none;
-        stroke-width: 2;
-        transition: transform 0.5s, opacity 0.3s;
-        position: absolute;
-    }
+	#game-container {
+		position: relative;
+		flex: 1;
+		border: 2px solid var(--line-color);
+		overflow: hidden;
+		display: flex;
+		justify-content: center;
+		align-items: center;
+		height: calc(100vh - 80px);
+		width: 100%;
+	}
 
-    [data-theme="dark"] .sun-icon {
-        transform: rotate(180deg);
-        opacity: 0;
-    }
+	#game-container::before {
+		content: '';
+		position: absolute;
+		top: 0;
+		left: 0;
+		right: 0;
+		bottom: 0;
+		background: 
+		    radial-gradient(circle 60px at center, transparent 58px, var(--line-color) 58px, var(--line-color) 60px, transparent 60px),
+		    linear-gradient(to right, transparent calc(50% - 1px), var(--line-color) calc(50% - 1px), var(--line-color) calc(50% + 1px), transparent calc(50% + 1px));
+	}
 
-    [data-theme="light"] .moon-icon {
-        transform: rotate(-180deg);
-        opacity: 0;
-    }
+	#game-container::after {
+		content: '';
+		position: absolute;
+		top: 0;
+		left: 0;
+		right: 0;
+		bottom: 0;
+		z-index: -1;
+		background:
+		    linear-gradient(var(--line-color), var(--line-color)) top center/min(120px, 30vmin) 2px no-repeat,
+		    linear-gradient(var(--line-color), var(--line-color)) top center/2px min(60px, 15vmin) no-repeat,
+		    linear-gradient(var(--line-color), var(--line-color)) top min(60px, 15vmin) center/min(240px, 60vmin) 2px no-repeat,
+		    linear-gradient(var(--line-color), var(--line-color)) top left calc(50% - min(120px, 30vmin))/2px min(60px, 15vmin) no-repeat,
+		    linear-gradient(var(--line-color), var(--line-color)) top right calc(50% - min(120px, 30vmin))/2px min(60px, 15vmin) no-repeat,
+		    linear-gradient(var(--line-color), var(--line-color)) bottom center/min(120px, 30vmin) 2px no-repeat,
+		    linear-gradient(var(--line-color), var(--line-color)) bottom center/2px min(60px, 15vmin) no-repeat,
+		    linear-gradient(var(--line-color), var(--line-color)) bottom min(60px, 15vmin) center/min(240px, 60vmin) 2px no-repeat,
+		    linear-gradient(var(--line-color), var(--line-color)) bottom left calc(50% - min(120px, 30vmin))/2px min(60px, 15vmin) no-repeat,
+		    linear-gradient(var(--line-color), var(--line-color)) bottom right calc(50% - min(120px, 30vmin))/2px min(60px, 15vmin) no-repeat;
+	}
 
-    button {
-        background: #4CAF50;
-        color: white;
-        border: none;
-        padding: 8px 16px;
-        border-radius: 20px;
-        cursor: pointer;
-        font-weight: bold;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-        transition: transform 0.1s;
-        font-size: 18px;
-    }
+	#ball {
+		width: 80px;
+		height: 80px;
+		position: absolute;
+		left: 50%;
+		top: 50%;
+		transform: translate(-50%, -50%);
+		background: url('data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22500%22%20height%3D%22500%22%20viewBox%3D%22-2500%20-2500%205000%205000%22%3E%3Ctitle%3Esoccer%20ball%3C%2Ftitle%3E%3Cg%20stroke%3D%22%23000%22%20stroke-width%3D%2224%22%3E%3Ccircle%20fill%3D%22%23fff%22%20r%3D%222376%22%2F%3E%3Cpath%20fill%3D%22none%22%20d%3D%22m-1643-1716%20155%20158m-550%202364c231%20231%20538%20195%20826%20202m-524-2040c-491%20351-610%201064-592%201060m1216-1008c-51%20373%2084%20783%20364%201220m-107-2289c157-157%20466-267%20873-329m-528%204112c-50%20132-37%20315-8%20510m62-3883c282%2032%20792%2074%201196%20303m-404%202644c310%20173%20649%20247%201060%20180m-340-2008c-242%20334-534%20645-872%20936m1109-2119c-111-207-296-375-499-534m1146%201281c100%203%20197%2044%20290%20141m-438%20495c158%20297%20181%20718%20204%201140%22%2F%3E%3C%2Fg%3E%3Cpath%20fill%3D%22%23000%22%20d%3D%22m-1624-1700c243-153%20498-303%20856-424%20141%20117%20253%20307%20372%20492-288%20275-562%20544-724%20756-274-25-410-2-740-60%203-244%2084-499%20236-764zm2904-40c271%20248%20537%20498%20724%20788-55%20262-105%20553-180%20704-234-35-536-125-820-200-138-357-231-625-340-924%20210-156%20417-296%20616-368zm-3273%203033a2376%202376%200%200%201-378-1392l59-7c54%20342%20124%20674%20311%20928-36%20179-2%20323%2051%20458zm1197-1125c365%2060%20717%20120%201060%20180%20106%20333%20120%20667%20156%201000-263%20218-625%20287-944%20420-372-240-523-508-736-768%20122-281%20257-561%20464-832zm3013%20678a2376%202376%200%200%201-925%201147l-116-5c84-127%20114-297%20118-488%20232-111%20464-463%20696-772%2086%2030%20159%2072%20227%20118zm-2287%201527a2376%202376%200%200%201-993-251c199%2074%20367%20143%20542%2083%2053%2075%20176%20134%20451%20168z%22%2F%3E%3C%2Fsvg%3E') center/contain no-repeat;
+		filter: drop-shadow(0 4px 4px var(--ball-shadow));
+		transform-origin: center;
+		will-change: transform;
+	}
 
-    button:active {
-        transform: scale(0.95);
-    }
+	button {
+		background: #4CAF50;
+		color: white;
+		border: none;
+		padding: 8px 16px;
+		border-radius: 20px;
+		cursor: pointer;
+		font-weight: bold;
+		box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+		transition: transform 0.1s;
+		font-size: 18px;
+	}
 
-    .message {
-        position: fixed;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-        font-weight: bold;
-        opacity: 0;
-        transition: opacity 0.3s;
-        text-align: center;
-        pointer-events: none;
-        z-index: 1000;
-    }
+	button:active {
+		transform: scale(0.95);
+	}
 
-    .message.show {
-        opacity: 1;
-        pointer-events: all;
-    }
+	.message {
+		position: fixed;
+		top: 50%;
+		left: 50%;
+		transform: translate(-50%, -50%);
+		font-weight: bold;
+		opacity: 0;
+		transition: opacity 0.3s;
+		text-align: center;
+		pointer-events: none;
+		z-index: 1000;
+	}
 
-    #game-over {
-        font-size: 36px;
-        background: rgba(0, 0, 0, 0.8);
-        padding: 20px 30px;
-        border-radius: 20px;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        gap: 20px;
-        width: 80%;
-    }
-    
-    @media (min-width: 768px) {
-        #game-over {
-            width: unset;
-        }
-    }
+	.message.show {
+		opacity: 1;
+		pointer-events: all;
+	}
 
-    .message .final-score {
-        font-size: 24px;
-        opacity: 0.8;
-    }
+	#game-over {
+		font-size: 36px;
+		background: rgba(0, 0, 0, 0.8);
+		padding: 20px 30px;
+		border-radius: 20px;
+		box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		gap: 20px;
+		width: 80%;
+	}
 
-    #restart {
-        display: none;
-        padding: 12px 24px;
-        font-size: 20px;
-        min-width: 140px;
-    }
+	@media (min-width: 768px) {
+		#game-over {
+		    width: unset;
+		}
+	}
 
-    .message.show #restart {
-        display: block;
-    }
+	.message .final-score {
+		font-size: 24px;
+		opacity: 0.8;
+	}
 
-    .tap-hint {
-        position: fixed;
-        left: 50%;
-        transform: translateX(-50%);
-        font-size: 24px;
-        opacity: 0.6;
-        animation: pulse 2s infinite;
-        text-shadow: 0 2px 4px rgba(0,0,0,0.2);
-        background: rgba(0, 0, 0, 0.6);
-        padding: 8px 16px;
-        border-radius: 16px;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-        bottom: 90px;
-        z-index: 1000;
-        text-align: center;
-        width: 85%;
-    }
-    
-    @media (min-width: 768px) {
-        .tap-hint {
-            width: unset;
-        }
-    }
+	#restart {
+		display: none;
+		padding: 12px 24px;
+		font-size: 20px;
+		min-width: 140px;
+	}
 
-    @keyframes pulse {
-        0% { opacity: 0.6; transform: translateX(-50%) scale(1); }
-        50% { opacity: 0.8; transform: translateX(-50%) scale(1.1); }
-        100% { opacity: 0.6; transform: translateX(-50%) scale(1); }
-    }
+	.message.show #restart {
+		display: block;
+	}
+
+	.tap-hint {
+		position: fixed;
+		left: 50%;
+		transform: translateX(-50%);
+		font-size: 24px;
+		opacity: 0.6;
+		animation: pulse 2s infinite;
+		text-shadow: 0 2px 4px rgba(0,0,0,0.2);
+		background: rgba(0, 0, 0, 0.6);
+		padding: 8px 16px;
+		border-radius: 16px;
+		box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+		bottom: 90px;
+		z-index: 1000;
+		text-align: center;
+		width: 85%;
+	}
+
+	@media (min-width: 768px) {
+		.tap-hint {
+		    width: unset;
+		}
+	}
+
+	@keyframes pulse {
+		0% { opacity: 0.6; transform: translateX(-50%) scale(1); }
+		50% { opacity: 0.8; transform: translateX(-50%) scale(1.1); }
+		100% { opacity: 0.6; transform: translateX(-50%) scale(1); }
+	}
 </style>
 </head>
 <body>
-<div class="header">
-        <div id="score-container">Score:&nbsp;<span id="score">0</span></div>
-        <div class="theme-toggle" id="themeToggle">
-            <svg class="sun-icon" viewBox="0 0 24 24">
-                <circle cx="12" cy="12" r="5"></circle>
-                <line x1="12" y1="1" x2="12" y2="3"></line>
-                <line x1="12" y1="21" x2="12" y2="23"></line>
-                <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
-                <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
-                <line x1="1" y1="12" x2="3" y2="12"></line>
-                <line x1="21" y1="12" x2="23" y2="12"></line>
-                <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
-                <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
-            </svg>
-            <svg class="moon-icon" viewBox="0 0 24 24">
-                <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
-            </svg>
+    <div class="game-wrapper">
+        <div class="header">
+            <div id="score-container">Score:&nbsp;<span id="score">0</span></div>
+            <div class="theme-toggle" id="themeToggle">
+                <svg class="sun-icon" viewBox="0 0 24 24">
+                    <circle cx="12" cy="12" r="5"></circle>
+                    <line x1="12" y1="1" x2="12" y2="3"></line>
+                    <line x1="12" y1="21" x2="12" y2="23"></line>
+                    <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                    <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                    <line x1="1" y1="12" x2="3" y2="12"></line>
+                    <line x1="21" y1="12" x2="23" y2="12"></line>
+                    <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                    <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                </svg>
+                <svg class="moon-icon" viewBox="0 0 24 24">
+                    <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                </svg>
+            </div>
         </div>
-    </div>
-    <div id="game-container">
-        <div id="ball"></div>
+        <div id="game-container">
+            <div id="ball"></div>
+        </div>
     </div>
     <div class="message" id="game-over">
         Game Over!

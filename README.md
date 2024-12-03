@@ -1,6 +1,5 @@
 # AI Game Collection
-
-A collection of browser-based games created using AI assistance, featuring minimal code modifications. Experience engaging gameplay with a modern, responsive interface.
+A collection of browser-based games created using AI assistance, featuring minimal code modifications. Experience engaging gameplay with a modern, responsive interface at [jereme.dev/games](https://jereme.dev/games).
 
 ## 🎮 Available Games
 
@@ -13,8 +12,16 @@ A classic card-matching game that helps improve concentration and recall abiliti
 ### Soccer Juggle
 Keep the soccer ball in the air for as long as possible. Challenge yourself to achieve your highest juggling streak in this addictive skill-based game.
 
-## 🚀 Features
+## 📸 Screenshots
+<div style="display: flex; flex-wrap: wrap; gap: 10px; justify-content: center;">
+    <img src="https://jereme.dev/games/images/screenshots/landing.png" width="300" alt="Game Menu"/>
+    <img src="https://jereme.dev/games/images/screenshots/pipes-puzzle.png" width="300" alt="Pipes Puzzle Game"/>
+    <img src="https://jereme.dev/games/images/screenshots/memory.png" width="300" alt="Memory Game"/>
+    <img src="https://jereme.dev/games/images/screenshots/soccer-juggle.png" width="300" alt="Soccer Juggle Game"/>
+</div>
 
+
+## 🚀 Features
 - Clean, modern UI with a dark theme
 - Responsive design that works on all devices
 - Smooth transitions and animations
@@ -23,7 +30,6 @@ Keep the soccer ball in the air for as long as possible. Challenge yourself to a
 - Minimalist design focused on gameplay
 
 ## 🛠️ Technical Details
-
 The site is built using:
 - HTML5
 - CSS3 (with modern features like CSS Grid and Flexbox)
@@ -32,7 +38,6 @@ The site is built using:
 - Responsive iframe implementation for game loading
 
 ## 🎨 Design Features
-
 - Gradient backgrounds
 - Glass-morphism effects
 - Hover animations
@@ -41,14 +46,12 @@ The site is built using:
 - Accessibility considerations
 
 ## 📱 Responsive Design
-
 The site adapts seamlessly to different screen sizes:
 - Desktop: Full grid layout
 - Tablet: Adjusted card sizes
 - Mobile: Single column layout with optimized spacing
 
 ## 🌐 Browser Support
-
 Works on all modern browsers including:
 - Chrome
 - Firefox
@@ -57,16 +60,34 @@ Works on all modern browsers including:
 
 ## 🔄 Usage
 
-Simply visit the site and click on any game card to start playing. Use the back button in the bottom-left corner to return to the game selection screen.
+### 🌐 Website Access
+Visit [jereme.dev/games](https://jereme.dev/games) and click on any game card to start playing. Use the back button in the bottom-left corner to return to the game selection screen.
+
+### 📱 Progressive Web App (PWA)
+Install the collection as a PWA for a native app-like experience:
+
+#### iOS Installation
+1. Open Safari and visit [jereme.dev/games](https://jereme.dev/games)
+2. Tap the Share button (square with arrow)
+3. Scroll down and tap "Add to Home Screen"
+4. Choose a name and tap "Add"
+
+#### Android Installation
+1. Visit [jereme.dev/games](https://jereme.dev/games) in Chrome
+2. Tap the menu (three dots)
+3. Select "Add to Home Screen"
+4. Follow the prompts to install
+
+### 📲 Android App
+For Android users preferring a native experience:
+
+Coming soon!
 
 ## 🤖 AI Development
-
 This project showcases the possibilities of AI-assisted development, with all games and the main interface being primarily built using AI tools, requiring minimal manual code adjustments.
 
 ## 📈 Future Development
-
 The collection is designed to be easily expandable, allowing for new games to be added while maintaining consistent design and user experience.
 
 ---
-
 *Created with AI assistance - Demonstrating the potential of AI in game development*
