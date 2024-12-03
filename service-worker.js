@@ -4,6 +4,7 @@ const urlsToCache = [
    'pipes-puzzle/index.html',
    'memory/index.html',
    'soccer-juggle/index.html',
+   'water-ring-toss/index.html',
   'images/icons/web-app-manifest-192x192.png', 
   'images/icons/web-app-manifest-512x512.png'
 ];
