@@ -13,7 +13,7 @@ A classic card-matching game that helps improve concentration and recall abiliti
 Keep the soccer ball in the air for as long as possible. Challenge yourself to achieve your highest juggling streak in this addictive skill-based game.
 
 ## 📸 Screenshots
-<div style="display: flex; flex-wrap: wrap; gap: 10px; justify-content: center;">
+<div style="display: flex; flex-wrap: wrap; gap: 100px; justify-content: center;">
     <img src="https://jereme.dev/games/images/screenshots/landing.png" width="300" alt="Game Menu"/>
     <img src="https://jereme.dev/games/images/screenshots/pipes-puzzle.png" width="300" alt="Pipes Puzzle Game"/>
     <img src="https://jereme.dev/games/images/screenshots/memory.png" width="300" alt="Memory Game"/>
