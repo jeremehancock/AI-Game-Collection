@@ -3,6 +3,7 @@ const urlsToCache = [
   'index.html',
    'pipes-puzzle/index.html',
    'memory/index.html',
+   'minesweeper/index.html',
    'snake-game/index.html',
    'soccer-juggle/index.html',
    'water-ring-toss/index.html',
