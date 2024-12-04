@@ -24,6 +24,9 @@ Keep the soccer ball in the air for as long as possible. Challenge yourself to a
 ### Water Ring Toss
 Test your skill and patience in this classic water game! Use precision to land all the rings onto the pegs. How many can you score? (*Mobile Only*)
 
+### Waveform
+Guide particles to their targets by shaping a wave using frequency, amplitude, and phase controls while avoiding obstacles in this unique physics puzzle.
+
 ## 📸 Screenshots
 <div align="center">
     <img src="https://jereme.dev/games/images/screenshots/home.png" width="300" alt="Game Menu"/>
@@ -34,6 +37,7 @@ Test your skill and patience in this classic water game! Use precision to land a
     <img src="https://jereme.dev/games/images/screenshots/snake-game.png" width="300" alt="Snake Game"/>
     <img src="https://jereme.dev/games/images/screenshots/soccer-juggle.png" width="300" alt="Soccer Juggle Game"/>
     <img src="https://jereme.dev/games/images/screenshots/water-ring-toss-game.png" width="300" alt="Water Ring Toss"/>
+    <img src="https://jereme.dev/games/images/screenshots/waveform.png" width="300" alt="Water Ring Toss"/>
 </div>
 
 ## 🚀 Features
