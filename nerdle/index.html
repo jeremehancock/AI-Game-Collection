@@ -631,10 +631,10 @@
                 }
                 toggleTheme() {
                     const e = "dark" === document.body.dataset.theme ? "light" : "dark";
-                    (document.body.dataset.theme = e), localStorage.setItem("theme", e);
+                    (document.body.dataset.theme = e), localStorage.setItem("nerdle-theme", e);
                 }
                 loadTheme() {
-                    const e = localStorage.getItem("theme");
+                    const e = localStorage.getItem("nerdle-theme");
                     e && (document.body.dataset.theme = e);
                 }
                 checkLastPlayed() {

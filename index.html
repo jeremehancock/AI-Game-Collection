@@ -586,9 +586,13 @@ mobileOnly: true
 		function createGameCards() {
 			const container = document.getElementById('gamesContainer');
 			
+			// Check if device is mobile
+			const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) 
+				|| window.innerWidth <= 768;
+			
 			for (const [key, game] of Object.entries(games)) {
-				// Skip games that are mobile only
-				if (game.mobileOnly) continue;
+				// Skip if game is mobile only AND we're not on a mobile device
+				if (game.mobileOnly && !isMobile) continue;
 				
 				const card = document.createElement('div');
 				card.className = 'game-card';
@@ -606,7 +610,6 @@ mobileOnly: true
 				container.appendChild(card);
 			}
 		}
-
         // Function to load game in iframe
         function loadGame(gamePath) {
             const container = document.getElementById('gameContainer');
