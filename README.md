@@ -9,6 +9,9 @@ Connect the pipes to create a continuous flow. Test your logical thinking skills
 ### Memory
 A classic card-matching game that helps improve concentration and recall abilities. Test your memory by finding matching pairs of cards in this timeless brain-training exercise.
 
+### Snake Game
+Classic snake game with a modern twist. Eat the food, grow longer, and try not to hit the walls or yourself!
+
 ### Soccer Juggle
 Keep the soccer ball in the air for as long as possible. Challenge yourself to achieve your highest juggling streak in this addictive skill-based game.
 
@@ -20,6 +23,7 @@ Test your skill and patience in this classic water game! Use precision to land a
     <img src="https://jereme.dev/games/images/screenshots/landing.png" width="300" alt="Game Menu"/>
     <img src="https://jereme.dev/games/images/screenshots/pipes-puzzle.png" width="300" alt="Pipes Puzzle Game"/>
     <img src="https://jereme.dev/games/images/screenshots/memory.png" width="300" alt="Memory Game"/>
+    <img src="https://jereme.dev/games/images/screenshots/snake-game.png" width="300" alt="Water Ring Toss"/>
     <img src="https://jereme.dev/games/images/screenshots/soccer-juggle-game.png" width="300" alt="Soccer Juggle Game"/>
     <img src="https://jereme.dev/games/images/screenshots/water-ring-toss-game.png" width="300" alt="Water Ring Toss"/>
 </div>
