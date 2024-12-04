@@ -18,24 +18,24 @@
                 background: #000;
                 overflow: hidden;
             }
-			#game-container {
-				position: relative;
-				margin: 20px auto;
-				height: calc(100dvh - 40px);
-				max-height: calc(100% - 40px);
-				background: #f0f8ff;
-				border: 8px solid #f44;
-				border-radius: 20px;
-				display: flex;
-				flex-direction: column;
-				touch-action: none;
-				overflow: hidden;
-			}
-			@media (min-width: 751px) {
-				#game-container {
-				    max-width: 550px;
-				}
-			}
+            #game-container {
+                position: relative;
+                margin: 20px auto;
+                height: calc(100dvh - 40px);
+                max-height: calc(100% - 40px);
+                background: #f0f8ff;
+                border: 8px solid #f44;
+                border-radius: 20px;
+                display: flex;
+                flex-direction: column;
+                touch-action: none;
+                overflow: hidden;
+            }
+            @media (min-width: 751px) {
+                #game-container {
+                    max-width: 550px;
+                }
+            }
             #overlay {
                 display: none;
                 position: fixed;
@@ -99,7 +99,7 @@
                 font-family: Rubik, sans-serif;
                 text-transform: uppercase;
                 letter-spacing: 1px;
-                font-weight: bold;
+                font-weight: 700;
                 margin-bottom: 70px;
             }
             .b {
@@ -336,7 +336,7 @@
             function j(x) {
                 const area = getPlayArea();
                 for (let i = 0; i < 3; i++) g.b.push(new B(x + (Math.random() - 0.5) * 40));
-                for (let i = 0; i < 25; i++) {
+                for (let i = 0; i < 20; i++) {
                     let s = Math.pow(Math.random(), 2) * 1.2,
                         a = -1.7 - 0.2 + (Math.random() - 0.5) * s,
                         f = 1 - Math.abs(a + 1.7) / 1.5,
