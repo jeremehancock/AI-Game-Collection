@@ -28,7 +28,7 @@ Test your skill and patience in this classic water game! Use precision to land a
     <img src="https://jereme.dev/games/images/screenshots/memory.png" width="300" alt="Memory Game"/>
     <img src="https://jereme.dev/games/images/screenshots/minesweeper.png" width="300" alt="Memory Game"/>
     <img src="https://jereme.dev/games/images/screenshots/snake-game.png" width="300" alt="Water Ring Toss"/>
-    <img src="https://jereme.dev/games/images/screenshots/soccer-juggle-game.png" width="300" alt="Soccer Juggle Game"/>
+    <img src="https://jereme.dev/games/images/screenshots/soccer-juggle.png" width="300" alt="Soccer Juggle Game"/>
     <img src="https://jereme.dev/games/images/screenshots/water-ring-toss-game.png" width="300" alt="Water Ring Toss"/>
 </div>
 
