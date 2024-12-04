@@ -97,6 +97,43 @@ For Android users preferring a native experience:
 
 [![Get it on Google Play](https://play.google.com/intl/en_us/badges/static/images/badges/en_badge_web_generic.png)](https://play.google.com/store/apps/details?id=dev.jereme.games.twa)
 
+## 🐳 Run Locally in Docker
+You can run the game collection locally using Docker in two ways:
+
+### Option 1: Pull from Docker Hub
+1. Pull the image:
+```bash
+docker pull bozodev/ai-game-collection:latest
+```
+
+2. Run the container:
+```bash
+docker run -d -p 38008:80 ai-game-collection:latest
+```
+
+### Option 2: Build Locally
+1. Clone the repository:
+```bash
+git clone https://github.com/jeremehancock/AI-Game-Collection.git
+cd ai-game-collection
+```
+
+2. Build the Docker image:
+```bash
+docker build -t ai-game-collection .
+```
+
+3. Run the container:
+```bash
+docker run -d -p 38008:80 ai-game-collection
+```
+
+### Access and Management
+Once running with either option:
+- Access the games by opening your browser and visiting `http://localhost:38008/games/`
+- View running containers: `docker ps`
+- Stop the container: `docker stop <container-id>`
+
 ## 🤖 AI Development
 This project showcases the possibilities of AI-assisted development, with all games and the main interface being primarily built using AI tools, requiring minimal manual code adjustments.
 
