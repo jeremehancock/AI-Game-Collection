@@ -514,49 +514,49 @@
                     this.init(), this.setupEventListeners(), this.loadTheme(), this.loadStats(), this.checkLastPlayed();
                 }
                 init() {
-                    (this.currentRow = 0), (this.currentTile = 0), (this.gameOver = !1), (this.word = this.getWordOfTheDay()), (this.guesses = []), this.setupGrid(), this.setupKeyboard();
+                    (this.currentRow = 0), (this.currentTile = 0), (this.gameOver = !1), (this.word = this.getWordOfTheDay()), (this.guesses = []), this.setupGrid(), this.setupKeyboard(), (this.hasWon = !1);
                 }
                 getWordOfTheDay() {
                     const e = new Date(),
                         t = new Date(2024, 0, 1),
-                        n = e - t,
-                        r = Math.floor(n / 864e5);
+                        s = e - t,
+                        r = Math.floor(s / 864e5);
                     return WORDS[r % WORDS.length];
                 }
                 setupGrid() {
                     const e = document.querySelector(".grid");
                     e.innerHTML = "";
                     for (let t = 0; t < 6; t++) {
-                        const n = document.createElement("div");
-                        n.className = "row";
+                        const s = document.createElement("div");
+                        s.className = "row";
                         for (let e = 0; e < 5; e++) {
                             const e = document.createElement("div");
-                            (e.className = "tile"), n.appendChild(e);
+                            (e.className = "tile"), s.appendChild(e);
                         }
-                        e.appendChild(n);
+                        e.appendChild(s);
                     }
                 }
                 setupKeyboard() {
                     const e = ["QWERTYUIOP".split(""), "ASDFGHJKL".split(""), ["ENTER", ..."ZXCVBNM".split(""), "BACK"]],
                         t = document.querySelector(".keyboard"),
-                        n = t.querySelectorAll(".keyboard-row");
+                        s = t.querySelectorAll(".keyboard-row");
                     e.forEach((e, t) => {
-                        (n[t].innerHTML = ""),
+                        (s[t].innerHTML = ""),
                             e.forEach((e) => {
                                 const r = document.createElement("button");
-                                (r.textContent = e), (r.className = "key"), ("ENTER" === e || "BACK" === e) && r.classList.add("wide"), r.setAttribute("data-key", e), n[t].appendChild(r);
+                                (r.textContent = e), (r.className = "key"), ("ENTER" === e || "BACK" === e) && r.classList.add("wide"), r.setAttribute("data-key", e), s[t].appendChild(r);
                             });
                     });
                 }
                 setupEventListeners() {
                     document.addEventListener("click", (e) => {
                         if (e.target.matches(".key")) {
-                            if (this.gameOver) return void this.showOverlay();
+                            if (this.gameOver && (this.hasWon || this.currentRow >= 5)) return void this.showOverlay();
                             this.handleKeyPress(e.target.getAttribute("data-key"));
                         }
                     }),
                         document.addEventListener("keydown", (e) => {
-                            if (this.gameOver) return void this.showOverlay();
+                            if (this.gameOver && (this.hasWon || this.currentRow >= 5)) return void this.showOverlay();
                             "Enter" === e.key ? this.handleKeyPress("ENTER") : "Backspace" === e.key ? this.handleKeyPress("BACK") : /^[A-Za-z]$/.test(e.key) && this.handleKeyPress(e.key.toUpperCase());
                         }),
                         document.querySelector(".theme-toggle").addEventListener("click", () => {
@@ -571,11 +571,16 @@
                 }
                 showOverlay() {
                     const e = document.querySelector(".played-overlay"),
-                        t = document.querySelector(".last-word");
-                    (t.textContent = this.word), (e.style.display = "flex"), this.updateOverlayStats(), this.startNextGameTimer();
+                        t = document.querySelector(".last-word"),
+                        s = document.querySelector(".played-overlay h2");
+                    (t.textContent = this.word),
+                        this.hasWon ? (s.textContent = "Congratulations! Come back tomorrow for a new word!") : this.currentRow >= 5 ? (s.textContent = "Better luck tomorrow!") : (s.textContent = "Keep playing!"),
+                        (e.style.display = "flex"),
+                        this.updateOverlayStats(),
+                        this.startNextGameTimer();
                 }
                 handleKeyPress(e) {
-                    if (this.gameOver) return void this.showOverlay();
+                    if (this.gameOver && (this.hasWon || this.currentRow >= 5)) return void this.showOverlay();
                     if ("BACK" === e) {
                         if (this.currentTile > 0) {
                             this.currentTile--;
@@ -593,27 +598,27 @@
                 }
                 checkGuess(e) {
                     const t = Array(5).fill("absent"),
-                        n = this.word.split(""),
+                        s = this.word.split(""),
                         r = e.split("");
-                    for (let e = 0; e < 5; e++) r[e] === n[e] && ((t[e] = "correct"), (n[e] = null), (r[e] = null));
+                    for (let e = 0; e < 5; e++) r[e] === s[e] && ((t[e] = "correct"), (s[e] = null), (r[e] = null));
                     for (let e = 0; e < 5; e++)
                         if (r[e]) {
-                            const s = n.indexOf(r[e]);
-                            -1 !== s && ((t[e] = "present"), (n[s] = null));
+                            const n = s.indexOf(r[e]);
+                            -1 !== n && ((t[e] = "present"), (s[n] = null));
                         }
                     return t;
                 }
                 updateTiles(e) {
                     e.forEach((e, t) => {
-                        const n = this.getTileElement(this.currentRow, t);
-                        n.classList.add(e);
+                        const s = this.getTileElement(this.currentRow, t);
+                        s.classList.add(e);
                     });
                 }
                 updateKeyboard(e, t) {
-                    const n = e.split("");
+                    const s = e.split("");
                     t.forEach((e, t) => {
-                        const r = document.querySelector(`[data-key="${n[t]}"]`);
-                        r && ((r.className = "key"), r.classList.add(e), ("ENTER" !== n[t] && "BACK" !== n[t]) || r.classList.add("wide"));
+                        const r = document.querySelector(`[data-key="${s[t]}"]`);
+                        r && ((r.className = "key"), r.classList.add(e), ("ENTER" !== s[t] && "BACK" !== s[t]) || r.classList.add("wide"));
                     });
                 }
                 showToast(e) {
@@ -634,35 +639,35 @@
                 }
                 checkLastPlayed() {
                     const e = localStorage.getItem("lastPlayed"),
-                        t = new Date().toDateString(),
-                        n = parseInt(localStorage.getItem("attemptsUsed") || "0");
-                    if (e === t)
-                        if (n >= 6) (this.gameOver = !0), this.showOverlay();
-                        else {
-                            (this.currentRow = n), (this.guesses = JSON.parse(localStorage.getItem("currentGuesses") || "[]")), this.restoreBoardState();
-                        }
-                    else localStorage.setItem("lastPlayed", t), localStorage.setItem("attemptsUsed", "0"), localStorage.setItem("currentGuesses", "[]");
+                        t = localStorage.getItem("lastPlayedWord"),
+                        s = new Date().toDateString();
+                    if (e === s && t === this.word) {
+                        const e = JSON.parse(localStorage.getItem("gameState") || "{}");
+                        e.hasWon || (e.attempts && e.attempts >= 6)
+                            ? ((this.gameOver = !0), (this.hasWon = e.hasWon), this.showOverlay())
+                            : e.attempts > 0 && ((this.currentRow = e.attempts), (this.guesses = e.guesses || []), this.restoreBoardState());
+                    } else localStorage.setItem("lastPlayed", s), localStorage.setItem("lastPlayedWord", this.word), localStorage.setItem("gameState", JSON.stringify({ attempts: 0, guesses: [], hasWon: !1 }));
                 }
                 restoreBoardState() {
                     this.guesses.forEach((e, t) => {
-                        const n = this.checkGuess(e);
+                        const s = this.checkGuess(e);
                         for (let r = 0; r < 5; r++) {
-                            const s = this.getTileElement(t, r);
-                            (s.textContent = e[r]), s.classList.add(n[r]);
+                            const n = this.getTileElement(t, r);
+                            (n.textContent = e[r]), n.classList.add(s[r]);
                         }
-                        this.updateKeyboard(e, n);
+                        this.updateKeyboard(e, s);
                     });
                 }
                 startNextGameTimer() {
                     const e = document.querySelector(".next-game-timer"),
                         t = () => {
-                            const n = new Date(),
-                                r = new Date(n);
+                            const s = new Date(),
+                                r = new Date(s);
                             r.setDate(r.getDate() + 1), r.setHours(0, 0, 0, 0);
-                            const s = r - n,
-                                a = Math.floor(s / 36e5),
-                                o = Math.floor((s % 36e5) / 6e4),
-                                i = Math.floor((s % 6e4) / 1e3);
+                            const n = r - s,
+                                a = Math.floor(n / 36e5),
+                                o = Math.floor((n % 36e5) / 6e4),
+                                i = Math.floor((n % 6e4) / 1e3);
                             e.textContent = `Next game in: ${a}h ${o}m ${i}s`;
                         };
                     t(), setInterval(t, 1e3);
@@ -678,11 +683,11 @@
                     return JSON.parse(localStorage.getItem("stats")) || { gamesPlayed: 0, gamesWon: 0, currentStreak: 0, maxStreak: 0, distribution: [0, 0, 0, 0, 0, 0] };
                 }
                 updateStats(e, t) {
-                    const n = this.loadStats();
-                    n.gamesPlayed++,
-                        e ? (n.gamesWon++, n.currentStreak++, (n.maxStreak = Math.max(n.maxStreak, n.currentStreak)), n.distribution[t - 1]++) : (n.currentStreak = 0),
-                        localStorage.setItem("stats", JSON.stringify(n)),
-                        (this.stats = n);
+                    const s = this.loadStats();
+                    s.gamesPlayed++,
+                        e ? (s.gamesWon++, s.currentStreak++, (s.maxStreak = Math.max(s.maxStreak, s.currentStreak)), s.distribution[t - 1]++) : (s.currentStreak = 0),
+                        localStorage.setItem("stats", JSON.stringify(s)),
+                        (this.stats = s);
                 }
                 showStats() {
                     const e = document.querySelector(".modal");
@@ -703,15 +708,13 @@
                     if (!WORDS.includes(e)) return void this.showToast("Not in word list");
                     const t = this.checkGuess(e);
                     this.updateTiles(t), this.updateKeyboard(e, t), this.guesses.push(e);
-                    const n = this.currentRow + 1;
-                    localStorage.setItem("attemptsUsed", n.toString()),
-                        localStorage.setItem("currentGuesses", JSON.stringify(this.guesses)),
+                    const s = { attempts: this.currentRow + 1, guesses: this.guesses, hasWon: e === this.word };
+                    localStorage.setItem("gameState", JSON.stringify(s)),
                         e === this.word
-                            ? ((this.gameOver = !0), this.updateStats(!0, n), this.showToast("Genius!"), setTimeout(() => this.showStats(), 1500))
+                            ? ((this.gameOver = !0), (this.hasWon = !0), this.updateStats(!0, this.currentRow + 1), this.showToast("Genius!"), setTimeout(() => this.showOverlay(), 1500))
                             : 5 === this.currentRow
-                            ? ((this.gameOver = !0), this.updateStats(!1), this.showToast(this.word), setTimeout(() => this.showStats(), 1500))
-                            : (this.currentRow++, (this.currentTile = 0)),
-                        n >= 6 && ((this.gameOver = !0), this.showOverlay());
+                            ? ((this.gameOver = !0), this.updateStats(!1), this.showToast(this.word), setTimeout(() => this.showOverlay(), 1500))
+                            : (this.currentRow++, (this.currentTile = 0));
                 }
             }
             new NerdleGame();
