@@ -2,6 +2,25 @@
 <html lang="en">
     <head>
         <meta charset="UTF-8" />
+		<script>
+		  (function() {
+			function getInitialTheme() {
+			  const savedTheme = localStorage.getItem('nerdle-theme');
+			  if (savedTheme) {
+				return savedTheme;
+			  }
+			  return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+			}
+			
+			const theme = getInitialTheme();
+			document.documentElement.classList.add(theme);
+		  })();
+		</script>
+		<style>
+		  html, body {
+			transition: none !important;
+		  }
+		</style>
         <meta name="viewport" content="width=device-width,initial-scale=1" />
         <title>Nerdle</title>
         <style>
@@ -629,14 +648,18 @@
                             t.style.display = "none";
                         }, 2e3);
                 }
-                toggleTheme() {
-                    const e = "dark" === document.body.dataset.theme ? "light" : "dark";
-                    (document.body.dataset.theme = e), localStorage.setItem("nerdle-theme", e);
-                }
-                loadTheme() {
-                    const e = localStorage.getItem("nerdle-theme");
-                    e && (document.body.dataset.theme = e);
-                }
+				toggleTheme() {
+					const theme = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+					document.documentElement.setAttribute('data-theme', theme);
+					localStorage.setItem('nerdle-theme', theme);
+				}
+
+				loadTheme() {
+					const theme = localStorage.getItem('nerdle-theme');
+					if (theme) {
+						document.documentElement.setAttribute('data-theme', theme);
+					}
+				}
                 checkLastPlayed() {
                     const e = localStorage.getItem("lastPlayed"),
                         t = localStorage.getItem("lastPlayedWord"),
