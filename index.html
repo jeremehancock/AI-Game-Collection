@@ -297,6 +297,18 @@
     <script>
         // Game collection data with SVG icons
         const games = {
+		    nerdle: {
+				title: 'Nerdle',
+				path: '/games/nerdle',
+				description: 'A nerdy twist on the famous word game. Guess the hidden "nerdy" word in 6 tries.',
+				icon: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+			  <path fill="white" d="M32 2C15.432 2 2 15.432 2 32s13.432 30 30 30 30-13.432 30-30S48.568 2 32 2m18.103 9.324c-2.818-1.123-5.925-1.463-8.979-.915-.703.135-.192 2.27.388 2.156 4.168-.748 8.456.4 11.69 3.133.163.142.469.015.765-.222 1.734 2.3 3.11 4.881 4.06 7.66C55.73 19.456 51.657 17 47 17c-4.533 0-8.521 2.323-10.848 5.842-2.688-1.168-5.805-1.061-8.301.007C25.525 19.326 21.537 17 17 17c-4.657 0-8.73 2.457-11.026 6.137.962-2.818 2.367-5.433 4.136-7.758.27.197.538.299.686.169 3.237-2.732 7.524-3.881 11.692-3.133.58.113 1.092-2.021.389-2.156-2.944-.528-5.936-.228-8.672.8C19.006 6.973 25.218 4.5 32 4.5c6.928 0 13.262 2.581 18.103 6.824M57 30c0 5.521-4.479 10-10 10s-10-4.479-10-10c0-5.524 4.479-10 10-10s10 4.476 10 10m-29.999 0c0 5.523-4.479 10-10.001 10-5.522 0-10-4.477-10-10 0-5.524 4.477-10 10-10s10.001 4.476 10.001 10M32 59.5c-14.563 0-26.511-11.379-27.436-25.712C6.187 39.119 11.139 43 17 43c7.18 0 13-5.82 13-13 0-1.276-.191-2.506-.534-3.671 1.53-.436 3.54-.434 5.068.001C34.191 27.494 34 28.725 34 30c0 7.18 5.82 13 13 13 5.861 0 10.813-3.881 12.436-9.212C58.511 48.121 46.563 59.5 32 59.5"/>
+			  <ellipse fill="white" cx="20" cy="30.5" rx="4" ry="5"/>
+			  <ellipse fill="white" cx="44" cy="30.5" rx="4" ry="5"/>
+			  <path fill="white" d="M41.404 45.15c-3.223 2.269-8.353 3.834-13.66 2.433-1.421-.377-2.535 3.31-1.018 3.733 5.767 1.55 12.049.429 16.93-3.014 1.205-.868-1.054-4.027-2.252-3.152"/>
+			</svg>`,
+				mobileOnly: false
+	},
             pipesPuzzle: {
                 title: 'Pipes Puzzle',
                 path: '/games/pipes-puzzle',
@@ -308,7 +320,8 @@
                         <path d="M18.7,20h1.1c0.1,0,0.2,0.1,0.2,0.2V23h8v-4c0-3.9-3.1-7-7-7h-2.3c-0.3-0.6-1-1-1.7-1h-2c-0.7,0-1.4,0.4-1.7,1h-1.1
                             c-0.1,0-0.2-0.1-0.2-0.2V9H4v4c0,3.9,3.1,7,7,7h2.3c0.3,0.6,1,1,1.7,1h2C17.7,21,18.4,20.6,18.7,20z"/>
                     </g>
-                </svg>`
+                </svg>`,
+                mobileOnly: false
             },
             memory: {
                 title: 'Memory',
@@ -416,7 +429,8 @@
 		c4.413,0,8.866,0.141,13.35,0.416l0.744-12.017l-0.737,12.017c55.443,3.488,96.252,25.609,123.914,57.755
 		c27.616,32.17,41.938,74.898,41.938,119.674C452.356,207.812,452.113,213.73,451.611,219.664z"/>
 </g>
-</svg>`
+</svg>`,
+mobileOnly: false
             },
 			minesweeper: {
 				title: 'Minesweeper',
@@ -431,7 +445,8 @@
     <path d="m496,96.586h-32c-8.844,0-16,7.164-16,16 0,8.836 7.156,16 16,16h32c8.844,0 16-7.164 16-16 0-8.836-7.156-16-16-16z"/>
     <path d="m436.98,75.605c3.125,3.125 7.219,4.688 11.313,4.688 4.094,0 8.188-1.563 11.313-4.688l32-32c6.25-6.25 6.25-16.375 0-22.625s-16.375-6.25-22.625,0l-32,32c-6.251,6.25-6.251,16.375-0.001,22.625z"/>
   </g>
-</svg>`
+</svg>`,
+mobileOnly: false
 			},
 			snakeGame: {
 				title: 'Snake Game',
@@ -482,7 +497,8 @@
 	<path class="st0" d="M169.222,82.207c-5.836,0-10.559,4.724-10.559,10.559c0,5.817,4.723,10.55,10.559,10.55
 		c5.825,0,10.55-4.733,10.55-10.55C179.772,86.931,175.047,82.207,169.222,82.207z"/>
 </g>
-</svg>`
+</svg>`,
+mobileOnly: false
 			},
             soccerJuggle: {
                 title: 'Soccer Juggle',
@@ -495,7 +511,8 @@
                         <path fill="none" d="m-1643-1716 155 158m-550 2364c231 231 538 195 826 202m-524-2040c-491 351-610 1064-592 1060m1216-1008c-51 373 84 783 364 1220m-107-2289c157-157 466-267 873-329m-528 4112c-50 132-37 315-8 510m62-3883c282 32 792 74 1196 303m-404 2644c310 173 649 247 1060 180m-340-2008c-242 334-534 645-872 936m1109-2119c-111-207-296-375-499-534m1146 1281c100 3 197 44 290 141m-438 495c158 297 181 718 204 1140"/>
                     </g>
                     <path fill="#000" d="m-1624-1700c243-153 498-303 856-424 141 117 253 307 372 492-288 275-562 544-724 756-274-25-410-2-740-60 3-244 84-499 236-764zm2904-40c271 248 537 498 724 788-55 262-105 553-180 704-234-35-536-125-820-200-138-357-231-625-340-924 210-156 417-296 616-368zm-3273 3033a2376 2376 0 0 1-378-1392l59-7c54 342 124 674 311 928-36 179-2 323 51 458zm1197-1125c365 60 717 120 1060 180 106 333 120 667 156 1000-263 218-625 287-944 420-372-240-523-508-736-768 122-281 257-561 464-832zm3013 678a2376 2376 0 0 1-925 1147l-116-5c84-127 114-297 118-488 232-111 464-463 696-772 86 30 159 72 227 118zm-2287 1527a2376 2376 0 0 1-993-251c199 74 367 143 542 83 53 75 176 134 451 168z"/>
-                </svg>`
+                </svg>`,
+                mobileOnly: false
             },
 			waterRingToss: {
 				title: 'Water Ring Toss',
@@ -559,32 +576,36 @@ c-84 -42 -203 -88 -209 -82 -2 2 -6 48 -10 101 l-6 98 32 -6 c18 -3 69 -14
 113 -24z m-1186 -127 c-4 -54 -7 -113 -8 -132 l-1 -34 -87 6 c-105 8 -229 30
 -320 58 -65 20 -65 21 -42 37 60 42 387 160 449 162 13 0 14 -14 9 -97z"/>
 </g>
-</svg>`
+</svg>`,
+mobileOnly: true
 			}
 
         };
 
         // Function to create game cards
-        function createGameCards() {
-            const container = document.getElementById('gamesContainer');
-            
-            for (const [key, game] of Object.entries(games)) {
-                const card = document.createElement('div');
-                card.className = 'game-card';
-                card.innerHTML = `
-                    <div class="game-icon">${game.icon}</div>
-                    <h2 class="game-title">${game.title}</h2>
-                    <p class="game-description">${game.description}</p>
-                    <button class="play-button">Play Now</button>
-                `;
-                
-                card.addEventListener('click', () => {
-                    loadGame(game.path);
-                });
-                
-                container.appendChild(card);
-            }
-        }
+		function createGameCards() {
+			const container = document.getElementById('gamesContainer');
+			
+			for (const [key, game] of Object.entries(games)) {
+				// Skip games that are mobile only
+				if (game.mobileOnly) continue;
+				
+				const card = document.createElement('div');
+				card.className = 'game-card';
+				card.innerHTML = `
+				    <div class="game-icon">${game.icon}</div>
+				    <h2 class="game-title">${game.title}</h2>
+				    <p class="game-description">${game.description}</p>
+				    <button class="play-button">Play Now</button>
+				`;
+				
+				card.addEventListener('click', () => {
+				    loadGame(game.path);
+				});
+				
+				container.appendChild(card);
+			}
+		}
 
         // Function to load game in iframe
         function loadGame(gamePath) {

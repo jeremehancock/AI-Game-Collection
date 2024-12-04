@@ -3,6 +3,9 @@ A collection of browser-based games created using AI assistance, featuring minim
 
 ## 🎮 Available Games
 
+### Nerdle
+A nerdy twist on the famous word game. Guess the hidden "nerdy" word in 6 tries.
+
 ### Pipes Puzzle
 Connect the pipes to create a continuous flow. Test your logical thinking skills with this challenging puzzle game that requires strategic planning and spatial awareness.
 
@@ -19,15 +22,16 @@ Classic snake game with a modern twist. Eat the food, grow longer, and try not t
 Keep the soccer ball in the air for as long as possible. Challenge yourself to achieve your highest juggling streak in this addictive skill-based game.
 
 ### Water Ring Toss
-Test your skill and patience in this classic water game! Use precision to land all the rings onto the pegs. How many can you score?
+Test your skill and patience in this classic water game! Use precision to land all the rings onto the pegs. How many can you score? (*Mobile Only*)
 
 ## 📸 Screenshots
 <div align="center">
-    <img src="https://jereme.dev/games/images/screenshots/landing-page.png" width="300" alt="Game Menu"/>
-    <img src="https://jereme.dev/games/images/screenshots/pipes-puzzle.png" width="300" alt="Pipes Puzzle Game"/>
+    <img src="https://jereme.dev/games/images/screenshots/landing.png" width="300" alt="Game Menu"/>
+    <img src="https://jereme.dev/games/images/screenshots/nerdle.png" width="300" alt="Nerdle"/>
+    <img src="https://jereme.dev/games/images/screenshots/pipes-puzzle.png" width="300" alt="Pipes Puzzle"/>
     <img src="https://jereme.dev/games/images/screenshots/memory.png" width="300" alt="Memory Game"/>
-    <img src="https://jereme.dev/games/images/screenshots/minesweeper.png" width="300" alt="Memory Game"/>
-    <img src="https://jereme.dev/games/images/screenshots/snake-game.png" width="300" alt="Water Ring Toss"/>
+    <img src="https://jereme.dev/games/images/screenshots/minesweeper.png" width="300" alt="Minesweeper"/>
+    <img src="https://jereme.dev/games/images/screenshots/snake-game.png" width="300" alt="Snake Game"/>
     <img src="https://jereme.dev/games/images/screenshots/soccer-juggle.png" width="300" alt="Soccer Juggle Game"/>
     <img src="https://jereme.dev/games/images/screenshots/water-ring-toss-game.png" width="300" alt="Water Ring Toss"/>
 </div>

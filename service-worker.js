@@ -1,6 +1,7 @@
 const CACHE_NAME = 'pwa-cache-v1';
 const urlsToCache = [
   'index.html',
+  'nerdle/index.html',
   'pipes-puzzle/index.html',
   'memory/index.html',
   'minesweeper/index.html',
