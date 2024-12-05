@@ -37,7 +37,7 @@ Guide particles to their targets by shaping a wave using frequency, amplitude, a
     <img src="https://jereme.dev/games/images/screenshots/snake-game.png" width="300" alt="Snake Game"/>
     <img src="https://jereme.dev/games/images/screenshots/soccer-juggle.png" width="300" alt="Soccer Juggle Game"/>
     <img src="https://jereme.dev/games/images/screenshots/water-ring-toss-game.png" width="300" alt="Water Ring Toss"/>
-    <img src="https://jereme.dev/games/images/screenshots/waveform.png" width="300" alt="Water Ring Toss"/>
+    <img src="https://jereme.dev/games/images/screenshots/waveform-game.png" width="300" alt="Water Ring Toss"/>
 </div>
 
 ## 🚀 Features

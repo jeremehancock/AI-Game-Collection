@@ -33,7 +33,19 @@
             .warning {
             	color: red;
                 font-size: 1.5rem !important;
+                animation: pulse 1.5s infinite;
             }
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.1);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
             .controls {
                 position: absolute;
                 bottom: 120px;
@@ -86,7 +98,10 @@
                 cursor: pointer;
                 box-shadow: 0 4px 15px rgba(255, 71, 87, 0.3);
                 transition: all 0.3s ease;
-                margin: 0 20px;
+                position: absolute;
+                bottom: 0;
+                right: 0;
+                margin: 10px;
                 display: none;
             }
             #restart-btn:hover {
@@ -179,9 +194,9 @@
             <canvas id="gameCanvas"></canvas>
             <div id="stats">
                 <div id="score">Score: 0</div>
-                <button id="restart-btn">Restart</button>
                 <div id="level">Level: 1</div>
             </div>
+            <button id="restart-btn">Restart</button>
             <div class="controls">
                 <div class="slider">
                     <label>Frequency</label>
@@ -202,8 +217,8 @@
         </div>
         <div id="start-screen">
             <h1>Waveform</h1>
-            <p>Guide the particles to the green circles by adjusting the wave.</p>
-            <p><strong>Frequency</strong> - Changes how many peaks and valleys</p>
+            <p>Guide the particles to the green circles.</p>
+            <p><strong>Frequency</strong> - How many peaks and valleys</p>
             <p><strong>Amplitude</strong> - Makes the wave taller or shorter</p>
             <p><strong>Phase</strong> - Moves the wave left and right</p>
             <p class="warning">Avoid the red obstacles!</p>
@@ -359,6 +374,26 @@
                             dy = p.y - g.y;
                         return Math.sqrt(dx * dx + dy * dy) < 15;
                     },
+					drawRoundedRect(ctx, x, y, width, height, radius, fillColor) {
+						// Ensure radius scales dynamically and does not exceed half of width or height
+						radius = Math.min(radius || Math.min(width, height) / 4, width / 2, height / 2);
+
+						ctx.beginPath();
+						ctx.moveTo(x + radius, y); // Start at the top-left corner (with rounded adjustment)
+						ctx.lineTo(x + width - radius, y); // Top edge
+						ctx.arcTo(x + width, y, x + width, y + radius, radius); // Top-right corner
+						ctx.lineTo(x + width, y + height - radius); // Right edge
+						ctx.arcTo(x + width, y + height, x + width - radius, y + height, radius); // Bottom-right corner
+						ctx.lineTo(x + radius, y + height); // Bottom edge
+						ctx.arcTo(x, y + height, x, y + height - radius, radius); // Bottom-left corner
+						ctx.lineTo(x, y + radius); // Left edge
+						ctx.arcTo(x, y, x + radius, y, radius); // Top-left corner
+						ctx.closePath();
+
+						// Fill the rectangle with the specified color
+						ctx.fillStyle = fillColor;
+						ctx.fill();
+					},
                     draw() {
                         this.ctx.clearRect(0, 0, this.width, this.height), this.ctx.beginPath(), (this.ctx.strokeStyle = "rgba(255, 255, 255, 0.5)"), (this.ctx.lineWidth = 2);
                         for (let x = 0; x < this.width; x += 2) {
@@ -367,11 +402,12 @@
                         }
                         this.ctx.stroke(),
                             (this.ctx.fillStyle = "#ff4444"),
-                            this.obstacles.forEach((o) => {
-                                this.ctx.fillRect(o.x, o.y, o.width, o.height);
-                            }),
+                  this.obstacles.forEach((o) => {
+                this.drawRoundedRect(this.ctx, o.x, o.y, o.width, o.height, 10, "#ff4444");
+            });
                             this.goals.forEach((g) => {
                                 this.ctx.beginPath(), (this.ctx.strokeStyle = g.reached ? "#00ff00" : "#4CAF50"), (this.ctx.lineWidth = 2), this.ctx.arc(g.x, g.y, 15, 0, 2 * Math.PI), this.ctx.stroke();
+                                this.ctx.beginPath(), (this.ctx.fillStyle = g.reached ? "#00ff00" : "transparent"), (this.ctx.lineWidth = 2), this.ctx.arc(g.x, g.y, 15, 0, 2 * Math.PI), this.ctx.fill();
                             }),
                             (this.ctx.fillStyle = "#ffffff"),
                             this.particles.forEach((p) => {
