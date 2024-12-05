@@ -2,10 +2,10 @@
 FROM nginx:alpine
 
 # Step 2: Set the working directory in the Nginx container
-WORKDIR /usr/share/nginx/html/games
+WORKDIR /usr/share/nginx/html/
 
 # Step 3: Copy all files and directories from the 'games' directory to the Nginx root
-COPY . /usr/share/nginx/html/games
+COPY . /usr/share/nginx/html/
 
 # Step 4: Expose port 80 for the container
 EXPOSE 80

@@ -1,0 +1,14 @@
+[
+  {
+    "relation": [
+      "delegate_permission/common.handle_all_urls"
+    ],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "dev.jereme.games.twa",
+      "sha256_cert_fingerprints": [
+        "DA:E5:F4:82:AF:CF:7E:60:F0:F2:3D:DE:C1:5C:6B:2A:C7:00:D7:ED:B8:EA:80:ED:00:3B:09:50:F4:3F:3C:C7"
+      ]
+    }
+  }
+]

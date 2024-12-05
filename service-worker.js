@@ -1,13 +1,13 @@
 const CACHE_NAME = 'pwa-cache-v1';
 const urlsToCache = [
   'index.html',
-  'nerdle/index.html',
-  'pipes-puzzle/index.html',
-  'memory/index.html',
-  'minesweeper/index.html',
-  'snake-game/index.html',
-  'soccer-juggle/index.html',
-  'water-ring-toss/index.html',
+  'games/nerdle/index.html',
+  'games/pipes-puzzle/index.html',
+  'games/memory/index.html',
+  'games/minesweeper/index.html',
+  'games/snake-game/index.html',
+  'games/soccer-juggle/index.html',
+  'games/water-ring-toss/index.html',
   'images/icons/web-app-manifest-192x192.png', 
   'images/icons/web-app-manifest-512x512.png'
 ];

@@ -1,5 +1,5 @@
 # AI Game Collection
-A collection of browser-based games created using AI assistance, featuring minimal code modifications. Experience engaging gameplay with a modern, responsive interface at [jereme.dev/games](https://jereme.dev/games).
+A collection of browser-based games created using AI assistance, featuring minimal code modifications. Experience engaging gameplay with a modern, responsive interface at [AI Game Collection](https://aigamecollection.com).
 
 ## 🎮 Available Games
 
@@ -35,17 +35,17 @@ Break the bricks, level up, and beat your high score! A fast-paced game of skill
 
 ## 📸 Screenshots
 <div align="center">
-    <img src="https://jereme.dev/games/images/screenshots/home-page.png" width="300" alt="Game Menu"/>
-    <img src="https://jereme.dev/games/images/screenshots/nerdle.png" width="300" alt="Nerdle"/>
-    <img src="https://jereme.dev/games/images/screenshots/pipes-puzzle.png" width="300" alt="Pipes Puzzle"/>
-    <img src="https://jereme.dev/games/images/screenshots/memory.png" width="300" alt="Memory Game"/>
-    <img src="https://jereme.dev/games/images/screenshots/minesweeper.png" width="300" alt="Minesweeper"/>
-    <img src="https://jereme.dev/games/images/screenshots/snake-game.png" width="300" alt="Snake Game"/>
-    <img src="https://jereme.dev/games/images/screenshots/soccer-juggle.png" width="300" alt="Soccer Juggle Game"/>
-    <img src="https://jereme.dev/games/images/screenshots/water-ring-toss-game.png" width="300" alt="Water Ring Toss"/>
-    <img src="https://jereme.dev/games/images/screenshots/waveform-game.png" width="300" alt="Waveform"/>
-     <img src="https://jereme.dev/games/images/screenshots/bubble-pop-game.png" width="300" alt="Bubble Pop"/>
-    <img src="https://jereme.dev/games/images/screenshots/breakout.png" width="300" alt="Breakout"/>
+    <img src="https://aigamecollection.com/images/screenshots/home-page.png" width="300" alt="Game Menu"/>
+    <img src="https://aigamecollection.com/images/screenshots/nerdle.png" width="300" alt="Nerdle"/>
+    <img src="https://aigamecollection.com/images/screenshots/pipes-puzzle.png" width="300" alt="Pipes Puzzle"/>
+    <img src="https://aigamecollection.com/images/screenshots/memory.png" width="300" alt="Memory Game"/>
+    <img src="https://aigamecollection.com/images/screenshots/minesweeper.png" width="300" alt="Minesweeper"/>
+    <img src="https://aigamecollection.com/images/screenshots/snake-game.png" width="300" alt="Snake Game"/>
+    <img src="https://aigamecollection.com/images/screenshots/soccer-juggle.png" width="300" alt="Soccer Juggle Game"/>
+    <img src="https://aigamecollection.com/images/screenshots/water-ring-toss-game.png" width="300" alt="Water Ring Toss"/>
+    <img src="https://aigamecollection.com/images/screenshots/waveform-game.png" width="300" alt="Waveform"/>
+     <img src="https://aigamecollection.com/images/screenshots/bubble-pop-game.png" width="300" alt="Bubble Pop"/>
+    <img src="https://aigamecollection.com/images/screenshots/breakout.png" width="300" alt="Breakout"/>
 </div>
 
 ## 🚀 Features
@@ -87,19 +87,19 @@ Works on all modern browsers including:
 ## 🔄 Usage
 
 ### 🌐 Website Access
-Visit [jereme.dev/games](https://jereme.dev/games) and click on any game card to start playing. Use the back button in the bottom-left corner to return to the game selection screen.
+Visit [AI Game Collection](https://aigamecollection.com) and click on any game card to start playing. Use the back button in the bottom-left corner to return to the game selection screen.
 
 ### 📱 Progressive Web App (PWA)
 Install the collection as a PWA for a native app-like experience:
 
 #### iOS Installation
-1. Open Safari and visit [jereme.dev/games](https://jereme.dev/games)
+1. Open Safari and visit [AI Game Collection](https://aigamecollection.com/)
 2. Tap the Share button (square with arrow)
 3. Scroll down and tap "Add to Home Screen"
 4. Choose a name and tap "Add"
 
 #### Android Installation
-1. Visit [jereme.dev/games](https://jereme.dev/games) in Chrome
+1. Visit [AI Game Collection](https://aigamecollection.com) in Chrome
 2. Tap the menu (three dots)
 3. Select "Add to Home Screen"
 4. Follow the prompts to install
