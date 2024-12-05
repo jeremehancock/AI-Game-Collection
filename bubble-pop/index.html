@@ -101,7 +101,7 @@
     <div id="startScreen" class="overlay">
         <div class="content">
             <h1>Bubble Pop</h1>
-            <p>Pop the falling bubbles before they reach the bottom!</p>
+            <p>Pop the floating bubbles before they reach the top!</p>
             <p>Smaller bubbles are worth more points.</p>
             <p>Watch as bubbles bounce and collide!</p>
             <p>Don't let any bubbles escape!</p>
@@ -145,16 +145,16 @@
                     groupX + (Math.random() - 0.5) * 60 : 
                     Math.random() * (canvas.width - this.radius * 2) + this.radius;
                 this.x = Math.max(this.radius, Math.min(canvas.width - this.radius, this.x));
-                this.y = -this.radius;
+                this.y = canvas.height + this.radius;
                 this.vx = (Math.random() - 0.5) * 2;
-                this.vy = 0.5 + Math.random() * 0.5;
+                this.vy = -0.5 - Math.random() * 0.5;
                 this.baseHue = Math.random() * 360;
                 this.points = Math.ceil((50 - this.radius) * 2);
                 this.active = true;
             }
 
             update() {
-                this.vy += 0.05;
+                this.vy -= 0.05;
                 this.vx += (Math.random() - 0.5) * 0.1;
                 this.vx *= 0.99;
                 this.vy *= 0.99;
@@ -170,7 +170,7 @@
                     this.vx = -Math.abs(this.vx) * 0.8;
                 }
 
-                return this.y - this.radius > canvas.height;
+                return this.y + this.radius < 0;
             }
 
             draw() {
@@ -326,7 +326,7 @@
             checkCollisions();
 
             bubbles = bubbles.filter(bubble => {
-                if (bubble.y - bubble.radius > canvas.height) {
+                if (bubble.y + bubble.radius < 0) {
                     endGame();
                     return false;
                 }
