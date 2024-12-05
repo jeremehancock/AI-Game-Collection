@@ -149,8 +149,8 @@
         const ball = {
             x: 0,
             y: 0,
-            dx: 2,
-            dy: -2,
+            dx: 4, // Increased from 2
+            dy: -4, // Increased from -2
             radius: 8
         };
 
@@ -168,7 +168,6 @@
         let gameOver = false;
         let lastFrameTime = 0;
 
-        // Updated function to draw a ball on a canvas
         function drawLifeBall(canvas) {
             const ctx = canvas.getContext('2d');
             ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -298,7 +297,6 @@
                             if (currentLevel < levels.length) {
                                 currentLevel++;
                                 updateLevel();
-                                // Reset lives to 3 when advancing to the next level
                                 lives = 3;
                                 updateLives();
                                 createBricks();
@@ -320,47 +318,50 @@
                 ball.x <= paddle.x + paddle.width) {
                 
                 const hitPos = (ball.x - paddle.x) / paddle.width;
-                ball.dx = 4 * (hitPos - 0.5);
+                ball.dx = 6 * (hitPos - 0.5); // Increased paddle hit response
                 ball.dy = -Math.abs(ball.dy);
                 ball.y = paddle.y - ball.radius;
             }
         }
-		document.addEventListener('keydown', (e) => {
-			if (e.key === 'ArrowLeft') {
-				paddle.x -= 20; // Move paddle left
-				if (paddle.x < 0) paddle.x = 0; // Ensure paddle doesn't go out of bounds
-			} else if (e.key === 'ArrowRight') {
-				paddle.x += 20; // Move paddle right
-				if (paddle.x + paddle.width > canvas.width) {
-				    paddle.x = canvas.width - paddle.width; // Ensure paddle doesn't go out of bounds
-				}
-			}
-		});
-		let touchX = null;
-		controlArea.addEventListener('touchstart', (e) => {
-			const touch = e.touches[0];
-			touchX = touch.clientX;
-		});
 
-		controlArea.addEventListener('touchmove', (e) => {
-			e.preventDefault();
-			const touch = e.touches[0];
-			if (touchX !== null) {
-				const deltaX = touch.clientX - touchX;
-				paddle.x += deltaX;
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowLeft') {
+                paddle.x -= 20;
+                if (paddle.x < 0) paddle.x = 0;
+            } else if (e.key === 'ArrowRight') {
+                paddle.x += 20;
+                if (paddle.x + paddle.width > canvas.width) {
+                    paddle.x = canvas.width - paddle.width;
+                }
+            }
+        });
 
-				if (paddle.x < 0) paddle.x = 0;
-				if (paddle.x + paddle.width > canvas.width) {
-				    paddle.x = canvas.width - paddle.width;
-				}
+        let touchX = null;
+        controlArea.addEventListener('touchstart', (e) => {
+            const touch = e.touches[0];
+            touchX = touch.clientX;
+        });
 
-				touchX = touch.clientX;
-			}
-		});
+        controlArea.addEventListener('touchmove', (e) => {
+            e.preventDefault();
+            const touch = e.touches[0];
+            if (touchX !== null) {
+                const deltaX = touch.clientX - touchX;
+                paddle.x += deltaX;
 
-		controlArea.addEventListener('touchend', () => {
-			touchX = null;
-		});
+                if (paddle.x < 0) paddle.x = 0;
+                if (paddle.x + paddle.width > canvas.width) {
+                    paddle.x = canvas.width - paddle.width;
+                }
+
+                touchX = touch.clientX;
+            }
+        });
+
+        controlArea.addEventListener('touchend', () => {
+            touchX = null;
+        });
+
         function showStartOverlay() {
             const overlay = document.createElement('div');
             overlay.className = 'overlay';
@@ -415,8 +416,8 @@
         function resetBall() {
             ball.x = canvas.width / 2;
             ball.y = canvas.height - 30;
-            ball.dx = 2;
-            ball.dy = -2;
+            ball.dx = 4; // Increased from 2
+            ball.dy = -4; // Increased from -2
         }
 
         function resetGame() {

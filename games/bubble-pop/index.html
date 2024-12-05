@@ -9,15 +9,28 @@
             overflow: hidden;
             touch-action: none;
             font-family: Arial, sans-serif;
+            background: #000000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+        .game-container {
             background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+        }
+        .game-container {
+            width: 100%;
+            max-width: 700px;
+            height: 100vh;
+            position: relative;
         }
         #gameCanvas {
             width: 100%;
-            height: 100vh;
+            height: 100%;
             touch-action: none;
         }
         .overlay {
-            position: fixed;
+            position: absolute;
             top: 0;
             left: 0;
             width: 100%;
@@ -51,7 +64,7 @@
             font-size: 1.1rem;
         }
         #score {
-            position: fixed;
+            position: absolute;
             top: 20px;
             left: 20px;
             color: white;
@@ -60,7 +73,7 @@
             z-index: 1;
         }
         .overlay-screen {
-            position: fixed;
+            position: absolute;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
@@ -98,23 +111,25 @@
     </style>
 </head>
 <body>
-    <div id="startScreen" class="overlay">
-        <div class="content">
-            <h1>Bubble Pop</h1>
-            <p>Pop the floating bubbles!</p>
-            <p>Smaller bubbles are worth more points.</p>
-            <p>Watch as bubbles bounce and collide!</p>
-            <p>Don't let any bubbles escape!</p>
-            <button onclick="startGame()">Play Now</button>
+    <div class="game-container">
+        <div id="startScreen" class="overlay">
+            <div class="content">
+                <h1>Bubble Pop</h1>
+                <p>Pop the floating bubbles!</p>
+                <p>Smaller bubbles are worth more points.</p>
+                <p>Watch as bubbles bounce and collide!</p>
+                <p>Don't let any bubbles escape!</p>
+                <button onclick="startGame()">Play Now</button>
+            </div>
         </div>
+        <div id="score">Score: 0</div>
+        <div id="gameOver" class="overlay-screen">
+            <h2>Game Over!</h2>
+            <p>Final Score: <span id="finalScore">0</span></p>
+            <button onclick="restartGame()">Play Again</button>
+        </div>
+        <canvas id="gameCanvas"></canvas>
     </div>
-    <div id="score">Score: 0</div>
-    <div id="gameOver" class="overlay-screen">
-        <h2>Game Over!</h2>
-        <p>Final Score: <span id="finalScore">0</span></p>
-        <button onclick="restartGame()">Play Again</button>
-    </div>
-    <canvas id="gameCanvas"></canvas>
 
     <script>
         const canvas = document.getElementById('gameCanvas');
@@ -123,6 +138,7 @@
         const gameOverElement = document.getElementById('gameOver');
         const finalScoreElement = document.getElementById('finalScore');
         const startScreen = document.getElementById('startScreen');
+        const gameContainer = document.querySelector('.game-container');
 
         let score = 0;
         let bubbles = [];
@@ -132,8 +148,8 @@
         let lastBubble = 0;
 
         function resizeCanvas() {
-            canvas.width = window.innerWidth;
-            canvas.height = window.innerHeight;
+            canvas.width = gameContainer.clientWidth;
+            canvas.height = gameContainer.clientHeight;
         }
         resizeCanvas();
         window.addEventListener('resize', resizeCanvas);
