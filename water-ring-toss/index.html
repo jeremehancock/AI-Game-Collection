@@ -191,7 +191,7 @@
                 this.x = x;
                 this.y = y;
                 this.vx = 0;
-                this.vy = -15 - Math.random() * 5;
+                this.vy = -17 - Math.random() * 5;
                 this.r = 25;
                 this.c = c;
                 this.p = null;
@@ -199,7 +199,7 @@
                 this.i = 0;
                 this.u = function () {
                     if (this.p) return;
-                    this.vy += G.y;
+                    this.vy += G.y * 0.5;
                     this.vx += G.x;
                     this.w += (Math.random() - 0.5) * 0.1;
                     this.w *= 0.95;
@@ -207,14 +207,14 @@
                     this.y += this.vy;
                     let s = Math.sqrt(this.vx * this.vx + this.vy * this.vy);
                     if (s > 0) {
-                        let d = 0.98 - Math.min(0.1, s * 0.001);
+                        let d = 0.995 - Math.min(0.03, s * 0.001);
                         this.vx *= d;
                         this.vy *= d;
                     }
-                    s < 2 && ((this.vx += (Math.random() - 0.5) * 0.2), (this.vy -= Math.random() * 0.1));
+                    s < 2 && ((this.vx += (Math.random() - 0.5) * 0.2), (this.vy -= Math.random() * 0.15));
                     const area = getPlayArea();
-                    this.x < this.r ? ((this.x = this.r), (this.vx *= -0.6), (this.vy *= 0.9)) : this.x > area.width - this.r && ((this.x = area.width - this.r), (this.vx *= -0.6), (this.vy *= 0.9));
-                    this.y > area.bottom - this.r ? ((this.y = area.bottom - this.r), (this.vy *= -0.6), (this.vx *= 0.9)) : this.y < this.r && ((this.y = this.r), (this.vy *= -0.6), (this.vx *= 0.9));
+                    this.x < this.r ? ((this.x = this.r), (this.vx *= -0.6), (this.vy *= 0.97)) : this.x > area.width - this.r && ((this.x = area.width - this.r), (this.vx *= -0.6), (this.vy *= 0.97));
+                    this.y > area.bottom - this.r ? ((this.y = area.bottom - this.r), (this.vy *= -0.7), (this.vx *= 0.97)) : this.y < this.r && ((this.y = this.r), (this.vy *= -0.7), (this.vx *= 0.97));
                     for (let i = 0; i < g.p.length; i++) {
                         let p = g.p[i];
                         if (p.r.length < 3) {
@@ -259,7 +259,7 @@
             function B(x) {
                 this.x = x;
                 this.y = getPlayArea().bottom;
-                this.vy = -4 - Math.random() * 2;
+                this.vy = -5 - Math.random() * 3;
                 this.r = Math.random() * 2 + 1.5;
                 this.l = 1;
                 this.w = Math.random() * 7;
@@ -268,8 +268,8 @@
                     this.w += this.s;
                     this.x += Math.sin(this.w) * 0.5;
                     this.y += this.vy;
-                    this.vy *= 0.99;
-                    this.y < getPlayArea().bottom - 200 && (this.l *= 0.95);
+                    this.vy *= 0.995;
+                    this.y < getPlayArea().bottom - 200 && (this.l *= 0.97);
                     return this.l > 0.1;
                 };
                 this.d = function () {
@@ -291,15 +291,15 @@
                 this.l = 1;
                 this.w = Math.random() * 7;
                 this.s = Math.random() * 0.1 + 0.05;
-                this.f = s * 0.2;
+                this.f = s * 0.25;
                 this.u = function () {
                     this.w += this.s;
                     this.x += Math.sin(this.w) * 0.2 + this.vx;
                     this.y += this.vy;
-                    this.vy += G.y;
+                    this.vy += G.y * 0.7;
                     this.vx += G.x;
-                    this.vx *= 0.985;
-                    this.vy *= 0.985;
+                    this.vx *= 0.99;
+                    this.vy *= 0.99;
                     const area = getPlayArea();
                     this.x < this.r ? ((this.vx *= -0.5), (this.vy += Math.random() - 0.5), (this.x = this.r)) : this.x > area.width - this.r && ((this.vx *= -0.5), (this.vy += Math.random() - 0.5), (this.x = area.width - this.r));
                     this.y < this.r && ((this.vy *= -0.5), (this.vx += Math.random() - 0.5), (this.y = this.r));
@@ -312,11 +312,11 @@
                                 ri = r.r * 3;
                             if (t < ri) {
                                 let f = (1 - t / ri) * this.f,
-                                    l = Math.max(0, -this.vy) * 0.03;
-                                r.vx += (d / t) * f * 0.1;
-                                r.vy += ((y / t) * f - l) * 0.1;
-                                r.vx += (Math.random() - 0.5) * f * 0.03;
-                                r.vy += (Math.random() - 0.5) * f * 0.03;
+                                    l = Math.max(0, -this.vy) * 0.05;
+                                r.vx += (d / t) * f * 0.15;
+                                r.vy += ((y / t) * f - l) * 0.15;
+                                r.vx += (Math.random() - 0.5) * f * 0.04;
+                                r.vy += (Math.random() - 0.5) * f * 0.04;
                             }
                         }
                     }
