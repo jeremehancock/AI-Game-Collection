@@ -298,6 +298,9 @@
                             if (currentLevel < levels.length) {
                                 currentLevel++;
                                 updateLevel();
+                                // Reset lives to 3 when advancing to the next level
+                                lives = 3;
+                                updateLives();
                                 createBricks();
                                 resetBall();
                             } else {
