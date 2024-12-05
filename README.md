@@ -27,6 +27,12 @@ Test your skill and patience in this classic water game! Use precision to land a
 ### Waveform
 Guide particles to their targets by shaping a wave using frequency, amplitude, and phase controls while avoiding obstacles in this unique physics puzzle.
 
+### Bubble Pop
+Pop the bubbles before they escape! A fast-paced game of precision and reflexes that will keep you on your toes.
+
+### Breakout
+Break the bricks, level up, and beat your high score! A fast-paced game of skill and strategy for all ages.
+
 ## 📸 Screenshots
 <div align="center">
     <img src="https://jereme.dev/games/images/screenshots/home.png" width="300" alt="Game Menu"/>
@@ -37,7 +43,9 @@ Guide particles to their targets by shaping a wave using frequency, amplitude, a
     <img src="https://jereme.dev/games/images/screenshots/snake-game.png" width="300" alt="Snake Game"/>
     <img src="https://jereme.dev/games/images/screenshots/soccer-juggle.png" width="300" alt="Soccer Juggle Game"/>
     <img src="https://jereme.dev/games/images/screenshots/water-ring-toss-game.png" width="300" alt="Water Ring Toss"/>
-    <img src="https://jereme.dev/games/images/screenshots/waveform-game.png" width="300" alt="Water Ring Toss"/>
+    <img src="https://jereme.dev/games/images/screenshots/waveform-game.png" width="300" alt="Waveform"/>
+     <img src="https://jereme.dev/games/images/screenshots/bubble-pop.png" width="300" alt="Bubble Pop"/>
+    <img src="https://jereme.dev/games/images/screenshots/breakout.png" width="300" alt="Breakout"/>
 </div>
 
 ## 🚀 Features

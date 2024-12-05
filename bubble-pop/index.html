@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Bubble Pop</title>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            touch-action: none;
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+        }
+        #gameCanvas {
+            width: 100%;
+            height: 100vh;
+            touch-action: none;
+        }
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.85);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 10;
+        }
+        .content {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            padding: 2rem;
+            border-radius: 20px;
+            text-align: center;
+            color: white;
+            max-width: 80%;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+        }
+        .content h1 {
+            margin: 0 0 1rem 0;
+            font-size: 2.5rem;
+            background: linear-gradient(45deg, #4CAF50, #45a049);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .content p {
+            margin: 1rem 0;
+            line-height: 1.6;
+            font-size: 1.1rem;
+        }
+        #score {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            color: white;
+            font-size: 24px;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+            z-index: 1;
+        }
+        .overlay-screen {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            color: white;
+            padding: 20px;
+            border-radius: 15px;
+            text-align: center;
+            display: none;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+        }
+        button {
+            background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+            border: none;
+            color: white;
+            padding: 15px 32px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 16px;
+            margin: 4px 2px;
+            cursor: pointer;
+            border-radius: 25px;
+            box-shadow: 0 4px 15px rgba(76, 175, 80, 0.3);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(76, 175, 80, 0.4);
+        }
+        #startScreen {
+            display: flex;
+        }
+    </style>
+</head>
+<body>
+    <div id="startScreen" class="overlay">
+        <div class="content">
+            <h1>Bubble Pop</h1>
+            <p>Pop the floating bubbles before they reach the top!</p>
+            <p>Smaller bubbles are worth more points.</p>
+            <p>Watch as bubbles bounce and collide!</p>
+            <p>Don't let any bubbles escape!</p>
+            <button onclick="startGame()">Play Now</button>
+        </div>
+    </div>
+    <div id="score">Score: 0</div>
+    <div id="gameOver" class="overlay-screen">
+        <h2>Game Over!</h2>
+        <p>Final Score: <span id="finalScore">0</span></p>
+        <button onclick="restartGame()">Play Again</button>
+    </div>
+    <canvas id="gameCanvas"></canvas>
+
+    <script>
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        const scoreElement = document.getElementById('score');
+        const gameOverElement = document.getElementById('gameOver');
+        const finalScoreElement = document.getElementById('finalScore');
+        const startScreen = document.getElementById('startScreen');
+
+        let score = 0;
+        let bubbles = [];
+        let gameActive = false;
+        let lastTime = 0;
+        let bubbleInterval = 1500;
+        let lastBubble = 0;
+
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        resizeCanvas();
+        window.addEventListener('resize', resizeCanvas);
+
+        class Bubble {
+            constructor(groupX = null) {
+                this.radius = 25 + Math.random() * 25;
+                this.x = groupX !== null ? 
+                    groupX + (Math.random() - 0.5) * 60 : 
+                    Math.random() * (canvas.width - this.radius * 2) + this.radius;
+                this.x = Math.max(this.radius, Math.min(canvas.width - this.radius, this.x));
+                this.y = -this.radius;
+                this.vx = (Math.random() - 0.5) * 2;
+                this.vy = 0.5 + Math.random() * 0.5;
+                this.baseHue = Math.random() * 360;
+                this.points = Math.ceil((50 - this.radius) * 2);
+                this.active = true;
+            }
+
+            update() {
+                this.vy += 0.05;
+                this.vx += (Math.random() - 0.5) * 0.1;
+                this.vx *= 0.99;
+                this.vy *= 0.99;
+                
+                this.x += this.vx;
+                this.y += this.vy;
+
+                if (this.x - this.radius < 0) {
+                    this.x = this.radius;
+                    this.vx = Math.abs(this.vx) * 0.8;
+                } else if (this.x + this.radius > canvas.width) {
+                    this.x = canvas.width - this.radius;
+                    this.vx = -Math.abs(this.vx) * 0.8;
+                }
+
+                return this.y - this.radius > canvas.height;
+            }
+
+            draw() {
+                const gradient = ctx.createRadialGradient(
+                    this.x - this.radius * 0.3, this.y - this.radius * 0.3, this.radius * 0.1,
+                    this.x, this.y, this.radius
+                );
+                
+                gradient.addColorStop(0, `hsla(${this.baseHue}, 100%, 90%, 0.8)`);
+                gradient.addColorStop(0.4, `hsla(${this.baseHue}, 70%, 60%, 0.6)`);
+                gradient.addColorStop(1, `hsla(${this.baseHue}, 90%, 40%, 0.4)`);
+
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+                ctx.fillStyle = gradient;
+                ctx.fill();
+
+                const highlightGradient = ctx.createRadialGradient(
+                    this.x - this.radius * 0.5, this.y - this.radius * 0.5, this.radius * 0.1,
+                    this.x - this.radius * 0.4, this.y - this.radius * 0.4, this.radius * 0.5
+                );
+                highlightGradient.addColorStop(0, 'rgba(255, 255, 255, 0.4)');
+                highlightGradient.addColorStop(1, 'rgba(255, 255, 255, 0)');
+                
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+                ctx.fillStyle = highlightGradient;
+                ctx.fill();
+
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+                ctx.strokeStyle = `hsla(${this.baseHue}, 90%, 60%, 0.3)`;
+                ctx.lineWidth = 2;
+                ctx.stroke();
+            }
+
+            contains(x, y) {
+                const distance = Math.sqrt(
+                    Math.pow(x - this.x, 2) + Math.pow(y - this.y, 2)
+                );
+                return distance <= this.radius;
+            }
+        }
+
+        function resolveCollision(b1, b2) {
+            const dx = b2.x - b1.x;
+            const dy = b2.y - b1.y;
+            const distance = Math.sqrt(dx * dx + dy * dy);
+            
+            if (distance < b1.radius + b2.radius) {
+                const nx = dx / distance;
+                const ny = dy / distance;
+                
+                const overlap = (b1.radius + b2.radius - distance) / 2;
+                b1.x -= nx * overlap;
+                b1.y -= ny * overlap;
+                b2.x += nx * overlap;
+                b2.y += ny * overlap;
+                
+                const dvx = b2.vx - b1.vx;
+                const dvy = b2.vy - b1.vy;
+                const velAlongNormal = dvx * nx + dvy * ny;
+                
+                if (velAlongNormal > 0) return;
+                
+                const restitution = 0.6;
+                const j = -(1 + restitution) * velAlongNormal;
+                const impulseX = j * nx;
+                const impulseY = j * ny;
+                
+                b1.vx -= impulseX;
+                b1.vy -= impulseY;
+                b2.vx += impulseX;
+                b2.vy += impulseY;
+                
+                b1.vx += (Math.random() - 0.5) * 0.5;
+                b1.vy += (Math.random() - 0.5) * 0.5;
+                b2.vx += (Math.random() - 0.5) * 0.5;
+                b2.vy += (Math.random() - 0.5) * 0.5;
+            }
+        }
+
+        function checkCollisions() {
+            for (let i = 0; i < bubbles.length; i++) {
+                for (let j = i + 1; j < bubbles.length; j++) {
+                    resolveCollision(bubbles[i], bubbles[j]);
+                }
+            }
+        }
+
+        function createBubbleGroup() {
+            const groupX = Math.random() * (canvas.width * 0.8) + canvas.width * 0.1;
+            for (let i = 0; i < 3; i++) {
+                bubbles.push(new Bubble(groupX));
+            }
+        }
+
+        function handleTouch(e) {
+            if (!gameActive) return;
+            
+            e.preventDefault();
+            const rect = canvas.getBoundingClientRect();
+            const scaleX = canvas.width / rect.width;
+            const scaleY = canvas.height / rect.height;
+            
+            const touches = e.touches || [e];
+            
+            for (let touch of touches) {
+                const x = (touch.clientX - rect.left) * scaleX;
+                const y = (touch.clientY - rect.top) * scaleY;
+                
+                for (let i = bubbles.length - 1; i >= 0; i--) {
+                    const bubble = bubbles[i];
+                    if (bubble.contains(x, y) && bubble.active) {
+                        score += bubble.points;
+                        scoreElement.textContent = `Score: ${score}`;
+                        bubbles.splice(i, 1);
+                        break;
+                    }
+                }
+            }
+        }
+
+        function startGame() {
+            startScreen.style.display = 'none';
+            gameActive = true;
+            score = 0;
+            bubbles = [];
+            lastBubble = 0;
+            bubbleInterval = 1500;
+            scoreElement.textContent = 'Score: 0';
+            requestAnimationFrame(gameLoop);
+        }
+
+        function gameLoop(timestamp) {
+            if (!gameActive) return;
+
+            const deltaTime = timestamp - lastTime;
+            lastTime = timestamp;
+
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            if (timestamp - lastBubble > bubbleInterval) {
+                createBubbleGroup();
+                lastBubble = timestamp;
+                bubbleInterval = Math.max(1000, 1500 - Math.floor(score/20));
+            }
+
+            bubbles.forEach(bubble => {
+                if (bubble.active) bubble.update();
+            });
+
+            checkCollisions();
+
+            bubbles = bubbles.filter(bubble => {
+                if (bubble.y - bubble.radius > canvas.height) {
+                    endGame();
+                    return false;
+                }
+                bubble.draw();
+                return true;
+            });
+
+            requestAnimationFrame(gameLoop);
+        }
+
+        function endGame() {
+            gameActive = false;
+            gameOverElement.style.display = 'block';
+            finalScoreElement.textContent = score;
+        }
+
+        function restartGame() {
+            gameActive = true;
+            score = 0;
+            bubbles = [];
+            lastBubble = 0;
+            bubbleInterval = 1500;
+            scoreElement.textContent = 'Score: 0';
+            gameOverElement.style.display = 'none';
+            requestAnimationFrame(gameLoop);
+        }
+
+        canvas.addEventListener('touchstart', handleTouch);
+        canvas.addEventListener('mousedown', handleTouch);
+    </script>
+</body>
+</html>
