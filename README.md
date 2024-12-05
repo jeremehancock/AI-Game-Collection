@@ -44,7 +44,7 @@ Break the bricks, level up, and beat your high score! A fast-paced game of skill
     <img src="https://jereme.dev/games/images/screenshots/soccer-juggle.png" width="300" alt="Soccer Juggle Game"/>
     <img src="https://jereme.dev/games/images/screenshots/water-ring-toss-game.png" width="300" alt="Water Ring Toss"/>
     <img src="https://jereme.dev/games/images/screenshots/waveform-game.png" width="300" alt="Waveform"/>
-     <img src="https://jereme.dev/games/images/screenshots/bubble-pop.png" width="300" alt="Bubble Pop"/>
+     <img src="https://jereme.dev/games/images/screenshots/bubble-pop-game.png" width="300" alt="Bubble Pop"/>
     <img src="https://jereme.dev/games/images/screenshots/breakout.png" width="300" alt="Breakout"/>
 </div>
 
