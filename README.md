@@ -39,7 +39,7 @@ Break the bricks, level up, and beat your high score! A fast-paced game of skill
     <img src="https://aigamecollection.com/images/screenshots/nerdle.png" width="300" alt="Nerdle"/>
     <img src="https://aigamecollection.com/images/screenshots/pipes-puzzle.png" width="300" alt="Pipes Puzzle"/>
     <img src="https://aigamecollection.com/images/screenshots/memory.png" width="300" alt="Memory Game"/>
-    <img src="https://aigamecollection.com/images/screenshots/minesweeper.png" width="300" alt="Minesweeper"/>
+    <img src="https://aigamecollection.com/images/screenshots/minesweeper-game.png" width="300" alt="Minesweeper"/>
     <img src="https://aigamecollection.com/images/screenshots/snake-game.png" width="300" alt="Snake Game"/>
     <img src="https://aigamecollection.com/images/screenshots/soccer-juggle.png" width="300" alt="Soccer Juggle Game"/>
     <img src="https://aigamecollection.com/images/screenshots/water-ring-toss-game.png" width="300" alt="Water Ring Toss"/>
