@@ -35,7 +35,7 @@ Break the bricks, level up, and beat your high score! A fast-paced game of skill
 
 ## 📸 Screenshots
 <div align="center">
-    <img src="https://jereme.dev/games/images/screenshots/home.png" width="300" alt="Game Menu"/>
+    <img src="https://jereme.dev/games/images/screenshots/home-page.png" width="300" alt="Game Menu"/>
     <img src="https://jereme.dev/games/images/screenshots/nerdle.png" width="300" alt="Nerdle"/>
     <img src="https://jereme.dev/games/images/screenshots/pipes-puzzle.png" width="300" alt="Pipes Puzzle"/>
     <img src="https://jereme.dev/games/images/screenshots/memory.png" width="300" alt="Memory Game"/>

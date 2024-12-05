@@ -231,57 +231,75 @@
                 font-size: 2rem;
             }
         }
-        .github-link {
-            position: absolute;
-            top: 2rem;
-            right: 2rem;
-            opacity: 0.7;
-            transition: all 0.3s ease;
-            background: rgba(255, 255, 255, 0.05);
-            padding: 0.75rem;
-            border-radius: 50%;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 100;
-        }
+		.icon-container {
+			display: flex;
+			gap: 1rem;  /* This adds space between the icons */
+			margin-top: 40px;
+			margin-bottom: -10px;
+			justify-content: center;
+		}
 
-        .github-link:hover {
-            opacity: 1;
-            background: rgba(255, 255, 255, 0.1);
-            border-color: rgba(255, 255, 255, 0.2);
-            transform: translateY(-2px);
-        }
+		.github-link, .dockerhub-link {
+			opacity: 0.7;
+			transition: all 0.3s ease;
+			background: rgba(255, 255, 255, 0.05);
+			padding: 0.75rem;
+			border-radius: 50%;
+			border: 1px solid rgba(255, 255, 255, 0.1);
+			display: flex;
+			align-items: center;
+			justify-content: center;
+		}
 
-        @media (max-width: 768px) {
-            .github-link {
-                top: .5rem;
-                right: .5rem;
-                padding: 0.5rem;
-                transform: scale(0.9);
-            }
-            
-            .github-link:hover {
-                transform: scale(0.9) translateY(-2px);
-            }
-        }
+		.github-link:hover, .dockerhub-link:hover {
+			opacity: 1;
+			background: rgba(255, 255, 255, 0.1);
+			border-color: rgba(255, 255, 255, 0.2);
+			transform: translateY(-2px);
+		}
+
+		@media (max-width: 768px) {
+			.icon-container {
+				top: .5rem;
+				right: .5rem;
+				gap: 0.75rem;  /* Slightly reduce space between icons for smaller screens */
+			}
+
+			.github-link, .dockerhub-link {
+				padding: 0.5rem;
+				transform: scale(0.9);
+			}
+			
+			.github-link:hover, .dockerhub-link:hover {
+				transform: scale(0.9) translateY(-2px);
+			}
+		}
+
     </style>
 </head>
 <body>
     <div class="container">
-        <header>
-            <h1>AI Game Collection</h1>
-            <p class="subtitle">This site and all games were built using AI with minimal code changes.</p>
-            <a href="https://github.com/jeremehancock/AI-Game-Collection" target="_blank" class="github-link">
-                <svg height="24" width="24" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"></path>
-                </svg>
-            </a>
-        </header>
+		<header>
+			<h1>AI Game Collection</h1>
+			<p class="subtitle">This site and all games were built using AI with minimal code changes.</p>
+		</header>
+
         <div class="games-grid" id="gamesContainer">
             <!-- Games will be dynamically inserted here -->
         </div>
+        			<div class="icon-container">
+				<a href="https://hub.docker.com/repository/docker/bozodev/ai-game-collection/general" target="_blank" class="dockerhub-link" title="Check it out on Docker Hub">
+					<svg xmlns="http://www.w3.org/2000/svg" height="24" width="24" viewBox="0 0 512 512">
+						<path stroke="#ffffff" stroke-width="38" d="M296 226h42m-92 0h42m-91 0h42m-91 0h41m-91 0h42m8-46h41m8 0h42m7 0h42m-42-46h42"/>
+						<path fill="#ffffff" d="m472 228s-18-17-55-11c-4-29-35-46-35-46s-29 35-8 74c-6 3-16 7-31 7H68c-5 19-5 145 133 145 99 0 173-46 208-130 52 4 63-39 63-39"/>
+					</svg>
+				</a>
+				<a href="https://github.com/jeremehancock/AI-Game-Collection" target="_blank" class="github-link" title="Check it out on GitHub">
+				    <svg height="24" width="24" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+				        <path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"></path>
+				    </svg>
+				</a>
+			</div>
     </div>
 
     <!-- New elements for iframe and back button -->
