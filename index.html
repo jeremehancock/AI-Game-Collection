@@ -376,14 +376,18 @@
 
         // Function to handle Google Play button visibility
         function handleGooglePlayButton() {
-            const modeParam = getUrlParameter('mode');
-            const googlePlayButton = document.getElementById('googlePlayButton');
-            
-            if (modeParam !== 'app') {
-                googlePlayButton.style.display = 'block';
-            } else {
-                googlePlayButton.style.display = 'none';
-            }
+        
+		    const isAndroid = /Android/i.test(navigator.userAgent);
+			const isWebView = isAndroid && !isStandalone && !/Chrome|Firefox/i.test(navigator.userAgent);
+
+		    const modeParam = getUrlParameter('mode');
+		    const googlePlayButton = document.getElementById('googlePlayButton');
+
+			if (isAndroid || modeParam === 'app') {
+			  document.getElementById('googlePlayButton').style.display = 'none';
+			} else {
+		      	googlePlayButton.style.display = 'block';
+		    }
         }
         
         // Game collection data with SVG icons
@@ -817,6 +821,7 @@ m489 -117 c31 -26 31 -78 -1 -104 -22 -18 -39 -19 -226 -16 -220 3 -226 5
         .catch(error => console.error('Service Worker registration failed:', error));
     });
   }
+
     </script>
 </body>
 </html>
