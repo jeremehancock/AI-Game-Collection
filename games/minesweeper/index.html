@@ -144,20 +144,45 @@
                 align-items: center;
                 gap: 4px;
             }
-            .toggle-flag-btn.active {
-                background-color: rgba(244, 67, 54, 0.1);
-            }
-            .difficulty-select {
-                width: 100%;
-                padding: 8px;
-                font-size: 1rem;
-                border: 1px solid #ddd;
-                border-radius: 4px;
-                background-color: var(--container-bg);
-                color: var(--text-color);
-                cursor: pointer;
-                margin: 4px 0;
-            }
+			.toggle-flag-btn.active {
+				background-color: rgba(244, 67, 54, 0.2);
+				color: white;
+				border: 2px solid #f44336;
+				font-weight: bold;
+				transform: scale(1.1);
+				transition: transform 0.2s ease, background-color 0.2s ease;
+			}
+
+			.flag-mode-overlay {
+				position: fixed;
+				top: 0;
+				left: 0;
+				width: 100%;
+				background-color: rgba(244, 67, 54, 0.9);
+				color: white;
+				text-align: center;
+				font-size: 1.2rem;
+				padding: 8px 0;
+				z-index: 9999;
+				display: none;
+			}
+
+			.flag-mode-overlay.active {
+				display: block;
+			}
+
+			.difficulty-select {
+				width: 100%;
+				padding: 8px;
+				font-size: 1rem;
+				border: 1px solid #ddd;
+				border-radius: 4px;
+				background-color: var(--container-bg);
+				color: var(--text-color);
+				cursor: pointer;
+				margin: 4px 0;
+				box-sizing: border-box; /* Ensure padding is included in width */
+			}
             .controls {
                 display: flex;
                 width: 100%;
@@ -247,6 +272,7 @@
 .dropdown {
     position: relative;
     display: inline-block;
+    width: 100%;
 }
 
 /* Dropdown select box */
@@ -271,6 +297,11 @@
     pointer-events: none; /* Prevent interfering with click */
     font-size: 0.8rem; /* Adjust arrow size */
     color: #333; /* Arrow color */
+}
+
+/* Dark mode arrow color */
+html.dark .dropdown::after {
+    color: #fff; /* White arrow in dark mode */
 }
 
         </style>
@@ -305,40 +336,46 @@
         </div>
         <script>
             class Minesweeper {
-                constructor() {
-                    (this.grid = document.querySelector(".grid")),
-                        (this.minesCount = document.querySelector(".mines-count")),
-                        (this.flagsCount = document.querySelector(".flags-count")),
-                        (this.timer = document.querySelector(".timer")),
-                        (this.difficultySelect = document.querySelector(".difficulty-select")),
-                        (this.themeToggle = document.querySelector(".theme-toggle")),
-                        (this.flagModeBtn = document.querySelector(".toggle-flag-btn")),
-                        (this.restartBtn = document.querySelector(".restart-btn")),
-                        (this.controls = document.querySelector(".controls")),
-                        (this.difficulties = { easy: { rows: 8, cols: 8, mines: 10 }, medium: { rows: 12, cols: 12, mines: 30 }, hard: { rows: 16, cols: 16, mines: 60 } }),
-                        (this.isGameOver = !1),
-                        (this.startTime = null),
-                        (this.timerInterval = null),
-                        (this.timeElapsed = 0),
-                        (this.minesLeft = 0),
-                        (this.flagsLeft = 0),
-                        (this.revealedCount = 0),
-                        (this.isDarkMode = !1),
-                        (this.isFlagMode = !1),
-                        (this.touchTimeout = null),
-                        this.setupEventListeners(),
-                        this.startNewGame();
-                }
-                initTheme() {
-                    (this.isDarkMode = !1),
-                        (document.documentElement.className = "light"),
-                        (this.themeToggle.textContent = "☀️"),
-                        this.themeToggle.addEventListener("click", () => {
-                            this.isDarkMode = !this.isDarkMode;
-                            const e = this.isDarkMode ? "dark" : "light";
-                            (document.documentElement.className = e), (this.themeToggle.textContent = this.isDarkMode ? "🌙" : "☀️");
-                        });
-                }
+				constructor() {
+					this.grid = document.querySelector(".grid");
+					this.minesCount = document.querySelector(".mines-count");
+					this.flagsCount = document.querySelector(".flags-count");
+					this.timer = document.querySelector(".timer");
+					this.difficultySelect = document.querySelector(".difficulty-select");
+					this.themeToggle = document.querySelector(".theme-toggle");
+					this.flagModeBtn = document.querySelector(".toggle-flag-btn");
+					this.restartBtn = document.querySelector(".restart-btn");
+					this.controls = document.querySelector(".controls");
+					this.difficulties = {
+						easy: { rows: 8, cols: 8, mines: 10 },
+						medium: { rows: 12, cols: 12, mines: 30 },
+						hard: { rows: 16, cols: 16, mines: 60 },
+					};
+					this.isGameOver = false;
+					this.startTime = null;
+					this.timerInterval = null;
+					this.timeElapsed = 0;
+					this.minesLeft = 0;
+					this.flagsLeft = 0;
+					this.revealedCount = 0;
+					this.isDarkMode = false;
+					this.isFlagMode = false;
+					this.touchTimeout = null;
+
+					// Initialize the theme and set up listeners
+					this.initTheme();
+
+					this.setupEventListeners();
+					this.startNewGame();
+				}
+
+				initTheme() {
+					const savedTheme = localStorage.getItem('minesweeper-theme'); // Check local storage for saved theme
+					this.isDarkMode = savedTheme === 'dark';
+					const theme = this.isDarkMode ? 'dark' : 'light';
+					document.documentElement.className = theme;
+					this.themeToggle.textContent = this.isDarkMode ? '🌙' : '☀️';
+				}
                 setupEventListeners() {
                     this.difficultySelect.addEventListener("change", () => this.startNewGame()),
                         this.grid.addEventListener("contextmenu", (e) => e.preventDefault()),
@@ -349,12 +386,13 @@
                         this.themeToggle.addEventListener("click", () => this.toggleTheme()),
                         window.addEventListener("resize", () => this.updateGridSize());
                 }
-                toggleTheme() {
-                    this.isDarkMode = !this.isDarkMode;
-                    const theme = this.isDarkMode ? "dark" : "light";
-                    document.documentElement.className = theme;
-                    this.themeToggle.textContent = this.isDarkMode ? "🌙" : "☀️";
-                }
+				toggleTheme() {
+					this.isDarkMode = !this.isDarkMode;
+					const theme = this.isDarkMode ? 'dark' : 'light';
+					document.documentElement.className = theme;
+					this.themeToggle.textContent = this.isDarkMode ? '🌙' : '☀️';
+					localStorage.setItem('minesweeper-theme', theme); // Save the current theme to local storage
+				}
                 updateGridSize() {
                     if (!this.isGameOver) {
                         const totalPadding = 32,
