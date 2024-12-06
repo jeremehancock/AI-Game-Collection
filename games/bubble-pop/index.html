@@ -142,6 +142,7 @@
 
         let score = 0;
         let bubbles = [];
+        let particles = [];
         let gameActive = false;
         let lastTime = 0;
         let bubbleInterval = 1500;
@@ -153,6 +154,41 @@
         }
         resizeCanvas();
         window.addEventListener('resize', resizeCanvas);
+
+        class Particle {
+            constructor(x, y, color) {
+                this.x = x;
+                this.y = y;
+                this.color = color;
+                this.size = Math.random() * 3 + 2;
+                const angle = Math.random() * Math.PI * 2;
+                const speed = Math.random() * 5 + 2;
+                this.vx = Math.cos(angle) * speed;
+                this.vy = Math.sin(angle) * speed;
+                this.alpha = 1;
+                this.life = 1;
+                this.fadeSpeed = 0.02 + Math.random() * 0.02;
+            }
+
+            update() {
+                this.x += this.vx;
+                this.y += this.vy;
+                this.vy += 0.1; // Add gravity
+                this.life -= this.fadeSpeed;
+                this.alpha = this.life;
+                return this.life > 0;
+            }
+
+            draw() {
+                ctx.save();
+                ctx.globalAlpha = this.alpha;
+                ctx.fillStyle = this.color;
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.restore();
+            }
+        }
 
         class Bubble {
             constructor(groupX = null) {
@@ -167,9 +203,17 @@
                 this.baseHue = Math.random() * 360;
                 this.points = Math.ceil((50 - this.radius) * 2);
                 this.active = true;
+                this.popScale = 1;
+                this.popping = false;
             }
 
             update() {
+                if (this.popping) {
+                    this.popScale *= 1.2;
+                    this.alpha = Math.max(0, this.alpha - 0.1);
+                    return this.alpha <= 0;
+                }
+
                 this.vy -= 0.05;
                 this.vx += (Math.random() - 0.5) * 0.1;
                 this.vx *= 0.99;
@@ -219,6 +263,22 @@
                 ctx.beginPath();
                 ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
                 ctx.strokeStyle = `hsla(${this.baseHue}, 90%, 60%, 0.3)`;
+                ctx.lineWidth = 2;
+                ctx.stroke();
+            }
+
+            pop() {
+                // Create particles
+                const particleCount = Math.floor(this.radius);
+                const baseColor = `hsl(${this.baseHue}, 70%, 60%)`;
+                for (let i = 0; i < particleCount; i++) {
+                    particles.push(new Particle(this.x, this.y, baseColor));
+                }
+
+                // Create ripple effect
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.radius * 1.2, 0, Math.PI * 2);
+                ctx.strokeStyle = `hsla(${this.baseHue}, 90%, 60%, 0.5)`;
                 ctx.lineWidth = 2;
                 ctx.stroke();
             }
@@ -301,6 +361,7 @@
                 for (let i = bubbles.length - 1; i >= 0; i--) {
                     const bubble = bubbles[i];
                     if (bubble.contains(x, y) && bubble.active) {
+                        bubble.pop();
                         score += bubble.points;
                         scoreElement.textContent = `Score: ${score}`;
                         bubbles.splice(i, 1);
@@ -315,6 +376,7 @@
             gameActive = true;
             score = 0;
             bubbles = [];
+            particles = [];
             lastBubble = 0;
             bubbleInterval = 1500;
             scoreElement.textContent = 'Score: 0';
@@ -335,6 +397,16 @@
                 bubbleInterval = Math.max(1000, 1500 - Math.floor(score/20));
             }
 
+            // Update and draw particles
+            particles = particles.filter(particle => {
+                const alive = particle.update();
+                if (alive) {
+                    particle.draw();
+                }
+                return alive;
+            });
+
+            // Update and draw bubbles
             bubbles.forEach(bubble => {
                 if (bubble.active) bubble.update();
             });
@@ -363,6 +435,7 @@
             gameActive = true;
             score = 0;
             bubbles = [];
+            particles = [];
             lastBubble = 0;
             bubbleInterval = 1500;
             scoreElement.textContent = 'Score: 0';
