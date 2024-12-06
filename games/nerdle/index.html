@@ -526,228 +526,393 @@
             ];
             class NerdleGame {
                 constructor() {
-                    this.init(), this.setupEventListeners(), this.loadTheme(), this.loadStats(), this.checkLastPlayed();
+                    this.init();
+                    this.setupEventListeners();
+                    this.loadTheme();
+                    this.loadStats();
+                    this.checkLastPlayed();
                 }
+
                 init() {
-                    (this.currentRow = 0), (this.currentTile = 0), (this.gameOver = !1), (this.word = this.getWordOfTheDay()), (this.guesses = []), this.setupGrid(), this.setupKeyboard(), (this.hasWon = !1);
+                    this.currentRow = 0;
+                    this.currentTile = 0;
+                    this.gameOver = false;
+                    this.word = this.getWordOfTheDay();
+                    this.guesses = [];
+                    this.setupGrid();
+                    this.setupKeyboard();
+                    this.hasWon = false;
                 }
-				getWordOfTheDay() {
-					const now = new Date();
-					const start = new Date(2024, 0, 1);
-					const days = Math.floor((now - start) / (24 * 60 * 60 * 1000));
-					return WORDS[days % WORDS.length];
-				}
+
+                getWordOfTheDay() {
+                    const now = new Date();
+                    const start = new Date(2024, 0, 1);
+                    const days = Math.floor((now - start) / (24 * 60 * 60 * 1000));
+                    return WORDS[days % WORDS.length];
+                }
 
                 setupGrid() {
-                    const e = document.querySelector(".grid");
-                    e.innerHTML = "";
-                    for (let t = 0; t < 6; t++) {
-                        const s = document.createElement("div");
-                        s.className = "row";
-                        for (let e = 0; e < 5; e++) {
-                            const e = document.createElement("div");
-                            (e.className = "tile"), s.appendChild(e);
+                    const grid = document.querySelector(".grid");
+                    grid.innerHTML = "";
+                    for (let i = 0; i < 6; i++) {
+                        const row = document.createElement("div");
+                        row.className = "row";
+                        for (let j = 0; j < 5; j++) {
+                            const tile = document.createElement("div");
+                            tile.className = "tile";
+                            row.appendChild(tile);
                         }
-                        e.appendChild(s);
+                        grid.appendChild(row);
                     }
                 }
+
                 setupKeyboard() {
-                    const e = ["QWERTYUIOP".split(""), "ASDFGHJKL".split(""), ["ENTER", ...["Z", "X", "C", "V", "B", "N", "M"], "BACK"]],
-                        t = document.querySelector(".keyboard"),
-                        s = t.querySelectorAll(".keyboard-row");
-                    e.forEach((e, t) => {
-                        (s[t].innerHTML = ""),
-                            e.forEach((e) => {
-                                const r = document.createElement("button");
-                                (r.textContent = e), (r.className = "key"), ("ENTER" === e || "BACK" === e) && r.classList.add("wide"), r.setAttribute("data-key", e), s[t].appendChild(r);
-                            });
+                    const layout = [
+                        "QWERTYUIOP".split(""),
+                        "ASDFGHJKL".split(""),
+                        ["ENTER", ...["Z", "X", "C", "V", "B", "N", "M"], "BACK"],
+                    ];
+                    const keyboard = document.querySelector(".keyboard");
+                    const rows = keyboard.querySelectorAll(".keyboard-row");
+
+                    layout.forEach((row, i) => {
+                        rows[i].innerHTML = "";
+                        row.forEach((key) => {
+                            const button = document.createElement("button");
+                            button.textContent = key;
+                            button.className = "key";
+                            if (key === "ENTER" || key === "BACK") {
+                                button.classList.add("wide");
+                            }
+                            button.setAttribute("data-key", key);
+                            rows[i].appendChild(button);
+                        });
                     });
                 }
+
                 setupEventListeners() {
                     document.addEventListener("click", (e) => {
                         if (e.target.matches(".key")) {
-                            if (this.gameOver && (this.hasWon || this.currentRow >= 5)) return void this.showOverlay();
+                            if (this.gameOver && (this.hasWon || this.currentRow >= 5)) {
+                                return this.showOverlay();
+                            }
                             this.handleKeyPress(e.target.getAttribute("data-key"));
                         }
-                    }),
-                        document.addEventListener("keydown", (e) => {
-                            if (this.gameOver && (this.hasWon || this.currentRow >= 5)) return void this.showOverlay();
-                            "Enter" === e.key ? this.handleKeyPress("ENTER") : "Backspace" === e.key ? this.handleKeyPress("BACK") : /^[A-Za-z]$/.test(e.key) && this.handleKeyPress(e.key.toUpperCase());
-                        }),
-                        document.querySelector(".theme-toggle").addEventListener("click", () => {
-                            this.toggleTheme();
-                        }),
-                        document.querySelector(".stats-btn").addEventListener("click", () => {
-                            this.showStats();
-                        }),
-                        document.querySelector(".modal").addEventListener("click", (e) => {
-                            e.target.classList.contains("modal") && this.hideStats();
-                        });
+                    });
+
+                    document.addEventListener("keydown", (e) => {
+                        if (this.gameOver && (this.hasWon || this.currentRow >= 5)) {
+                            return this.showOverlay();
+                        }
+                        if (e.key === "Enter") {
+                            this.handleKeyPress("ENTER");
+                        } else if (e.key === "Backspace") {
+                            this.handleKeyPress("BACK");
+                        } else if (/^[A-Za-z]$/.test(e.key)) {
+                            this.handleKeyPress(e.key.toUpperCase());
+                        }
+                    });
+
+                    document.querySelector(".theme-toggle").addEventListener("click", () => {
+                        this.toggleTheme();
+                    });
+
+                    document.querySelector(".stats-btn").addEventListener("click", () => {
+                        this.showStats();
+                    });
+
+                    document.querySelector(".modal").addEventListener("click", (e) => {
+                        if (e.target.classList.contains("modal")) {
+                            this.hideStats();
+                        }
+                    });
                 }
-				    showOverlay() {
-				        const overlay = document.querySelector(".played-overlay");
-				        const lastWordElement = document.querySelector(".last-word");
-				        const messageElement = document.querySelector(".played-overlay h2");
-				        const timerElement = document.querySelector(".next-game-timer");
-				        
-				        lastWordElement.textContent = this.word;
-				        
-				        if (this.hasWon) {
-				            messageElement.textContent = "Congratulations!";
-				        } else if (this.currentRow >= 5) {
-				            messageElement.textContent = "Better luck tomorrow!";
-				        } else {
-				            messageElement.textContent = "Come back tomorrow for a new word!";
-				        }
-				        
-				        // Simply show "Come back tomorrow!" instead of a countdown
-				        timerElement.textContent = "Come back tomorrow for a new word!";
-				        
-				        overlay.style.display = "flex";
-				        this.updateOverlayStats();
-				    }
-                handleKeyPress(e) {
-                    if (this.gameOver && (this.hasWon || this.currentRow >= 5)) return void this.showOverlay();
-                    if ("BACK" === e) {
+
+                showOverlay() {
+                    const overlay = document.querySelector(".played-overlay");
+                    const lastWordElement = document.querySelector(".last-word");
+                    const messageElement = document.querySelector(".played-overlay h2");
+                    const timerElement = document.querySelector(".next-game-timer");
+
+                    lastWordElement.textContent = this.word;
+
+                    if (this.hasWon) {
+                        messageElement.textContent = "Congratulations!";
+                    } else if (this.currentRow >= 5) {
+                        messageElement.textContent = "Better luck tomorrow!";
+                    } else {
+                        messageElement.textContent = "Come back tomorrow for a new word!";
+                    }
+
+                    timerElement.textContent = "Come back tomorrow for a new word!";
+
+                    overlay.style.display = "flex";
+                    this.updateOverlayStats();
+                }
+
+                handleKeyPress(key) {
+                    if (this.gameOver && (this.hasWon || this.currentRow >= 5)) {
+                        return this.showOverlay();
+                    }
+
+                    if (key === "BACK") {
                         if (this.currentTile > 0) {
                             this.currentTile--;
-                            const e = this.getTileElement(this.currentRow, this.currentTile);
-                            e.textContent = "";
+                            const tile = this.getTileElement(this.currentRow, this.currentTile);
+                            tile.textContent = "";
                         }
-                    } else if ("ENTER" === e) 5 === this.currentTile ? this.submitGuess() : this.showToast("Not enough letters");
-                    else if (this.currentTile < 5) {
-                        const t = this.getTileElement(this.currentRow, this.currentTile);
-                        (t.textContent = e), this.currentTile++;
+                    } else if (key === "ENTER") {
+                        if (this.currentTile === 5) {
+                            this.submitGuess();
+                        } else {
+                            this.showToast("Not enough letters");
+                        }
+                    } else if (this.currentTile < 5) {
+                        const tile = this.getTileElement(this.currentRow, this.currentTile);
+                        tile.textContent = key;
+                        this.currentTile++;
                     }
                 }
-                getTileElement(e, t) {
-                    return document.querySelector(`.row:nth-child(${e + 1}) .tile:nth-child(${t + 1})`);
-                }
-                checkGuess(e) {
-                    const t = Array(5).fill("absent"),
-                        s = this.word.split(""),
-                        r = e.split("");
-                    for (let e = 0; e < 5; e++) r[e] === s[e] && ((t[e] = "correct"), (s[e] = null), (r[e] = null));
-                    for (let e = 0; e < 5; e++)
-                        if (r[e]) {
-                            const n = s.indexOf(r[e]);
-                            -1 !== n && ((t[e] = "present"), (s[n] = null));
-                        }
-                    return t;
-                }
-                updateTiles(e) {
-                    e.forEach((e, t) => {
-                        const s = this.getTileElement(this.currentRow, t);
-                        s.classList.add(e);
-                    });
-                }
-                updateKeyboard(e, t) {
-                    const s = e.split("");
-                    t.forEach((e, t) => {
-                        const r = document.querySelector(`[data-key="${s[t]}"]`);
-                        r && ((r.className = "key"), r.classList.add(e), ("ENTER" !== s[t] && "BACK" !== s[t]) || r.classList.add("wide"));
-                    });
-                }
-                showToast(e) {
-                    const t = document.querySelector(".toast");
-                    (t.textContent = e),
-                        (t.style.display = "block"),
-                        setTimeout(() => {
-                            t.style.display = "none";
-                        }, 2e3);
-                }
-                toggleTheme() {
-                    const e = "dark" === document.documentElement.getAttribute("data-theme") ? "light" : "dark";
-                    document.documentElement.setAttribute("data-theme", e), localStorage.setItem("nerdle-theme", e);
-                }
-                loadTheme() {
-                    const e = localStorage.getItem("nerdle-theme");
-                    e && document.documentElement.setAttribute("data-theme", e);
-                }
-				checkLastPlayed() {
-					const now = new Date();
-					const currentDay = now.toDateString();
-					const lastPlayed = localStorage.getItem("lastPlayed");
-					const lastPlayedWord = localStorage.getItem("lastPlayedWord");
 
-					if (lastPlayed === currentDay && lastPlayedWord === this.word) {
-						const gameState = JSON.parse(localStorage.getItem("gameState") || "{}");
-						if (gameState.hasWon || (gameState.attempts && gameState.attempts >= 6)) {
-							this.gameOver = true;
-							this.hasWon = gameState.hasWon;
-							this.showOverlay();
-						} else if (gameState.attempts > 0) {
-							this.currentRow = gameState.attempts;
-							this.guesses = gameState.guesses || [];
-							this.restoreBoardState();
-						}
-					} else {
-						localStorage.setItem("lastPlayed", currentDay);
-						localStorage.setItem("lastPlayedWord", this.word);
-						localStorage.setItem("gameState", JSON.stringify({
-							attempts: 0,
-							guesses: [],
-							hasWon: false
-						}));
-					}
-				}
-                restoreBoardState() {
-                    this.guesses.forEach((e, t) => {
-                        const s = this.checkGuess(e);
-                        for (let r = 0; r < 5; r++) {
-                            const n = this.getTileElement(t, r);
-                            (n.textContent = e[r]), n.classList.add(s[r]);
+                getTileElement(row, col) {
+                    return document.querySelector(`.row:nth-child(${row + 1}) .tile:nth-child(${col + 1})`);
+                }
+
+                checkGuess(guess) {
+                    const result = Array(5).fill("absent");
+                    const wordArr = this.word.split("");
+                    const guessArr = guess.split("");
+
+                    // First pass: check for correct letters in correct positions
+                    for (let i = 0; i < 5; i++) {
+                        if (guessArr[i] === wordArr[i]) {
+                            result[i] = "correct";
+                            wordArr[i] = null;
+                            guessArr[i] = null;
                         }
-                        this.updateKeyboard(e, s);
+                    }
+
+                    // Second pass: check for present letters in wrong positions
+                    for (let i = 0; i < 5; i++) {
+                        if (guessArr[i]) {
+                            const index = wordArr.indexOf(guessArr[i]);
+                            if (index !== -1) {
+                                result[i] = "present";
+                                wordArr[index] = null;
+                            }
+                        }
+                    }
+
+                    return result;
+                }
+
+                updateTiles(results) {
+                    results.forEach((result, index) => {
+                        const tile = this.getTileElement(this.currentRow, index);
+                        tile.classList.add(result);
                     });
                 }
+
+                updateKeyboard(guess, results) {
+                    const letters = guess.split('');
+                    const keyStates = new Map(); // Track the "best" state for each key
+                    
+                    // Priority order for states (higher index = higher priority)
+                    const statePriority = {
+                        'absent': 0,
+                        'present': 1,
+                        'correct': 2
+                    };
+
+                    // Update state for each letter based on priority
+                    letters.forEach((letter, index) => {
+                        const currentState = results[index];
+                        const existingState = keyStates.get(letter);
+                        
+                        if (!existingState || statePriority[currentState] > statePriority[existingState]) {
+                            keyStates.set(letter, currentState);
+                        }
+                    });
+
+                    // Apply the states to keyboard
+                    keyStates.forEach((state, letter) => {
+                        const key = document.querySelector(`[data-key="${letter}"]`);
+                        if (key) {
+                            // Remove all possible states first
+                            key.classList.remove('absent', 'present', 'correct');
+                            // Add the new state
+                            key.classList.add(state);
+                            // Preserve the 'wide' class for special keys
+                            if (letter === 'ENTER' || letter === 'BACK') {
+                                key.classList.add('wide');
+                            }
+                        }
+                    });
+
+                    // Make sure ENTER and BACK keys maintain their styling
+                    ['ENTER', 'BACK'].forEach(specialKey => {
+                        const key = document.querySelector(`[data-key="${specialKey}"]`);
+                        if (key) {
+                            key.classList.add('wide');
+                        }
+                    });
+                }
+
+                showToast(message) {
+                    const toast = document.querySelector(".toast");
+                    toast.textContent = message;
+                    toast.style.display = "block";
+                    setTimeout(() => {
+                        toast.style.display = "none";
+                    }, 2000);
+                }
+
+                toggleTheme() {
+                    const theme = document.documentElement.getAttribute("data-theme") === "dark" ? "light" : "dark";
+                    document.documentElement.setAttribute("data-theme", theme);
+                    localStorage.setItem("nerdle-theme", theme);
+                }
+
+                loadTheme() {
+                    const theme = localStorage.getItem("nerdle-theme");
+                    if (theme) {
+                        document.documentElement.setAttribute("data-theme", theme);
+                    }
+                }
+
+                checkLastPlayed() {
+                    const now = new Date();
+                    const currentDay = now.toDateString();
+                    const lastPlayed = localStorage.getItem("lastPlayed");
+                    const lastPlayedWord = localStorage.getItem("lastPlayedWord");
+
+                    if (lastPlayed === currentDay && lastPlayedWord === this.word) {
+                        const gameState = JSON.parse(localStorage.getItem("gameState") || "{}");
+                        if (gameState.hasWon || (gameState.attempts && gameState.attempts >= 6)) {
+                            this.gameOver = true;
+                            this.hasWon = gameState.hasWon;
+                            this.showOverlay();
+                        } else if (gameState.attempts > 0) {
+                            this.currentRow = gameState.attempts;
+                            this.guesses = gameState.guesses || [];
+                            this.restoreBoardState();
+                        }
+                    } else {
+                        localStorage.setItem("lastPlayed", currentDay);
+                        localStorage.setItem("lastPlayedWord", this.word);
+                        localStorage.setItem(
+                            "gameState",
+                            JSON.stringify({
+                                attempts: 0,
+                                guesses: [],
+                                hasWon: false,
+                            })
+                        );
+                    }
+                }
+
+                restoreBoardState() {
+                    this.guesses.forEach((guess, row) => {
+                        const results = this.checkGuess(guess);
+                        for (let i = 0; i < 5; i++) {
+                            const tile = this.getTileElement(row, i);
+                            tile.textContent = guess[i];
+                            tile.classList.add(results[i]);
+                        }
+                        this.updateKeyboard(guess, results);
+                    });
+                }
+
                 updateOverlayStats() {
-                    const e = this.loadStats();
-                    (document.getElementById("overlay-games-played").textContent = e.gamesPlayed),
-                        (document.getElementById("overlay-win-percentage").textContent = e.gamesPlayed ? Math.round((e.gamesWon / e.gamesPlayed) * 100) : 0),
-                        (document.getElementById("overlay-current-streak").textContent = e.currentStreak),
-                        (document.getElementById("overlay-max-streak").textContent = e.maxStreak);
+                    const stats = this.loadStats();
+                    document.getElementById("overlay-games-played").textContent = stats.gamesPlayed;
+                    document.getElementById("overlay-win-percentage").textContent = stats.gamesPlayed ? Math.round((stats.gamesWon / stats.gamesPlayed) * 100) : 0;
+                    document.getElementById("overlay-current-streak").textContent = stats.currentStreak;
+                    document.getElementById("overlay-max-streak").textContent = stats.maxStreak;
                 }
+
                 loadStats() {
-                    return JSON.parse(localStorage.getItem("stats")) || { gamesPlayed: 0, gamesWon: 0, currentStreak: 0, maxStreak: 0, distribution: [0, 0, 0, 0, 0, 0] };
+                    return (
+                        JSON.parse(localStorage.getItem("stats")) || {
+                            gamesPlayed: 0,
+                            gamesWon: 0,
+                            currentStreak: 0,
+                            maxStreak: 0,
+                            distribution: [0, 0, 0, 0, 0, 0],
+                        }
+                    );
                 }
-                updateStats(e, t) {
-                    const s = this.loadStats();
-                    s.gamesPlayed++,
-                        e ? (s.gamesWon++, s.currentStreak++, (s.maxStreak = Math.max(s.maxStreak, s.currentStreak)), s.distribution[t - 1]++) : (s.currentStreak = 0),
-                        localStorage.setItem("stats", JSON.stringify(s)),
-                        (this.stats = s);
+
+                updateStats(won, attempts) {
+                    const stats = this.loadStats();
+                    stats.gamesPlayed++;
+                    if (won) {
+                        stats.gamesWon++;
+                        stats.currentStreak++;
+                        stats.maxStreak = Math.max(stats.maxStreak, stats.currentStreak);
+                        stats.distribution[attempts - 1]++;
+                    } else {
+                        stats.currentStreak = 0;
+                    }
+                    localStorage.setItem("stats", JSON.stringify(stats));
+                    this.stats = stats;
                 }
+
                 showStats() {
-                    const e = document.querySelector(".modal");
-                    e.style.display = "flex";
-                    const t = this.loadStats();
-                    (document.getElementById("games-played").textContent = t.gamesPlayed),
-                        (document.getElementById("win-percentage").textContent = t.gamesPlayed ? Math.round((t.gamesWon / t.gamesPlayed) * 100) : 0),
-                        (document.getElementById("current-streak").textContent = t.currentStreak),
-                        (document.getElementById("max-streak").textContent = t.maxStreak);
+                    const modal = document.querySelector(".modal");
+                    modal.style.display = "flex";
+                    const stats = this.loadStats();
+                    document.getElementById("games-played").textContent = stats.gamesPlayed;
+                    document.getElementById("win-percentage").textContent = stats.gamesPlayed ? Math.round((stats.gamesWon / stats.gamesPlayed) * 100) : 0;
+                    document.getElementById("current-streak").textContent = stats.currentStreak;
+                    document.getElementById("max-streak").textContent = stats.maxStreak;
                 }
+
                 hideStats() {
                     document.querySelector(".modal").style.display = "none";
                 }
+
                 submitGuess() {
-                    const e = Array.from(document.querySelectorAll(`.row:nth-child(${this.currentRow + 1}) .tile`))
-                        .map((e) => e.textContent)
+                    const guess = Array.from(document.querySelectorAll(`.row:nth-child(${this.currentRow + 1}) .tile`))
+                        .map((tile) => tile.textContent)
                         .join("");
-                    if (!WORDS.includes(e)) return void this.showToast("Not in word list");
-                    const t = this.checkGuess(e);
-                    this.updateTiles(t), this.updateKeyboard(e, t), this.guesses.push(e);
-                    const s = { attempts: this.currentRow + 1, guesses: this.guesses, hasWon: e === this.word };
-                    localStorage.setItem("gameState", JSON.stringify(s)),
-                        e === this.word
-                            ? ((this.gameOver = !0), (this.hasWon = !0), this.updateStats(!0, this.currentRow + 1), this.showToast("Genius!"), setTimeout(() => this.showOverlay(), 1500))
-                            : 5 === this.currentRow
-                            ? ((this.gameOver = !0), this.updateStats(!1), this.showToast(this.word), setTimeout(() => this.showOverlay(), 1500))
-                            : (this.currentRow++, (this.currentTile = 0));
+
+                    if (!WORDS.includes(guess)) {
+                        return this.showToast("Not in word list");
+                    }
+
+                    const results = this.checkGuess(guess);
+                    this.updateTiles(results);
+                    this.updateKeyboard(guess,results);
+                    this.guesses.push(guess);
+
+                    const gameState = {
+                        attempts: this.currentRow + 1,
+                        guesses: this.guesses,
+                        hasWon: guess === this.word,
+                    };
+                    localStorage.setItem("gameState", JSON.stringify(gameState));
+
+                    if (guess === this.word) {
+                        this.gameOver = true;
+                        this.hasWon = true;
+                        this.updateStats(true, this.currentRow + 1);
+                        this.showToast("Genius!");
+                        setTimeout(() => this.showOverlay(), 1500);
+                    } else if (this.currentRow === 5) {
+                        this.gameOver = true;
+                        this.updateStats(false);
+                        this.showToast(this.word);
+                        setTimeout(() => this.showOverlay(), 1500);
+                    } else {
+                        this.currentRow++;
+                        this.currentTile = 0;
+                    }
                 }
             }
+
+            // Initialize the game
             new NerdleGame();
         </script>
     </body>
 </html>
-
