@@ -31,21 +31,21 @@
                 touch-action: none;
             }
             .warning {
-            	color: red;
+                color: red;
                 font-size: 1.5rem !important;
                 animation: pulse 1.5s infinite;
             }
-@keyframes pulse {
-  0% {
-    transform: scale(1);
-  }
-  50% {
-    transform: scale(1.1);
-  }
-  100% {
-    transform: scale(1);
-  }
-}
+            @keyframes pulse {
+              0% {
+                transform: scale(1);
+              }
+              50% {
+                transform: scale(1.1);
+              }
+              100% {
+                transform: scale(1);
+              }
+            }
             .controls {
                 position: absolute;
                 bottom: 120px;
@@ -241,7 +241,9 @@
                     obstacles: [],
                     goals: [],
                     waveParams: { frequency: 2, amplitude: 50, phase: 0 },
-                    gameStarted: !1,
+                    gameStarted: false,
+                    resetStartX: 50, // Starting X position for particles
+
                     init() {
                         this.canvas = document.getElementById("gameCanvas");
                         this.ctx = this.canvas.getContext("2d");
@@ -273,154 +275,268 @@
                             { passive: false }
                         );
                     },
+
+                    // Calculate Y position on wave for any X coordinate
+                    getWaveY(x) {
+                        return this.height / 2 + Math.sin((x * this.waveParams.frequency) / 100 + this.waveParams.phase / 57.3) * this.waveParams.amplitude;
+                    },
+
+                    // Reset particle position smoothly
+                    resetParticle(particle) {
+                        particle.x = this.resetStartX;
+                        particle.y = this.getWaveY(this.resetStartX);
+                        particle.resetting = false;
+                    },
+
                     startGame() {
-                        this.gameStarted || ((this.gameStarted = !0), this.createLevel(), this.animate());
+                        if (!this.gameStarted) {
+                            this.gameStarted = true;
+                            this.createLevel();
+                            this.animate();
+                        }
                     },
+
                     resize() {
-                        const e = window.devicePixelRatio || 1;
-                        (this.width = window.innerWidth),
-                            (this.height = window.innerHeight),
-                            (this.canvas.width = this.width * e),
-                            (this.canvas.height = this.height * e),
-                            (this.canvas.style.width = this.width + "px"),
-                            (this.canvas.style.height = this.height + "px"),
-                            this.ctx.scale(e, e);
+                        const dpr = window.devicePixelRatio || 1;
+                        this.width = window.innerWidth;
+                        this.height = window.innerHeight;
+                        this.canvas.width = this.width * dpr;
+                        this.canvas.height = this.height * dpr;
+                        this.canvas.style.width = this.width + "px";
+                        this.canvas.style.height = this.height + "px";
+                        this.ctx.scale(dpr, dpr);
                     },
+
                     setupEventListeners() {
-                        window.addEventListener("resize", () => this.resize()),
-                            ["frequency", "amplitude", "phase"].forEach((param) => {
-                                const slider = document.getElementById(param),
-                                    display = document.getElementById(param + "-value"),
-                                    updateValue = (e) => {
-                                        e.preventDefault();
-                                        let value;
-                                        if ("touchstart" === e.type || "touchmove" === e.type) {
-                                            const rect = slider.getBoundingClientRect(),
-                                                touch = e.touches[0],
-                                                percentage = (touch.clientX - rect.left) / rect.width,
-                                                min = parseFloat(slider.min),
-                                                max = parseFloat(slider.max);
-                                            value = min + (max - min) * Math.max(0, Math.min(1, percentage));
-                                        } else value = parseFloat(slider.value);
-                                        (slider.value = value), (this.waveParams[param] = value), (display.textContent = value.toFixed(1));
-                                    };
-                                slider.addEventListener("touchstart", updateValue, { passive: !1 }), slider.addEventListener("touchmove", updateValue, { passive: !1 }), slider.addEventListener("input", updateValue);
-                            });
+                        window.addEventListener("resize", () => this.resize());
+
+                        ["frequency", "amplitude", "phase"].forEach((param) => {
+                            const slider = document.getElementById(param);
+                            const display = document.getElementById(param + "-value");
+
+                            const updateValue = (e) => {
+                                e.preventDefault();
+                                let value;
+                                if (e.type === "touchstart" || e.type === "touchmove") {
+                                    const rect = slider.getBoundingClientRect();
+                                    const touch = e.touches[0];
+                                    const percentage = (touch.clientX - rect.left) / rect.width;
+                                    const min = parseFloat(slider.min);
+                                    const max = parseFloat(slider.max);
+                                    value = min + (max - min) * Math.max(0, Math.min(1, percentage));
+                                } else {
+                                    value = parseFloat(slider.value);
+                                }
+                                slider.value = value;
+                                this.waveParams[param] = value;
+                                display.textContent = value.toFixed(1);
+                            };
+
+                            slider.addEventListener("touchstart", updateValue, { passive: false });
+                            slider.addEventListener("touchmove", updateValue, { passive: false });
+                            slider.addEventListener("input", updateValue);
+                        });
+
                         const nextBtn = document.getElementById("next-level");
                         nextBtn.addEventListener("touchend", () => {
-                            this.checkLevelComplete() && this.nextLevel();
-                        }),
-                            nextBtn.addEventListener("click", () => {
-                                this.checkLevelComplete() && this.nextLevel();
-                            });
-                    },
-                    createLevel() {
-                        const baseFreq = 1 + 0.3 * this.level,
-                            baseAmp = Math.min(30 + 5 * this.level, this.height / 4);
-                        (this.particles = []), (this.obstacles = []), (this.goals = []);
-                        const particleCount = Math.min(this.level, 3);
-                        for (let i = 0; i < particleCount; i++) this.particles.push({ x: 50, y: this.height / 2, velocity: this.width / 200 });
-                        for (let i = 0; i < particleCount; i++) {
-                            const yPos = this.height / 2 + (i - (particleCount - 1) / 2) * baseAmp;
-                            this.goals.push({ x: this.width - Math.min(100, 0.15 * this.width), y: yPos, reached: !1 });
-                        }
-                        const obstacleCount = Math.min(2 * this.level, 8),
-                            gap = 0.15 * this.height;
-                        for (let i = 0; i < obstacleCount; i++) {
-                            const obstacle = { x: this.width * (0.3 + (i / obstacleCount) * 0.4), y: this.height / 2 - baseAmp - gap / 2 + Math.random() * (2 * baseAmp + gap), width: 0.03 * this.width, height: 0.15 * this.height };
-                            this.obstacles.push(obstacle);
-                        }
-                        (this.waveParams.frequency = baseFreq),
-                            (this.waveParams.amplitude = baseAmp),
-                            (this.waveParams.phase = 0),
-                            ["frequency", "amplitude", "phase"].forEach((param) => {
-                                const slider = document.getElementById(param),
-                                    display = document.getElementById(param + "-value");
-                                (slider.value = this.waveParams[param]), (display.textContent = this.waveParams[param].toFixed(1));
-                            }),
-                            (document.getElementById("level-complete").style.display = "none");
-                    },
-                    nextLevel() {
-                        this.level++,
-                            (this.score += 100 * this.level),
-                            (document.getElementById("score").textContent = `Score: ${this.score}`),
-                            (document.getElementById("level").textContent = `Level: ${this.level}`),
-                            (document.getElementById("level-complete").style.display = "none"),
-                            this.createLevel();
-                    },
-                    checkLevelComplete() {
-                        const complete = this.goals.every((goal) => goal.reached);
-                        return complete && (document.getElementById("level-complete").style.display = "block"), complete;
-                    },
-                    updateParticles() {
-                        this.particles.forEach((p) => {
-                            const waveY = this.height / 2 + Math.sin((p.x * this.waveParams.frequency) / 100 + this.waveParams.phase / 57.3) * this.waveParams.amplitude;
-                            (p.y = waveY), (p.x += p.velocity), this.checkCollisions(p), p.x > this.width && ((p.x = 50), (p.y = this.height / 2));
+                            if (this.checkLevelComplete()) this.nextLevel();
+                        });
+                        nextBtn.addEventListener("click", () => {
+                            if (this.checkLevelComplete()) this.nextLevel();
                         });
                     },
-                    checkCollisions(p) {
-                        this.obstacles.forEach((o) => {
-                            this.hitObstacle(p, o) && (p.x = 50);
-                        }),
-                            this.goals.forEach((g) => {
-                                !g.reached && this.hitGoal(p, g) && ((g.reached = !0), this.checkLevelComplete());
+
+                    createLevel() {
+                        const baseFreq = 1 + 0.3 * this.level;
+                        const baseAmp = Math.min(30 + 5 * this.level, this.height / 4);
+
+                        this.particles = [];
+                        this.obstacles = [];
+                        this.goals = [];
+
+                        // Create particles
+                        const particleCount = Math.min(this.level, 3);
+                        for (let i = 0; i < particleCount; i++) {
+                            this.particles.push({
+                                x: this.resetStartX,
+                                y: this.height / 2,
+                                velocity: this.width / 200,
+                                resetting: false
                             });
+                        }
+
+                        // Create goals
+                        for (let i = 0; i < particleCount; i++) {
+                            const yPos = this.height / 2 + (i - (particleCount - 1) / 2) * baseAmp;
+                            this.goals.push({
+                                x: this.width - Math.min(100, 0.15 * this.width),
+                                y: yPos,
+                                reached: false
+                            });
+                        }
+
+                        // Create obstacles
+                        const obstacleCount = Math.min(2 * this.level, 8);
+                        const gap = 0.15 * this.height;
+                        for (let i = 0; i < obstacleCount; i++) {
+                            const obstacle = {
+                                x: this.width * (0.3 + (i / obstacleCount) * 0.4),
+                                y: this.height / 2 - baseAmp - gap / 2 + Math.random() * (2 * baseAmp + gap),
+                                width: 0.03 * this.width,
+                                height: 0.15 * this.height
+                            };
+                            this.obstacles.push(obstacle);
+                        }
+
+                        // Set wave parameters
+                        this.waveParams.frequency = baseFreq;
+                        this.waveParams.amplitude = baseAmp;
+                        this.waveParams.phase = 0;
+
+                        // Update UI sliders
+                        ["frequency", "amplitude", "phase"].forEach((param) => {
+                            const slider = document.getElementById(param);
+                            const display = document.getElementById(param + "-value");
+                            slider.value = this.waveParams[param];
+                            display.textContent = this.waveParams[param].toFixed(1);
+                        });
+
+                        document.getElementById("level-complete").style.display = "none";
                     },
+
+                    nextLevel() {
+                        this.level++;
+                        this.score += 100 * this.level;
+                        document.getElementById("score").textContent = `Score: ${this.score}`;
+                        document.getElementById("level").textContent = `Level: ${this.level}`;
+                        document.getElementById("level-complete").style.display = "none";
+                        this.createLevel();
+                    },
+
+                    checkLevelComplete() {
+                        const complete = this.goals.every((goal) => goal.reached);
+                        if (complete) {
+                            document.getElementById("level-complete").style.display = "block";
+                        }
+                        return complete;
+                    },
+
+                    updateParticles() {
+                        this.particles.forEach((p) => {
+                            if (p.resetting) {
+                                this.resetParticle(p);
+                            } else {
+                                // Update particle position based on wave function
+                                p.y = this.getWaveY(p.x);
+                                p.x += p.velocity;
+
+                                this.checkCollisions(p);
+
+                                // Reset if particle goes off screen
+                                if (p.x > this.width) {
+                                    this.resetParticle(p);
+                                }
+                            }
+                        });
+                    },
+
+                    checkCollisions(p) {
+                        // Check obstacle collisions
+                        this.obstacles.forEach((o) => {
+                            if (this.hitObstacle(p, o)) {
+                                p.resetting = true;
+                            }
+                        });
+
+                        // Check goal collisions
+                        this.goals.forEach((g) => {
+                            if (!g.reached && this.hitGoal(p, g)) {
+                                g.reached = true;
+                                this.checkLevelComplete();
+                            }
+                        });
+                    },
+
                     hitObstacle(p, o) {
                         return p.x > o.x && p.x < o.x + o.width && p.y > o.y && p.y < o.y + o.height;
                     },
+
                     hitGoal(p, g) {
-                        const dx = p.x - g.x,
-                            dy = p.y - g.y;
+                        const dx = p.x - g.x;
+                        const dy = p.y - g.y;
                         return Math.sqrt(dx * dx + dy * dy) < 15;
                     },
-					drawRoundedRect(ctx, x, y, width, height, radius, fillColor) {
-						// Ensure radius scales dynamically and does not exceed half of width or height
-						radius = Math.min(radius || Math.min(width, height) / 4, width / 2, height / 2);
 
-						ctx.beginPath();
-						ctx.moveTo(x + radius, y); // Start at the top-left corner (with rounded adjustment)
-						ctx.lineTo(x + width - radius, y); // Top edge
-						ctx.arcTo(x + width, y, x + width, y + radius, radius); // Top-right corner
-						ctx.lineTo(x + width, y + height - radius); // Right edge
-						ctx.arcTo(x + width, y + height, x + width - radius, y + height, radius); // Bottom-right corner
-						ctx.lineTo(x + radius, y + height); // Bottom edge
-						ctx.arcTo(x, y + height, x, y + height - radius, radius); // Bottom-left corner
-						ctx.lineTo(x, y + radius); // Left edge
-						ctx.arcTo(x, y, x + radius, y, radius); // Top-left corner
-						ctx.closePath();
+                    drawRoundedRect(ctx, x, y, width, height, radius, fillColor) {
+                        radius = Math.min(radius || Math.min(width, height) / 4, width / 2, height / 2);
 
-						// Fill the rectangle with the specified color
-						ctx.fillStyle = fillColor;
-						ctx.fill();
-					},
-                    draw() {
-                        this.ctx.clearRect(0, 0, this.width, this.height), this.ctx.beginPath(), (this.ctx.strokeStyle = "rgba(255, 255, 255, 0.5)"), (this.ctx.lineWidth = 2);
-                        for (let x = 0; x < this.width; x += 2) {
-                            const y = this.height / 2 + Math.sin((x * this.waveParams.frequency) / 100 + this.waveParams.phase / 57.3) * this.waveParams.amplitude;
-                            0 === x ? this.ctx.moveTo(x, y) : this.ctx.lineTo(x, y);
-                        }
-                        this.ctx.stroke(),
-                            (this.ctx.fillStyle = "#ff4444"),
-                  this.obstacles.forEach((o) => {
-                this.drawRoundedRect(this.ctx, o.x, o.y, o.width, o.height, 10, "#ff4444");
-            });
-                            this.goals.forEach((g) => {
-                                this.ctx.beginPath(), (this.ctx.strokeStyle = g.reached ? "#00ff00" : "#4CAF50"), (this.ctx.lineWidth = 2), this.ctx.arc(g.x, g.y, 15, 0, 2 * Math.PI), this.ctx.stroke();
-                                this.ctx.beginPath(), (this.ctx.fillStyle = g.reached ? "#00ff00" : "transparent"), (this.ctx.lineWidth = 2), this.ctx.arc(g.x, g.y, 15, 0, 2 * Math.PI), this.ctx.fill();
-                            }),
-                            (this.ctx.fillStyle = "#ffffff"),
-                            this.particles.forEach((p) => {
-                                this.ctx.beginPath(), this.ctx.arc(p.x, p.y, 5, 0, 2 * Math.PI), this.ctx.fill();
-                            });
+                        ctx.beginPath();
+                        ctx.moveTo(x + radius, y);
+                        ctx.lineTo(x + width - radius, y);
+                        ctx.arcTo(x + width, y, x + width, y + radius, radius);
+                        ctx.lineTo(x + width, y + height - radius);
+                        ctx.arcTo(x + width, y + height, x + width - radius, y + height, radius);
+                        ctx.lineTo(x + radius, y + height);
+                        ctx.arcTo(x, y + height, x, y + height - radius, radius);
+                        ctx.lineTo(x, y + radius);
+                        ctx.arcTo(x, y, x + radius, y, radius);
+                        ctx.closePath();
+
+                        ctx.fillStyle = fillColor;
+                        ctx.fill();
                     },
+
+                    draw() {
+                        this.ctx.clearRect(0, 0, this.width, this.height);
+
+                        // Draw wave
+                        this.ctx.beginPath();
+                        this.ctx.strokeStyle = "rgba(255, 255, 255, 0.5)";
+                        this.ctx.lineWidth = 2;
+
+                        for (let x = 0; x < this.width; x += 2) {
+                            const y = this.getWaveY(x);
+                            x === 0 ? this.ctx.moveTo(x, y) : this.ctx.lineTo(x, y);
+                        }
+                        this.ctx.stroke();
+
+                        // Draw obstacles
+                        this.obstacles.forEach((o) => {
+                            this.drawRoundedRect(this.ctx, o.x, o.y, o.width, o.height, 10, "#ff4444");
+                        });
+
+                        // Draw goals
+                        this.goals.forEach((g) => {
+                            this.ctx.beginPath();
+                            this.ctx.strokeStyle = g.reached ? "#00ff00" : "#4CAF50";
+                            this.ctx.lineWidth = 2;
+                            this.ctx.arc(g.x, g.y, 15, 0, 2 * Math.PI);
+                            this.ctx.stroke();
+
+                            this.ctx.beginPath();
+                            this.ctx.fillStyle = g.reached ? "#00ff00" : "transparent";
+                            this.ctx.arc(g.x, g.y, 15, 0, 2 * Math.PI);
+                            this.ctx.fill();
+                        });
+
+                        // Draw particles
+                        this.ctx.fillStyle = "#ffffff";
+                        this.particles.forEach((p) => {
+                            this.ctx.beginPath();
+                            this.ctx.arc(p.x, p.y, 5, 0, 2 * Math.PI);
+                            this.ctx.fill();
+                        });
+                    },
+
                     animate() {
-                        this.updateParticles(), this.draw(), requestAnimationFrame(() => this.animate());
+                        this.updateParticles();
+                        this.draw();
+                        requestAnimationFrame(() => this.animate());
                     },
                 };
+
                 game.init();
             };
         </script>
     </body>
 </html>
-

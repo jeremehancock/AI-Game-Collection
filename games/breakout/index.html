@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mobile Breakout</title>
+    <title>Breakout</title>
     <style>
         /* ... keeping all the same styles ... */
         body {
@@ -114,6 +114,55 @@
                 display: none !important;
             }
         }
+		.gesture-hint {
+		    position: absolute;
+		    bottom: 16px;
+		    left: 50%;
+		    transform: translateX(-50%);
+		    background: rgba(255, 255, 255, 0.2);
+		    padding: 8px 16px;
+		    border-radius: 20px;
+		    pointer-events: none;
+		    user-select: none;
+		    display: flex;
+		    align-items: center;
+		    gap: 10px;
+		    animation: fadeInOut 2s infinite;
+		    z-index: 10;
+		}
+
+		.gesture-hint .swipe-icon {
+		    width: 24px;
+		    height: 24px;
+		    background: white;
+		    border-radius: 50%;
+		    position: relative;
+		    animation: swipeAnim 2s infinite;
+		}
+
+		@keyframes swipeAnim {
+		    0% { transform: translateX(-10px); }
+		    50% { transform: translateX(10px); }
+		    100% { transform: translateX(-10px); }
+		}
+
+		@keyframes fadeInOut {
+		    0% { opacity: 0.7; }
+		    50% { opacity: 1; }
+		    100% { opacity: 0.7; }
+		}
+
+		/* Hide the old control area text */
+		.controlAreaText {
+		    display: none;
+		}
+
+		/* Hide gesture hint on desktop */
+		@media (hover: hover) and (pointer: fine) {
+		    .gesture-hint {
+		        display: none;
+		    }
+		}
     </style>
 </head>
 <body>
@@ -133,7 +182,12 @@
             </div>
         </div>
         <canvas id="gameCanvas"></canvas>
-        <div id="controlArea"><span class="controlAreaText">Slide here to control paddle</span></div>
+        <div id="controlArea">
+ 		<div class="gesture-hint">
+			<div class="swipe-icon"></div>
+			Slide here to move
+		</div>
+
     </div>
     <script>
         const canvas = document.getElementById('gameCanvas');
@@ -170,336 +224,465 @@
         let gameStarted = false;
         let gameOver = false;
         let lastFrameTime = 0;
+        let hasInteracted = false;
+    	const gestureHint = document.querySelector('.gesture-hint');
+
+		// Add this to your touchstart event listener
+		controlArea.addEventListener('touchstart', (e) => {
+		    if (!hasInteracted && gestureHint) {
+		        hasInteracted = true;
+		        gestureHint.style.display = 'none';
+		    }
+		    const touch = e.touches[0];
+		    touchX = touch.clientX;
+		});
+
+		// Add this to make sure hint is hidden when game starts
+		function showStartOverlay() {
+		    const overlay = document.createElement('div');
+		    overlay.className = 'overlay';
+		    
+		    const title = document.createElement('h1');
+		    title.textContent = 'BREAKOUT';
+		    
+		    const button = document.createElement('button');
+		    button.className = 'button';
+		    button.textContent = 'Play Now';
+		    button.onclick = () => {
+		        overlay.remove();
+		        gameStarted = true;
+		        hasInteracted = false; // Reset interaction flag
+		        if (gestureHint) {
+		            gestureHint.style.display = 'flex'; // Show hint when game starts
+		        }
+		        createBricks();
+		        draw();
+		    };
+		    
+		    overlay.appendChild(title);
+		    overlay.appendChild(button);
+		    document.body.appendChild(overlay);
+		}
 
         function drawLifeBall(canvas) {
-    const ctx = canvas.getContext('2d');
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    ctx.beginPath();
-    ctx.arc(canvas.width/2, canvas.height/2, 6, 0, Math.PI * 2);
-    ctx.fillStyle = '#FFFFFF';
-    ctx.fill();
-    ctx.closePath();
-}
+			const ctx = canvas.getContext('2d');
+			ctx.clearRect(0, 0, canvas.width, canvas.height);
+			ctx.beginPath();
+			ctx.arc(canvas.width/2, canvas.height/2, 6, 0, Math.PI * 2);
+			ctx.fillStyle = '#FFFFFF';
+			ctx.fill();
+			ctx.closePath();
+		}
 
-function updateLives() {
-    const livesContainer = document.getElementById('livesDisplay');
-    livesContainer.innerHTML = '';
-    for (let i = 0; i < lives; i++) {
-        const ballCanvas = document.createElement('canvas');
-        ballCanvas.className = 'life-ball';
-        ballCanvas.width = 16;
-        ballCanvas.height = 16;
-        drawLifeBall(ballCanvas);
-        livesContainer.appendChild(ballCanvas);
-    }
-}
+		function updateLives() {
+			const livesContainer = document.getElementById('livesDisplay');
+			livesContainer.innerHTML = '';
+			for (let i = 0; i < lives; i++) {
+				const ballCanvas = document.createElement('canvas');
+				ballCanvas.className = 'life-ball';
+				ballCanvas.width = 16;
+				ballCanvas.height = 16;
+				drawLifeBall(ballCanvas);
+				livesContainer.appendChild(ballCanvas);
+			}
+		}
 
-function updateScore() {
-    document.getElementById('scoreDisplay').textContent = score;
-}
+		function updateScore() {
+			document.getElementById('scoreDisplay').textContent = score;
+		}
 
-function updateLevel() {
-    document.getElementById('levelDisplay').textContent = currentLevel;
-}
+		function updateLevel() {
+			document.getElementById('levelDisplay').textContent = currentLevel;
+		}
 
-const levels = [
-    {   // Level 1: Classic rows
-        pattern: [
-            [1,1,1,1,1,1],
-            [1,1,1,1,1,1],
-            [1,1,1,1,1,1]
-        ],
-        color: '#FF0000'
-    },
-    {   // Level 2: Pyramid
-        pattern: [
-            [0,0,1,1,0,0],
-            [0,1,1,1,1,0],
-            [1,1,1,1,1,1]
-        ],
-        color: '#00FF00'
-    },
-    {   // Level 3: Checkerboard
-        pattern: [
-            [1,0,1,0,1,0],
-            [0,1,0,1,0,1],
-            [1,0,1,0,1,0],
-            [0,1,0,1,0,1]
-        ],
-        color: '#0000FF'
-    }
-];
+		// Add this code right before the existing levels array
+		function generateRandomColor() {
+			return '#' + Math.floor(Math.random()*16777215).toString(16).padStart(6, '0');
+		}
 
-let bricks = [];
+		const levels = [
+			{   // Level 1: Classic rows
+				pattern: [
+				    [1,1,1,1,1,1],
+				    [1,1,1,1,1,1],
+				    [1,1,1,1,1,1]
+				],
+				color: '#FF0000'
+			},
+			{   // Level 2: Pyramid
+				pattern: [
+				    [0,0,1,1,0,0],
+				    [0,1,1,1,1,0],
+				    [1,1,1,1,1,1]
+				],
+				color: '#00FF00'
+			},
+			{   // Level 3: Checkerboard
+				pattern: [
+				    [1,0,1,0,1,0],
+				    [0,1,0,1,0,1],
+				    [1,0,1,0,1,0],
+				    [0,1,0,1,0,1]
+				],
+				color: '#0000FF'
+			},
+			{   // Level 4: Double Diamond
+				pattern: [
+				    [0,0,1,1,0,0],
+				    [0,1,0,0,1,0],
+				    [1,0,0,0,0,1],
+				    [0,1,0,0,1,0],
+				    [0,0,1,1,0,0]
+				],
+				color: '#FF00FF'
+			},
+			{   // Level 5: Cross
+				pattern: [
+				    [1,0,0,0,0,1],
+				    [0,1,0,0,1,0],
+				    [0,0,1,1,0,0],
+				    [0,0,1,1,0,0],
+				    [0,1,0,0,1,0],
+				    [1,0,0,0,0,1]
+				],
+				color: '#FFFF00'
+			},
+			// ... (Levels 6-20 from previous implementation) ...
+		];
 
-function createBricks() {
-    const level = levels[currentLevel - 1];
-    const pattern = level.pattern;
-    const brickWidth = (canvas.width - 30) / pattern[0].length;
-    const brickHeight = 20;
-    bricks = [];
+		// Generate remaining levels (21-103) programmatically
+		const basePatterns = [
+			// Pattern 1: Alternating rows
+			() => Array(6).fill().map((_, idx) => idx % 2 === 0 ? [1,1,1,1,1,1] : [0,0,0,0,0,0]),
+			
+			// Pattern 2: Diagonal stripes
+			() => Array(6).fill().map((_, row) => Array(6).fill().map((_, col) => (row + col) % 2)),
+			
+			// Pattern 3: Random dots with minimum density
+			() => {
+				const pattern = Array(4).fill().map(() => Array(6).fill().map(() => Math.random() > 0.5 ? 1 : 0));
+				// Ensure at least 30% of blocks are active
+				const totalBlocks = pattern.flat().reduce((sum, val) => sum + val, 0);
+				if (totalBlocks < pattern.flat().length * 0.3) {
+				    return basePatterns[0](); // Fallback to alternating rows
+				}
+				return pattern;
+			},
+			
+			// Pattern 4: Concentric squares
+			() => [
+				[1,1,1,1,1,1],
+				[1,0,0,0,0,1],
+				[1,0,1,1,0,1],
+				[1,0,0,0,0,1],
+				[1,1,1,1,1,1]
+			],
+			
+			// Pattern 5: Double zigzag
+			() => [
+				[1,0,0,0,1,1],
+				[0,1,0,1,1,0],
+				[0,0,1,1,0,0],
+				[0,1,1,0,1,0],
+				[1,1,0,0,0,1]
+			]
+		];
 
-    for (let i = 0; i < pattern.length; i++) {
-        for (let j = 0; j < pattern[i].length; j++) {
-            if (pattern[i][j] === 1) {
-                bricks.push({
-                    x: j * (brickWidth + 2) + 15,
-                    y: i * (brickHeight + 2) + 30,
-                    width: brickWidth,
-                    height: brickHeight,
-                    status: 1
-                });
-            }
-        }
-    }
-}
+		for (let i = levels.length + 1; i <= 103; i++) {
+			// Select a base pattern
+			const patternGenerator = basePatterns[Math.floor(Math.random() * basePatterns.length)];
+			const basePattern = patternGenerator();
+			
+			// Modify the pattern slightly to create variation
+			const modifiedPattern = basePattern.map(row => 
+				row.map(cell => Math.random() > 0.8 ? (cell === 1 ? 0 : 1) : cell)
+			);
 
-function drawBall() {
-    ctx.beginPath();
-    ctx.arc(ball.x, ball.y, ball.radius, 0, Math.PI * 2);
-    ctx.fillStyle = '#FFFFFF';
-    ctx.fill();
-    ctx.closePath();
-}
+			levels.push({
+				pattern: modifiedPattern,
+				color: generateRandomColor()
+			});
+		}
 
-function drawPaddle() {
-    ctx.beginPath();
-    ctx.rect(paddle.x, paddle.y, paddle.width, paddle.height);
-    ctx.fillStyle = '#0095DD';
-    ctx.fill();
-    ctx.closePath();
-}
+		let bricks = [];
 
-function drawBricks() {
-    bricks.forEach(brick => {
-        if (brick.status === 1) {
-            ctx.beginPath();
-            ctx.rect(brick.x, brick.y, brick.width, brick.height);
-            ctx.fillStyle = levels[currentLevel - 1].color;
-            ctx.fill();
-            ctx.closePath();
-        }
-    });
-}
+		function createBricks() {
+			const level = levels[currentLevel - 1];
+			const pattern = level.pattern;
+			
+			// Calculate total width needed for all bricks and gaps
+			const totalBricks = pattern[0].length;
+			const gap = 4; // Gap between bricks
+			const brickWidth = Math.min(75, (canvas.width - (gap * (totalBricks + 1))) / totalBricks);
+			const brickHeight = 20;
+			
+			// Calculate starting X position to center the entire brick formation
+			const totalWidthNeeded = (brickWidth * totalBricks) + (gap * (totalBricks - 1));
+			const startX = (canvas.width - totalWidthNeeded) / 2;
+			
+			bricks = [];
 
-        function collisionDetection() {
-            for (let i = 0; i < bricks.length; i++) {
-                let b = bricks[i];
-                if (b.status === 1) {
-                    if (ball.x + ball.radius > b.x && 
-                        ball.x - ball.radius < b.x + b.width && 
-                        ball.y + ball.radius > b.y && 
-                        ball.y - ball.radius < b.y + b.height) {
-                        
-                        // Ensure the ball maintains minimum horizontal speed after brick collision
-                        if (Math.abs(ball.dx) < ball.minSpeed) {
-                            ball.dx = ball.dx < 0 ? -ball.minSpeed : ball.minSpeed;
-                        }
-                        
-                        ball.dy = -ball.dy;
-                        b.status = 0;
-                        score += 10;
-                        updateScore();
+			for (let i = 0; i < pattern.length; i++) {
+				for (let j = 0; j < pattern[i].length; j++) {
+				    if (pattern[i][j] === 1) {
+				        bricks.push({
+				            x: startX + j * (brickWidth + gap),
+				            y: 30 + i * (brickHeight + gap),
+				            width: brickWidth,
+				            height: brickHeight,
+				            status: 1
+				        });
+				    }
+				}
+			}
+		}
 
-                        if (bricks.every(brick => brick.status === 0)) {
-                            if (currentLevel < levels.length) {
-                                currentLevel++;
-                                updateLevel();
-                                lives = 3;
-                                updateLives();
-                                createBricks();
-                                resetBall();
-                            } else {
-                                showGameOver(true);
-                                return;
-                            }
-                        }
-                        break;
-                    }
-                }
-            }
+		function drawBall() {
+			ctx.beginPath();
+			ctx.arc(ball.x, ball.y, ball.radius, 0, Math.PI * 2);
+			ctx.fillStyle = '#FFFFFF';
+			ctx.fill();
+			ctx.closePath();
+		}
 
-            // Improved paddle collision physics
-            if (ball.dy > 0 && 
-                ball.y + ball.radius >= paddle.y && 
-                ball.y - ball.radius <= paddle.y + paddle.height && 
-                ball.x >= paddle.x && 
-                ball.x <= paddle.x + paddle.width) {
-                
-                // Calculate hit position relative to paddle center
-                const hitPos = (ball.x - (paddle.x + paddle.width/2)) / (paddle.width/2);
-                
-                // Calculate new angle based on hit position
-                const maxAngle = Math.PI / 3; // 60 degrees
-                const angle = hitPos * maxAngle;
-                
-                // Set new velocities based on angle and base speed
-                ball.dx = ball.baseSpeed * Math.sin(angle);
-                ball.dy = -ball.baseSpeed * Math.cos(angle);
-                
-                // Ensure minimum horizontal speed
-                if (Math.abs(ball.dx) < ball.minSpeed) {
-                    ball.dx = ball.dx < 0 ? -ball.minSpeed : ball.minSpeed;
-                }
-                
-                ball.y = paddle.y - ball.radius; // Prevent sticking
-            }
-        }
+		function drawPaddle() {
+			ctx.beginPath();
+			ctx.rect(paddle.x, paddle.y, paddle.width, paddle.height);
+			ctx.fillStyle = '#0095DD';
+			ctx.fill();
+			ctx.closePath();
+		}
 
-        // ... keeping all the remaining functions the same ...
+		function drawBricks() {
+			bricks.forEach(brick => {
+				if (brick.status === 1) {
+				    ctx.beginPath();
+				    ctx.rect(brick.x, brick.y, brick.width, brick.height);
+				    ctx.fillStyle = levels[currentLevel - 1].color;
+				    ctx.fill();
+				    ctx.closePath();
+				}
+			});
+		}
 
-        function resetBall() {
-            ball.x = canvas.width / 2;
-            ball.y = canvas.height - 30;
-            // Ensure initial direction has sufficient horizontal component
-            const initialAngle = (Math.random() * Math.PI/3) - Math.PI/6; // -30 to +30 degrees
-            ball.dx = ball.baseSpeed * Math.sin(initialAngle);
-            ball.dy = -ball.baseSpeed * Math.cos(initialAngle);
-        }
+				function collisionDetection() {
+				    for (let i = 0; i < bricks.length; i++) {
+				        let b = bricks[i];
+				        if (b.status === 1) {
+				            if (ball.x + ball.radius > b.x && 
+				                ball.x - ball.radius < b.x + b.width && 
+				                ball.y + ball.radius > b.y && 
+				                ball.y - ball.radius < b.y + b.height) {
+				                
+				                // Ensure the ball maintains minimum horizontal speed after brick collision
+				                if (Math.abs(ball.dx) < ball.minSpeed) {
+				                    ball.dx = ball.dx < 0 ? -ball.minSpeed : ball.minSpeed;
+				                }
+				                
+				                ball.dy = -ball.dy;
+				                b.status = 0;
+				                score += 10;
+				                updateScore();
 
-        // Event listeners for paddle control
-document.addEventListener('keydown', (e) => {
-    if (e.key === 'ArrowLeft') {
-        paddle.x -= 20;
-        if (paddle.x < 0) paddle.x = 0;
-    } else if (e.key === 'ArrowRight') {
-        paddle.x += 20;
-        if (paddle.x + paddle.width > canvas.width) {
-            paddle.x = canvas.width - paddle.width;
-        }
-    }
-});
+								if (bricks.every(brick => brick.status === 0)) {
+									if (currentLevel < levels.length) {  // This now checks against 103 levels
+										currentLevel++;
+										updateLevel();
+										lives = 3;
+										updateLives();
+										createBricks();
+										resetBall();
+									} else {
+										showGameOver(true);
+										return;
+									}
+								}
+				                break;
+				            }
+				        }
+				    }
 
-let touchX = null;
-controlArea.addEventListener('touchstart', (e) => {
-    const touch = e.touches[0];
-    touchX = touch.clientX;
-});
+				    // Improved paddle collision physics
+				    if (ball.dy > 0 && 
+				        ball.y + ball.radius >= paddle.y && 
+				        ball.y - ball.radius <= paddle.y + paddle.height && 
+				        ball.x >= paddle.x && 
+				        ball.x <= paddle.x + paddle.width) {
+				        
+				        // Calculate hit position relative to paddle center
+				        const hitPos = (ball.x - (paddle.x + paddle.width/2)) / (paddle.width/2);
+				        
+				        // Calculate new angle based on hit position
+				        const maxAngle = Math.PI / 3; // 60 degrees
+				        const angle = hitPos * maxAngle;
+				        
+				        // Set new velocities based on angle and base speed
+				        ball.dx = ball.baseSpeed * Math.sin(angle);
+				        ball.dy = -ball.baseSpeed * Math.cos(angle);
+				        
+				        // Ensure minimum horizontal speed
+				        if (Math.abs(ball.dx) < ball.minSpeed) {
+				            ball.dx = ball.dx < 0 ? -ball.minSpeed : ball.minSpeed;
+				        }
+				        
+				        ball.y = paddle.y - ball.radius; // Prevent sticking
+				    }
+				}
 
-controlArea.addEventListener('touchmove', (e) => {
-    e.preventDefault();
-    const touch = e.touches[0];
-    if (touchX !== null) {
-        const deltaX = touch.clientX - touchX;
-        paddle.x += deltaX;
+				// ... keeping all the remaining functions the same ...
 
-        if (paddle.x < 0) paddle.x = 0;
-        if (paddle.x + paddle.width > canvas.width) {
-            paddle.x = canvas.width - paddle.width;
-        }
+				function resetBall() {
+				    ball.x = canvas.width / 2;
+				    ball.y = canvas.height - 30;
+				    // Ensure initial direction has sufficient horizontal component
+				    const initialAngle = (Math.random() * Math.PI/3) - Math.PI/6; // -30 to +30 degrees
+				    ball.dx = ball.baseSpeed * Math.sin(initialAngle);
+				    ball.dy = -ball.baseSpeed * Math.cos(initialAngle);
+				}
 
-        touchX = touch.clientX;
-    }
-});
+				// Event listeners for paddle control
+		document.addEventListener('keydown', (e) => {
+			if (e.key === 'ArrowLeft') {
+				paddle.x -= 20;
+				if (paddle.x < 0) paddle.x = 0;
+			} else if (e.key === 'ArrowRight') {
+				paddle.x += 20;
+				if (paddle.x + paddle.width > canvas.width) {
+				    paddle.x = canvas.width - paddle.width;
+				}
+			}
+		});
 
-controlArea.addEventListener('touchend', () => {
-    touchX = null;
-});
+		let touchX = null;
+		controlArea.addEventListener('touchstart', (e) => {
+			const touch = e.touches[0];
+			touchX = touch.clientX;
+		});
 
-function showStartOverlay() {
-    const overlay = document.createElement('div');
-    overlay.className = 'overlay';
-    
-    const title = document.createElement('h1');
-    title.textContent = 'BREAKOUT';
-    
-    const button = document.createElement('button');
-    button.className = 'button';
-    button.textContent = 'Play Now';
-    button.onclick = () => {
-        overlay.remove();
-        gameStarted = true;
-        createBricks();
-        draw();
-    };
-    
-    overlay.appendChild(title);
-    overlay.appendChild(button);
-    document.body.appendChild(overlay);
-}
+		controlArea.addEventListener('touchmove', (e) => {
+			e.preventDefault();
+			const touch = e.touches[0];
+			if (touchX !== null) {
+				const deltaX = touch.clientX - touchX;
+				paddle.x += deltaX;
 
-function showGameOver(won = false) {
-    gameOver = true;
-    const overlay = document.createElement('div');
-    overlay.className = 'overlay';
-    
-    const title = document.createElement('h1');
-    title.textContent = won ? 'You Won!' : 'Game Over';
-    
-    const scoreDisplay = document.createElement('div');
-    scoreDisplay.className = 'score';
-    scoreDisplay.textContent = `Final Score: ${score}`;
-    
-    const button = document.createElement('button');
-    button.className = 'button';
-    button.textContent = 'Play Again';
-    button.onclick = () => {
-        overlay.remove();
-        resetGame();
-        gameStarted = true;
-        gameOver = false;
-        draw();
-    };
-    
-    overlay.appendChild(title);
-    overlay.appendChild(scoreDisplay);
-    overlay.appendChild(button);
-    document.body.appendChild(overlay);
-}
+				if (paddle.x < 0) paddle.x = 0;
+				if (paddle.x + paddle.width > canvas.width) {
+				    paddle.x = canvas.width - paddle.width;
+				}
 
-function resetGame() {
-    score = 0;
-    lives = 3;
-    currentLevel = 1;
-    updateScore();
-    updateLevel();
-    updateLives();
-    paddle.y = canvas.height - paddle.height - 10;
-    paddle.x = (canvas.width - paddle.width) / 2;
-    resetBall();
-    createBricks();
-}
+				touchX = touch.clientX;
+			}
+		});
 
-function draw(currentTime) {
-    if (!gameStarted || gameOver) return;
+		controlArea.addEventListener('touchend', () => {
+			touchX = null;
+		});
 
-    if (lastFrameTime && currentTime - lastFrameTime < 16) {
-        requestAnimationFrame(draw);
-        return;
-    }
-    lastFrameTime = currentTime;
+		function showStartOverlay() {
+			const overlay = document.createElement('div');
+			overlay.className = 'overlay';
+			
+			const title = document.createElement('h1');
+			title.textContent = 'BREAKOUT';
+			
+			const button = document.createElement('button');
+			button.className = 'button';
+			button.textContent = 'Play Now';
+			button.onclick = () => {
+				overlay.remove();
+				gameStarted = true;
+				createBricks();
+				draw();
+			};
+			
+			overlay.appendChild(title);
+			overlay.appendChild(button);
+			document.body.appendChild(overlay);
+		}
 
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    
-    drawBricks();
-    drawBall();
-    drawPaddle();
+		function showGameOver(won = false) {
+			gameOver = true;
+			const overlay = document.createElement('div');
+			overlay.className = 'overlay';
+			
+			const title = document.createElement('h1');
+			title.textContent = won ? 'You Won!' : 'Game Over';
+			
+			const scoreDisplay = document.createElement('div');
+			scoreDisplay.className = 'score';
+			scoreDisplay.textContent = `Final Score: ${score}`;
+			
+			const button = document.createElement('button');
+			button.className = 'button';
+			button.textContent = 'Play Again';
+			button.onclick = () => {
+				overlay.remove();
+				resetGame();
+				gameStarted = true;
+				gameOver = false;
+				draw();
+			};
+			
+			overlay.appendChild(title);
+			overlay.appendChild(scoreDisplay);
+			overlay.appendChild(button);
+			document.body.appendChild(overlay);
+		}
 
-    if (ball.x + ball.radius > canvas.width || ball.x - ball.radius < 0) {
-        ball.dx = -ball.dx;
-    }
-    if (ball.y - ball.radius < 0) {
-        ball.dy = -ball.dy;
-    }
-    
-    if (ball.y + ball.radius > canvas.height) {
-        lives--;
-        updateLives();
-        if (lives <= 0) {
-            showGameOver(false);
-            return;
-        } else {
-            resetBall();
-        }
-    }
+		function resetGame() {
+			score = 0;
+			lives = 3;
+			currentLevel = 1;
+			updateScore();
+			updateLevel();
+			updateLives();
+			paddle.y = canvas.height - paddle.height - 10;
+			paddle.x = (canvas.width - paddle.width) / 2;
+			resetBall();
+			createBricks();
+		}
 
-    collisionDetection();
+		function draw(currentTime) {
+			if (!gameStarted || gameOver) return;
 
-    ball.x += ball.dx;
-    ball.y += ball.dy;
+			if (lastFrameTime && currentTime - lastFrameTime < 16) {
+				requestAnimationFrame(draw);
+				return;
+			}
+			lastFrameTime = currentTime;
 
-    requestAnimationFrame(draw);
-}
+			ctx.clearRect(0, 0, canvas.width, canvas.height);
+			
+			drawBricks();
+			drawBall();
+			drawPaddle();
+
+			if (ball.x + ball.radius > canvas.width || ball.x - ball.radius < 0) {
+				ball.dx = -ball.dx;
+			}
+			if (ball.y - ball.radius < 0) {
+				ball.dy = -ball.dy;
+			}
+			
+			if (ball.y + ball.radius > canvas.height) {
+				lives--;
+				updateLives();
+				if (lives <= 0) {
+				    showGameOver(false);
+				    return;
+				} else {
+				    resetBall();
+				}
+			}
+
+			collisionDetection();
+
+			ball.x += ball.dx;
+			ball.y += ball.dy;
+
+			requestAnimationFrame(draw);
+		}
 
         resetGame();
         showStartOverlay();
