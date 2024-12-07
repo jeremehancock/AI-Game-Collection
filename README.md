@@ -35,17 +35,17 @@ Break the bricks, level up, and beat your high score! A fast-paced game of skill
 
 ## 📸 Screenshots
 <div align="center">
-    <img src="https://aigamecollection.com/images/screenshots/home.png" width="300" alt="Game Menu"/>
-    <img src="https://aigamecollection.com/images/screenshots/nerdle-game.png" width="300" alt="Nerdle"/>
-    <img src="https://aigamecollection.com/images/screenshots/pipes-puzzle.png" width="300" alt="Pipes Puzzle"/>
-    <img src="https://aigamecollection.com/images/screenshots/memory.png" width="300" alt="Memory Game"/>
-    <img src="https://aigamecollection.com/images/screenshots/minesweeper.png" width="300" alt="Minesweeper"/>
-    <img src="https://aigamecollection.com/images/screenshots/snake-game.png" width="300" alt="Snake Game"/>
-    <img src="https://aigamecollection.com/images/screenshots/soccer-juggle.png" width="300" alt="Soccer Juggle Game"/>
-    <img src="https://aigamecollection.com/images/screenshots/water-ring-toss-game.png" width="300" alt="Water Ring Toss"/>
-    <img src="https://aigamecollection.com/images/screenshots/waveform-game.png" width="300" alt="Waveform"/>
-     <img src="https://aigamecollection.com/images/screenshots/bubble-pop-game.png" width="300" alt="Bubble Pop"/>
-    <img src="https://aigamecollection.com/images/screenshots/breakout.png" width="300" alt="Breakout"/>
+    <img src="https://raw.githubusercontent.com/jeremehancock/AI-Game-Collection/refs/heads/main/images/screenshots/home.png" width="300" alt="Game Menu"/>
+    <img src="https://raw.githubusercontent.com/jeremehancock/AI-Game-Collection/refs/heads/main/images/screenshots/nerdle.png" width="300" alt="Nerdle"/>
+    <img src="https://raw.githubusercontent.com/jeremehancock/AI-Game-Collection/refs/heads/main/images/screenshots/pipes-puzzle.png" width="300" alt="Pipes Puzzle"/>
+    <img src="https://raw.githubusercontent.com/jeremehancock/AI-Game-Collection/refs/heads/main/images/screenshots/memory.png" width="300" alt="Memory Game"/>
+    <img src="https://raw.githubusercontent.com/jeremehancock/AI-Game-Collection/refs/heads/main/images/screenshots/minesweeper.png" width="300" alt="Minesweeper"/>
+    <img src="https://raw.githubusercontent.com/jeremehancock/AI-Game-Collection/refs/heads/main/images/screenshots/snake-game.png" width="300" alt="Snake Game"/>
+    <img src="https://raw.githubusercontent.com/jeremehancock/AI-Game-Collection/refs/heads/main/images/screenshots/soccer-juggle.png" width="300" alt="Soccer Juggle Game"/>
+    <img src="https://raw.githubusercontent.com/jeremehancock/AI-Game-Collection/refs/heads/main/images/screenshots/water-ring-toss-game.png" width="300" alt="Water Ring Toss"/>
+    <img src="https://raw.githubusercontent.com/jeremehancock/AI-Game-Collection/refs/heads/main/images/screenshots/waveform-game.png" width="300" alt="Waveform"/>
+     <img src="https://raw.githubusercontent.com/jeremehancock/AI-Game-Collection/refs/heads/main/images/screenshots/bubble-pop-game.png" width="300" alt="Bubble Pop"/>
+    <img src="https://raw.githubusercontent.com/jeremehancock/AI-Game-Collection/refs/heads/main/images/screenshots/breakout.png" width="300" alt="Breakout"/>
 </div>
 
 ## 🚀 Features

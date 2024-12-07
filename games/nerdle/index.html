@@ -244,7 +244,58 @@
                 display: none;
                 z-index: 1000;
             }
-.modal{display:none;position:fixed;top:0;left:0;right:0;bottom:0;background-color:rgba(0,0,0,.9);justify-content:center;align-items:center;z-index:1000}.modal-content{background-color:var(--bg-color);padding:2rem;border-radius:8px;max-width:90%;width:500px;position:relative}.modal-content h2{font-size:2rem;margin-bottom:1.5rem;color:var(--text-color)}.stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;margin:1rem 0;text-align:center}.stat-box{display:flex;flex-direction:column;align-items:center}.stat-number{font-size:2rem;font-weight:700;color:var(--text-color)}.stat-label{font-size:.8rem;color:var(--text-color)}
+			.modal {
+				display: none;
+				position: fixed;
+				top: 0;
+				left: 0;
+				right: 0;
+				bottom: 0;
+				background-color: rgba(0, 0, 0, .9);
+				justify-content: center;
+				align-items: center;
+				z-index: 1000
+			}
+
+			.modal-content {
+				background-color: var(--bg-color);
+				padding: 2rem;
+				border-radius: 8px;
+				max-width: 90%;
+				width: 500px;
+				position: relative
+			}
+
+			.modal-content h2 {
+				font-size: 2rem;
+				margin-bottom: 1.5rem;
+				color: var(--text-color)
+			}
+
+			.stats-grid {
+				display: grid;
+				grid-template-columns: repeat(4, 1fr);
+				gap: 1rem;
+				margin: 1rem 0;
+				text-align: center
+			}
+
+			.stat-box {
+				display: flex;
+				flex-direction: column;
+				align-items: center
+			}
+
+			.stat-number {
+				font-size: 2rem;
+				font-weight: 700;
+				color: var(--text-color)
+			}
+
+			.stat-label {
+				font-size: .8rem;
+				color: var(--text-color)
+			}
             .stats-grid {
                 display: grid;
                 grid-template-columns: repeat(4, 1fr);
@@ -315,7 +366,87 @@
                 font-size: 0.8rem;
                 color: var(--text-color);
             }
-.help-overlay{display:none;position:fixed;top:0;left:0;right:0;bottom:0;background-color:rgba(0,0,0,.9);justify-content:center;align-items:center;z-index:1000}.help-content{background-color:var(--bg-color);padding:2rem;border-radius:8px;max-width:90%;width:500px;position:relative}.help-content h2{font-size:2rem;margin-bottom:1.5rem;color:var(--text-color)}.help-content h3{font-size:1.5rem;margin:1.5rem 0;color:var(--text-color)}.main-instruction{font-size:1.1rem;line-height:1.5;margin-bottom:1.5rem;color:var(--text-color)}.word-row{display:flex;gap:5px;margin:1rem 0}.word-row .tile{width:45px;height:45px;border:2px solid #3a3a3c;display:flex;justify-content:center;align-items:center;font-size:1.5rem;font-weight:700}.example-text{font-size:1.1rem;margin:.5rem 0 1.5rem;color:var(--text-color)}.refresh-note{font-size:1.1rem;margin-top:2rem;color:var(--text-color)}.close-icon{position:absolute;top:1rem;right:1rem;cursor:pointer;font-size:1.5rem;color:var(--text-color);background:none;border:none;padding:.5rem}
+			.help-overlay {
+				display: none;
+				position: fixed;
+				top: 0;
+				left: 0;
+				right: 0;
+				bottom: 0;
+				background-color: rgba(0, 0, 0, .9);
+				justify-content: center;
+				align-items: center;
+				z-index: 1000
+			}
+
+			.help-content {
+				background-color: var(--bg-color);
+				padding: 2rem;
+				border-radius: 8px;
+				max-width: 90%;
+				width: 500px;
+				position: relative
+			}
+
+			.help-content h2 {
+				font-size: 2rem;
+				margin-bottom: 1.5rem;
+				color: var(--text-color)
+			}
+
+			.help-content h3 {
+				font-size: 1.5rem;
+				margin: 1.5rem 0;
+				color: var(--text-color)
+			}
+
+			.main-instruction {
+				font-size: 1.1rem;
+				line-height: 1.5;
+				margin-bottom: 1.5rem;
+				color: var(--text-color)
+			}
+
+			.word-row {
+				display: flex;
+				gap: 5px;
+				margin: 1rem 0
+			}
+
+			.word-row .tile {
+				width: 45px;
+				height: 45px;
+				border: 2px solid #3a3a3c;
+				display: flex;
+				justify-content: center;
+				align-items: center;
+				font-size: 1.5rem;
+				font-weight: 700
+			}
+
+			.example-text {
+				font-size: 1.1rem;
+				margin: .5rem 0 1.5rem;
+				color: var(--text-color)
+			}
+
+			.refresh-note {
+				font-size: 1.1rem;
+				margin-top: 2rem;
+				color: var(--text-color)
+			}
+
+			.close-icon {
+				position: absolute;
+				top: 1rem;
+				right: 1rem;
+				cursor: pointer;
+				font-size: 1.5rem;
+				color: var(--text-color);
+				background: none;
+				border: none;
+				padding: .5rem
+			}
             @media (max-width: 500px) {
                 .tile {
                     font-size: 1.5rem;
@@ -349,7 +480,6 @@
 			.theme-toggle {
 				background-color: var(--border-color);
 				padding: 8px;
-				border-radius: 8px;
 				display: flex;
 				align-items: center;
 				justify-content: center;
@@ -368,37 +498,37 @@
         </style>
     </head>
     <body>
-<svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
-    <!-- Help Icon (Updated) -->
-    <symbol id="help-icon" viewBox="0 0 24 24">
-        <path d="M8.5 9.5a3.5 3.5 0 1 1 7 0c0 2.5-3.5 3.5-3.5 6" fill="none"/>
-        <circle cx="12" cy="19" r="1"/>
-    </symbol>
-    
-    <!-- Stats Icon (Unchanged) -->
-    <symbol id="stats-icon" viewBox="0 0 24 24">
-        <path d="M3 3v18h18" fill="none"/>
-        <path d="M7 16l4-8 4 3 4-5" fill="none"/>
-    </symbol>
-    
-    <!-- Sun Icon (Unchanged) -->
-    <symbol id="sun-icon" viewBox="0 0 24 24">
-        <circle cx="12" cy="12" r="5"></circle>
-        <line x1="12" y1="1" x2="12" y2="3"></line>
-        <line x1="12" y1="21" x2="12" y2="23"></line>
-        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
-        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
-        <line x1="1" y1="12" x2="3" y2="12"></line>
-        <line x1="21" y1="12" x2="23" y2="12"></line>
-        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
-        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
-    </symbol>
-    
-    <!-- Moon Icon (Unchanged) -->
-    <symbol id="moon-icon" viewBox="0 0 24 24">
-        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
-    </symbol>
-</svg>
+		<svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
+			<!-- Help Icon (Updated) -->
+			<symbol id="help-icon" viewBox="0 0 24 24">
+				<path d="M8.5 9.5a3.5 3.5 0 1 1 7 0c0 2.5-3.5 3.5-3.5 6" fill="none"/>
+				<circle cx="12" cy="19" r="1"/>
+			</symbol>
+			
+			<!-- Stats Icon (Unchanged) -->
+			<symbol id="stats-icon" viewBox="0 0 24 24">
+				<path d="M3 3v18h18" fill="none"/>
+				<path d="M7 16l4-8 4 3 4-5" fill="none"/>
+			</symbol>
+			
+			<!-- Sun Icon (Unchanged) -->
+			<symbol id="sun-icon" viewBox="0 0 24 24">
+				<circle cx="12" cy="12" r="5"></circle>
+				<line x1="12" y1="1" x2="12" y2="3"></line>
+				<line x1="12" y1="21" x2="12" y2="23"></line>
+				<line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+				<line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+				<line x1="1" y1="12" x2="3" y2="12"></line>
+				<line x1="21" y1="12" x2="23" y2="12"></line>
+				<line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+				<line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+			</symbol>
+			
+			<!-- Moon Icon (Unchanged) -->
+			<symbol id="moon-icon" viewBox="0 0 24 24">
+				<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+			</symbol>
+		</svg>
 		<header>
 			<div class="title">Nerdle</div>
 			<div class="header-controls">
@@ -448,9 +578,65 @@
                 </div>
             </div>
         </div>
-<div class="help-overlay"><div class="help-content"><button class="close-icon" aria-label="Close help">×</button><h2>How to Play</h2><p class="main-instruction">Guess the word in 6 tries. After each guess, the color of the tiles will change to show how close your guess was to the word.</p><h3>Examples</h3><div class="word-row"><div class="tile correct">W</div><div class="tile">O</div><div class="tile">R</div><div class="tile">D</div><div class="tile">S</div></div><p class="example-text">W is in the word and in the correct spot.</p><div class="word-row"><div class="tile">P</div><div class="tile present">I</div><div class="tile">X</div><div class="tile">E</div><div class="tile">L</div></div><p class="example-text">I is in the word but in the wrong spot.</p><div class="word-row"><div class="tile">V</div><div class="tile">A</div><div class="tile absent">G</div><div class="tile">U</div><div class="tile">E</div></div><p class="example-text">G is not in the word in any spot.</p><p class="refresh-note">A new word will be available each day!</p></div></div>
-        <div class="toast"></div>
-<div class="modal"><div class="modal-content"><button class="close-icon" aria-label="Close statistics">×</button><h2>Statistics</h2><div class="stats-grid"><div class="stat-box"><div class="stat-number" id="games-played">0</div><div class="stat-label">Played</div></div><div class="stat-box"><div class="stat-number" id="win-percentage">0</div><div class="stat-label">Win %</div></div><div class="stat-box"><div class="stat-number" id="current-streak">0</div><div class="stat-label">Streak</div></div><div class="stat-box"><div class="stat-number" id="max-streak">0</div><div class="stat-label">Max Streak</div></div></div></div></div>
+		<div class="help-overlay">
+			<div class="help-content">
+				<button class="close-icon" aria-label="Close help">×</button>
+				<h2>How to Play</h2>
+				<p class="main-instruction">Guess the word in 6 tries. After each guess, the color of the tiles will change to show how close your guess was to the word.</p>
+				<h3>Examples</h3>
+				<div class="word-row">
+				    <div class="tile correct">W</div>
+				    <div class="tile">O</div>
+				    <div class="tile">R</div>
+				    <div class="tile">D</div>
+				    <div class="tile">S</div>
+				</div>
+				<p class="example-text">W is in the word and in the correct spot.</p>
+				<div class="word-row">
+				    <div class="tile">P</div>
+				    <div class="tile present">I</div>
+				    <div class="tile">X</div>
+				    <div class="tile">E</div>
+				    <div class="tile">L</div>
+				</div>
+				<p class="example-text">I is in the word but in the wrong spot.</p>
+				<div class="word-row">
+				    <div class="tile">V</div>
+				    <div class="tile">A</div>
+				    <div class="tile absent">G</div>
+				    <div class="tile">U</div>
+				    <div class="tile">E</div>
+				</div>
+				<p class="example-text">G is not in the word in any spot.</p>
+				<p class="refresh-note">A new word will be available each day!</p>
+			</div>
+		</div>
+		<div class="toast"></div>
+		<div class="modal">
+			<div class="modal-content">
+				<button class="close-icon" aria-label="Close statistics">×</button>
+				<h2>Statistics</h2>
+				<div class="stats-grid">
+				    <div class="stat-box">
+				        <div class="stat-number" id="games-played">0</div>
+				        <div class="stat-label">Played</div>
+				    </div>
+				    <div class="stat-box">
+				        <div class="stat-number" id="win-percentage">0</div>
+				        <div class="stat-label">Win %</div>
+				    </div>
+				    <div class="stat-box">
+				        <div class="stat-number" id="current-streak">0</div>
+				        <div class="stat-label">Streak</div>
+				    </div>
+				    <div class="stat-box">
+				        <div class="stat-number" id="max-streak">0</div>
+				        <div class="stat-label">Max Streak</div>
+				    </div>
+				</div>
+			</div>
+		</div>
+
         <script>
             const WORDS = [
                 "ABORT",
