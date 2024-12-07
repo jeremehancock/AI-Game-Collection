@@ -8,6 +8,9 @@ const urlsToCache = [
   'games/snake-game/index.html',
   'games/soccer-juggle/index.html',
   'games/water-ring-toss/index.html',
+  'games/waveform/index.html',
+  'games/bubble-pop/index.html',
+  'games/breakout/index.html',
   'images/icons/web-app-manifest-192x192.png', 
   'images/icons/web-app-manifest-512x512.png'
 ];
