@@ -37,253 +37,294 @@
 	<link rel="canonical" href="https://aigamecollection.com/">
 	<meta property="og:site_name" content="aigamecollection.com">
 	<meta property="og:locale" content="en_US">
+	
+	<link rel="preconnect" href="https://fonts.googleapis.com">
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+	<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-        }
+	<style>
+		* {
+		    margin: 0;
+		    padding: 0;
+		    box-sizing: border-box;
+		    font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+		}
 
-        body {
-            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
-            color: #fff;
-            min-height: 100vh;
-            padding: 2rem;
-        }
+		body {
+		    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+		    color: #fff;
+		    min-height: 100vh;
+		    padding: 2rem;
+		    -webkit-font-smoothing: antialiased;
+		    -moz-osx-font-smoothing: grayscale;
+		    letter-spacing: -0.015em;
+		}
 
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-        }
+		.container {
+		    max-width: 1200px;
+		    margin: 0 auto;
+		}
 
-        header {
-            text-align: center;
-            padding: 2rem;
-        }
+		header {
+		    text-align: center;
+		    padding: 2rem;
+		}
 
-        h1 {
-            font-size: 2.5rem;
-            margin-bottom: 1rem;
-            color: #fff;
-        }
+		h1 {
+		    font-size: 2.5rem;
+		    margin-bottom: 1rem;
+		    color: #fff;
+		    font-weight: 700;
+		    letter-spacing: -0.025em;
+		}
 
-        .subtitle {
-            color: #a0a0a0;
-            font-size: 1.1rem;
-        }
+		.subtitle {
+		    color: #a0a0a0;
+		    font-size: 1.1rem;
+		    font-weight: 400;
+		    line-height: 1.6;
+		}
 
-        .games-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 2rem;
-            padding: 1rem;
-        }
+		.games-grid {
+		    display: grid;
+		    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+		    gap: 2rem;
+		    padding: 1rem;
+		}
 
-        .game-card {
-            background: rgba(255, 255, 255, 0.05);
-            border-radius: 15px;
-            padding: 1.5rem;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            position: relative;
-            overflow: hidden;
-            display: flex;
-            flex-direction: column;
-            height: 100%;
-        }
+		.game-card {
+		    background: rgba(255, 255, 255, 0.05);
+		    border-radius: 15px;
+		    padding: 1.5rem;
+		    cursor: pointer;
+		    transition: all 0.3s ease;
+		    border: 1px solid rgba(255, 255, 255, 0.1);
+		    position: relative;
+		    overflow: hidden;
+		    display: flex;
+		    flex-direction: column;
+		    height: 100%;
+		}
 
-        .game-card:hover {
-            transform: translateY(-5px);
-            background: rgba(255, 255, 255, 0.1);
-            border-color: rgba(255, 255, 255, 0.2);
-        }
+		.game-card:hover {
+		    transform: translateY(-5px);
+		    background: rgba(255, 255, 255, 0.1);
+		    border-color: rgba(255, 255, 255, 0.2);
+		}
 
-        .game-card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.05));
-            pointer-events: none;
-        }
+		.game-card::before {
+		    content: '';
+		    position: absolute;
+		    top: 0;
+		    left: 0;
+		    width: 100%;
+		    height: 100%;
+		    background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.05));
+		    pointer-events: none;
+		}
 
-        .game-icon {
-            width: 48px;
-            height: 48px;
-            margin-bottom: 1rem;
-        }
+		.game-icon {
+		    width: 48px;
+		    height: 48px;
+		    margin-bottom: 1rem;
+		}
 
-        .game-icon svg {
-            width: 100%;
-            height: 100%;
-        }
+		.game-icon svg {
+		    width: 100%;
+		    height: 100%;
+		}
 
-        .game-title {
-            font-size: 1.5rem;
-            margin-bottom: 0.5rem;
-            color: #fff;
-        }
+		.game-title {
+		    font-size: 1.5rem;
+		    margin-bottom: 0.5rem;
+		    color: #fff;
+		    font-weight: 600;
+		    letter-spacing: -0.015em;
+		}
 
-        .game-description {
-            color: #a0a0a0;
-            font-size: 0.9rem;
-            line-height: 1.4;
-            margin-bottom: 20px;
-        }
+		.game-description {
+		    color: #a0a0a0;
+		    font-size: 1rem;
+		    line-height: 1.5;
+		    margin-bottom: 20px;
+		    font-weight: 400;
+		}
 
-        .game-meta {
-            margin-top: 1rem;
-            font-size: 0.8rem;
-            color: #666;
-            margin-bottom: auto;
-        }
+		.game-meta {
+		    margin-top: 1rem;
+		    font-size: 0.8rem;
+		    color: #666;
+		    margin-bottom: auto;
+		}
 
-        .play-button {
-            display: inline-block;
-            width: auto;
-            max-width: fit-content;
-            padding: 0.5rem 1rem;
-            background: rgba(255, 255, 255, 0.1);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            border-radius: 5px;
-            color: #fff;
-            text-decoration: none;
-            transition: all 0.3s ease;
-            margin-top: auto;
-            text-align: left;
-            cursor: pointer;
-        }
+		.play-button {
+		    display: inline-block;
+		    width: auto;
+		    max-width: fit-content;
+		    padding: 0.5rem 1rem;
+		    background: rgba(255, 255, 255, 0.1);
+		    border: 1px solid rgba(255, 255, 255, 0.2);
+		    border-radius: 5px;
+		    color: #fff;
+		    text-decoration: none;
+		    transition: all 0.3s ease;
+		    margin-top: auto;
+		    text-align: left;
+		    cursor: pointer;
+		    font-weight: 500;
+		    letter-spacing: 0.01em;
+		}
 
-        .play-button:hover {
-            background: rgba(255, 255, 255, 0.2);
-        }
+		.play-button:hover {
+		    background: rgba(255, 255, 255, 0.2);
+		}
 
-        /* New styles for iframe and back button */
-        .game-iframe-container {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: #000;
-            z-index: 1000;
-            display: none;
-        }
+		.game-iframe-container {
+		    position: fixed;
+		    top: 0;
+		    left: 0;
+		    width: 100%;
+		    height: 100%;
+		    background: #000;
+		    z-index: 1000;
+		    display: none;
+		}
 
-        .game-iframe {
-            width: 100%;
-            height: 100%;
-            border: none;
-        }
+		.game-iframe {
+		    width: 100%;
+		    height: 100%;
+		    border: none;
+		}
 
-        .back-button {
-            position: fixed;
-            bottom:30px;
-            left: 30px;
-            z-index: 1001;
-            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
-            color: white;
-            border: none;
-            padding: 12px;
-            border-radius: 50%;
-            cursor: pointer;
-            display: none;  /* Initial state is hidden */
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-            align-items: center;
-            justify-content: center;
-            width: 48px;
-            height: 48px;
-        }
+		.back-button {
+		    position: fixed;
+		    bottom: 30px;
+		    left: 30px;
+		    z-index: 1001;
+		    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+		    color: white;
+		    border: none;
+		    padding: 12px;
+		    border-radius: 50%;
+		    cursor: pointer;
+		    display: none;
+		    transition: all 0.3s ease;
+		    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+		    align-items: center;
+		    justify-content: center;
+		    width: 48px;
+		    height: 48px;
+		}
 
-        .back-button:hover {
-            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
-            transform: translateY(-2px);
-            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4);
-            opacity: 90%;
-        }
+		.back-button:hover {
+		    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+		    transform: translateY(-2px);
+		    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4);
+		    opacity: 90%;
+		}
 
-        .back-button:active {
-            transform: translateY(0);
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
-        }
+		.back-button:active {
+		    transform: translateY(0);
+		    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+		}
 
-        .back-button svg {
-            width: 24px;
-            height: 24px;
-        }
+		.back-button svg {
+		    width: 24px;
+		    height: 24px;
+		}
 
-        @media (max-width: 768px) {
-            body {
-                padding: 1rem;
-            }
+		.footer-container {
+		    display: flex;
+		    justify-content: space-between;
+		    align-items: center;
+		    padding: 1rem 2rem;
+		}
 
-            .games-grid {
-                grid-template-columns: 1fr;
-            }
+		.footer-text {
+		    color: #a0a0a0;
+		    font-size: 1rem;
+		    font-weight: 400;
+		}
 
-            h1 {
-                font-size: 2rem;
-            }
-        }
+		.footer-link {
+		    color: #fff;
+		    text-decoration: none;
+		    transition: opacity 0.3s ease;
+		    font-weight: 500;
+		}
+
+		.footer-link:hover {
+		    opacity: 0.8;
+		}
+
 		.icon-container {
-			display: flex;
-			gap: 1rem;  /* This adds space between the icons */
-			justify-content: center;
+		    display: flex;
+		    gap: 1rem;
 		}
 
 		.github-link, .dockerhub-link {
-			opacity: 0.7;
-			transition: all 0.3s ease;
-			background: rgba(255, 255, 255, 0.05);
-			padding: 0.75rem;
-			border-radius: 50%;
-			border: 1px solid rgba(255, 255, 255, 0.1);
-			display: flex;
-			align-items: center;
-			justify-content: center;
+		    opacity: 0.7;
+		    transition: all 0.3s ease;
+		    background: rgba(255, 255, 255, 0.05);
+		    padding: 0.75rem;
+		    border-radius: 50%;
+		    border: 1px solid rgba(255, 255, 255, 0.1);
+		    display: flex;
+		    align-items: center;
+		    justify-content: center;
 		}
 
 		.github-link:hover, .dockerhub-link:hover {
-			opacity: 1;
-			background: rgba(255, 255, 255, 0.1);
-			border-color: rgba(255, 255, 255, 0.2);
-			transform: translateY(-2px);
+		    opacity: 1;
+		    background: rgba(255, 255, 255, 0.1);
+		    border-color: rgba(255, 255, 255, 0.2);
+		    transform: translateY(-2px);
+		}
+
+		.google-play-container {
+		    display: flex;
+		    justify-content: center;
+		    margin-top: 50px;    
+		}
+		
+		#googlePlayButton {
+		    display: none;
 		}
 
 		@media (max-width: 768px) {
-			.icon-container {
-				top: .5rem;
-				right: .5rem;
-				gap: 0.75rem;  /* Slightly reduce space between icons for smaller screens */
-			}
+		    body {
+		        padding: 1rem;
+		    }
 
-			.github-link, .dockerhub-link {
-				padding: 0.5rem;
-				transform: scale(0.9);
-			}
-			
-			.github-link:hover, .dockerhub-link:hover {
-				transform: scale(0.9) translateY(-2px);
-			}
+		    h1 {
+		        font-size: 2rem;
+		    }
+
+		    .games-grid {
+		        grid-template-columns: 1fr;
+		    }
+
+		    .footer-container {
+		        padding: 1rem;
+		    }
+		    
+		    .footer-text {
+		        font-size: 0.9rem;
+		    }
+		    
+		    .icon-container {
+		        gap: 0.75rem;
+		    }
+		    
+		    .github-link, .dockerhub-link {
+		        transform: scale(0.9);
+		    }
+		    
+		    .github-link:hover, .dockerhub-link:hover {
+		        transform: scale(0.9) translateY(-2px);
+		    }
 		}
-        
-        .google-play-container {
-            dislay: flex;
-            justify-content: center;
-            margin-top: 50px;	
-        }
-        
-        #googlePlayButton {
-        	display: none;
-        }
-
-    </style>
+	</style>
 </head>
 <body>
     <div class="container">
@@ -339,19 +380,24 @@
         <div class="games-grid" id="gamesContainer">
             <!-- Games will be dynamically inserted here -->
         </div>
-        			<div class="icon-container">
-				<a href="https://hub.docker.com/repository/docker/bozodev/ai-game-collection/general" target="_blank" class="dockerhub-link" title="Check it out on Docker Hub">
-					<svg xmlns="http://www.w3.org/2000/svg" height="24" width="24" viewBox="0 0 512 512">
-						<path stroke="#ffffff" stroke-width="38" d="M296 226h42m-92 0h42m-91 0h42m-91 0h41m-91 0h42m8-46h41m8 0h42m7 0h42m-42-46h42"/>
-						<path fill="#ffffff" d="m472 228s-18-17-55-11c-4-29-35-46-35-46s-29 35-8 74c-6 3-16 7-31 7H68c-5 19-5 145 133 145 99 0 173-46 208-130 52 4 63-39 63-39"/>
-					</svg>
-				</a>
-				<a href="https://github.com/jeremehancock/AI-Game-Collection" target="_blank" class="github-link" title="Check it out on GitHub">
-				    <svg height="24" width="24" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-				        <path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"></path>
-				    </svg>
-				</a>
-			</div>
+        <div class="footer-container">
+            <div class="footer-text">
+                AI project by: <a href="https://jeremehancock.com" target="_blank" class="footer-link">Jereme Hancock</a>
+            </div>
+            <div class="icon-container">
+                <a href="https://hub.docker.com/repository/docker/bozodev/ai-game-collection/general" target="_blank" class="dockerhub-link" title="Check it out on Docker Hub">
+                    <svg xmlns="http://www.w3.org/2000/svg" height="32" width="32"  viewBox="49 140 442 235">
+                        <path stroke="#ffffff" stroke-width="38" d="M296 226h42m-92 0h42m-91 0h42m-91 0h41m-91 0h42m8-46h41m8 0h42m7 0h42m-42-46h42"/>
+                        <path fill="#ffffff" d="m472 228s-18-17-55-11c-4-29-35-46-35-46s-29 35-8 74c-6 3-16 7-31 7H68c-5 19-5 145 133 145 99 0 173-46 208-130 52 4 63-39 63-39"/>
+                    </svg>
+                </a>
+                <a href="https://github.com/jeremehancock/AI-Game-Collection" target="_blank" class="github-link" title="Check it out on GitHub">
+                    <svg height="24" width="24" viewBox="0 0 24 24" style="margin: 4px" fill="none" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"></path>
+                    </svg>
+                </a>
+            </div>
+        </div>
     </div>
 
     <!-- New elements for iframe and back button -->
