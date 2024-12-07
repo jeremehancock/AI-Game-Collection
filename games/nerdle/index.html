@@ -952,13 +952,38 @@
                         s.classList.add(e);
                     });
                 }
-                updateKeyboard(e, t) {
-                    const s = e.split("");
-                    t.forEach((e, t) => {
-                        const r = document.querySelector(`[data-key="${s[t]}"]`);
-                        r && ((r.className = "key"), r.classList.add(e), ("ENTER" !== s[t] && "BACK" !== s[t]) || r.classList.add("wide"));
-                    });
-                }
+				updateKeyboard(guess, results) {
+					const keys = guess.split('');
+					const keyStates = new Map(); // Track the "best" state for each key
+
+					// Process results to find the best state for each key
+					keys.forEach((key, index) => {
+						const currentResult = results[index];
+						const currentState = keyStates.get(key);
+						
+						// Define state hierarchy: correct > present > absent
+						if (!currentState || 
+						    (currentState === 'absent' && (currentResult === 'present' || currentResult === 'correct')) ||
+						    (currentState === 'present' && currentResult === 'correct')) {
+						    keyStates.set(key, currentResult);
+						}
+					});
+
+					// Update keyboard UI with the best state for each key
+					keyStates.forEach((state, key) => {
+						const keyElement = document.querySelector(`[data-key="${key}"]`);
+						if (keyElement) {
+						    // Remove existing state classes
+						    keyElement.className = 'key';
+						    // Add the best state class
+						    keyElement.classList.add(state);
+						    // Restore wide class for special keys if needed
+						    if (key === 'ENTER' || key === 'BACK') {
+						        keyElement.classList.add('wide');
+						    }
+						}
+					});
+				}
                 showToast(e) {
                     const t = document.querySelector(".toast");
                     (t.textContent = e),
