@@ -420,21 +420,20 @@
             return results === null ? '' : decodeURIComponent(results[1].replace(/\+/g, ' '));
         }
 
-        // Function to handle Google Play button visibility
-        function handleGooglePlayButton() {
-        
-		    const isAndroid = /Android/i.test(navigator.userAgent);
-			const isWebView = isAndroid && !isStandalone && !/Chrome|Firefox/i.test(navigator.userAgent);
+		// Function to handle Google Play button visibility
+		function handleGooglePlayButton() {
+			const isAndroid = /Android/i.test(navigator.userAgent);
+			const modeParam = getUrlParameter('mode'); // Assumes this function extracts the "mode" URL parameter
+			const isFullscreen = window.matchMedia('(display-mode: fullscreen)').matches; // Detect PWA mode
+			const googlePlayButton = document.getElementById('googlePlayButton');
 
-		    const modeParam = getUrlParameter('mode');
-		    const googlePlayButton = document.getElementById('googlePlayButton');
-
-			if (isAndroid || modeParam === 'app') {
-			  document.getElementById('googlePlayButton').style.display = 'none';
-			} else {
-		      	googlePlayButton.style.display = 'block';
-		    }
-        }
+			if ((isAndroid && isFullscreen) || modeParam === 'app') {
+				googlePlayButton.style.display = 'none'; // Hide in Android PWA or app mode
+			} 
+			else {
+				googlePlayButton.style.display = 'block'; // Show otherwise
+			}
+		}
         
         // Game collection data with SVG icons
         const games = {
