@@ -2,10 +2,10 @@ const CACHE_NAME = 'pwa-cache-v2';
 const urlsToCache = [
   'index.html',
   'games/nerdle/index.html',
-  'games/pipes-puzzle/index.html',
+  'games/pipes/index.html',
   'games/memory/index.html',
   'games/minesweeper/index.html',
-  'games/snake-game/index.html',
+  'games/snake/index.html',
   'games/soccer-juggle/index.html',
   'games/water-ring-toss/index.html',
   'games/waveform/index.html',

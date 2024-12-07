@@ -6,7 +6,7 @@ A collection of browser-based games created using AI assistance, featuring minim
 ### Nerdle
 A nerdy twist on the famous word game. Guess the hidden "nerdy" word in 6 tries.
 
-### Pipes Puzzle
+### Pipes
 Connect the pipes to create a continuous flow. Test your logical thinking skills with this challenging puzzle game that requires strategic planning and spatial awareness.
 
 ### Memory
@@ -15,7 +15,7 @@ A classic card-matching game that helps improve concentration and recall abiliti
 ### Minesweeper
 Classic Minesweeper game with a modern touch. Clear the board without hitting any mines in this strategic puzzle game.
 
-### Snake Game
+### Snake
 Classic snake game with a modern twist. Eat the food, grow longer, and try not to hit the walls or yourself!
 
 ### Soccer Juggle
