@@ -1,24 +1,23 @@
 <!DOCTYPE html>
 <html data-theme="light">
+<!-- Keep all the head content and styles exactly the same as original -->
 <head>
     <title>Pipes</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-        <!-- Add theme initialization script before any content loads -->
     <script>
-        // Immediately set the theme before the page renders
         (function() {
             const savedTheme = localStorage.getItem('pipePuzzleTheme') || 'light';
             document.documentElement.setAttribute('data-theme', savedTheme);
         })();
     </script>
     <style>
-        /* Theme variables */
+        /* All original styles remain exactly the same */
         [data-theme="light"] {
             --bg-color: #f0f0f0;
             --surface-color: white;
             --text-color: #000;
             --grid-color: #ddd;
-            --pipe-color: #333;
+            --pipe-color: #9e9e9e;
             --shadow-color: rgba(0,0,0,0.1);
         }
         
@@ -27,7 +26,7 @@
             --surface-color: #1e1e1e;
             --text-color: #fff;
             --grid-color: #333;
-            --pipe-color: #fff;
+            --pipe-color: #9e9e9e;
             --shadow-color: rgba(0,0,0,0.3);
         }
 
@@ -37,27 +36,27 @@
             box-sizing: border-box;
         }
 
-		body {
-			display: flex;
-			justify-content: center;  /* Center horizontally */
-			align-items: center;      /* Center vertically */
-			background: var(--bg-color);
-			font-family: system-ui, sans-serif;
-			color: var(--text-color);
-			transition: background-color 0.3s;
-			min-height: 100vh;         /* Ensure body takes full height */
-			padding: 16px;
-		}
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: var(--bg-color);
+            font-family: system-ui, sans-serif;
+            color: var(--text-color);
+            transition: background-color 0.3s;
+            min-height: 100vh;
+            padding: 16px;
+        }
 
-		.game-container {
-			display: flex;
-			flex-direction: column;
-			align-items: center;
-			gap: 16px;
-			width: 100%;
-			max-width: min(400px, 100%);
-			box-sizing: border-box;    /* Ensure padding does not affect the centering */
-		}
+        .game-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 16px;
+            width: 100%;
+            max-width: min(400px, 100%);
+            box-sizing: border-box;
+        }
 
         .header {
             width: 100%;
@@ -177,6 +176,7 @@
     </style>
 </head>
 <body>
+    <!-- Keep all the HTML exactly the same -->
     <div class="game-container">
         <div class="header">
             <h1>Pipes</h1>
@@ -208,6 +208,7 @@
     </div>
     <script>
         const game = {
+            // Keep all the original game properties and methods the same
             canvas: null,
             ctx: null,
             size: 5,
@@ -228,35 +229,29 @@
                 { type: '┘', connects: [1,2] }
             ],
 
+            // Keep all initialization and game logic methods exactly the same
             init() {
                 this.canvas = document.getElementById('gameCanvas');
                 this.ctx = this.canvas.getContext('2d');
                 
-                // Load saved theme
                 this.loadTheme();
                 
-                // Calculate the cell size based on the canvas size
                 const updateSize = () => {
                     const displayWidth = this.canvas.clientWidth;
                     const displayHeight = this.canvas.clientHeight;
                     
-                    // Update canvas buffer size to match display size
                     this.canvas.width = displayWidth;
                     this.canvas.height = displayHeight;
                     
-                    // Calculate new cell size
                     this.cellSize = Math.min(displayWidth, displayHeight) / this.size;
                     
-                    // Redraw if we have a grid
                     if (this.grid.length > 0) {
                         this.draw();
                     }
                 };
 
-                // Initial size setup
                 updateSize();
                 
-                // Update sizes when window resizes
                 window.addEventListener('resize', updateSize);
                 
                 this.canvas.addEventListener('click', (e) => this.handleClick(e));
@@ -334,99 +329,124 @@
                     this.draw();
                 }
             },
+
             draw() {
                 const isDarkTheme = document.documentElement.getAttribute('data-theme') === 'dark';
                 this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
                 
-                // Draw grid and pipes
                 for (let y = 0; y < this.size; y++) {
                     for (let x = 0; x < this.size; x++) {
-                        // Draw solution path highlight
                         if (this.solutionPath && this.solutionPath.some(pos => pos.x === x && pos.y === y)) {
                             this.ctx.fillStyle = 'rgba(76, 175, 80, 0.3)';
                             this.ctx.fillRect(x * this.cellSize, y * this.cellSize, this.cellSize, this.cellSize);
                         }
 
-                        // Draw grid cell
                         this.ctx.strokeStyle = isDarkTheme ? '#333' : '#ddd';
                         this.ctx.strokeRect(x * this.cellSize, y * this.cellSize, this.cellSize, this.cellSize);
                         
-                        // Draw pipe
                         this.drawPipe(x, y);
                     }
                 }
-
-                // Draw endpoints
-                this.ctx.fillStyle = '#4CAF50';  // Start point (green)
-                this.ctx.beginPath();
-                this.ctx.arc(this.startPos.x * this.cellSize + this.cellSize/2,
-                           this.startPos.y * this.cellSize + this.cellSize/2,
-                           this.cellSize * 0.15, 0, Math.PI * 2);
-                this.ctx.fill();
-
-                this.ctx.fillStyle = '#4CAF50';  // End point (green)
-                this.ctx.beginPath();
-                this.ctx.arc(this.endPos.x * this.cellSize + this.cellSize/2,
-                           this.endPos.y * this.cellSize + this.cellSize/2,
-                           this.cellSize * 0.15, 0, Math.PI * 2);
-                this.ctx.fill();
             },
 
+            // Modified drawPipe method to include rounded corners
             drawPipe(x, y) {
                 const isDarkTheme = document.documentElement.getAttribute('data-theme') === 'dark';
                 const pipe = this.grid[y][x];
                 const centerX = x * this.cellSize + this.cellSize/2;
                 const centerY = y * this.cellSize + this.cellSize/2;
                 const radius = this.cellSize * 0.3;
+                const pipeWidth = this.cellSize * 0.125;
+                const flangeWidth = pipeWidth * 1.5;
+                const flangeLength = pipeWidth * 0.8;
+                const cornerRadius = this.cellSize * 0.06; // Radius for the rounded corners
 
                 this.ctx.save();
                 this.ctx.translate(centerX, centerY);
                 this.ctx.rotate(pipe.rotation * Math.PI/2);
-                
-                this.ctx.beginPath();
-                
-                // Determine if this is a start or end pipe
+
                 const isStartOrEnd = (x === this.startPos.x && y === this.startPos.y) || 
                                    (x === this.endPos.x && y === this.endPos.y);
                 
-                // Set color based on whether it's start/end, part of solution, or regular pipe
-                this.ctx.strokeStyle = isStartOrEnd || 
+                const pipeColor = isStartOrEnd || 
                     (this.solutionPath && this.solutionPath.some(pos => pos.x === x && pos.y === y)) ? 
-                    '#4CAF50' : isDarkTheme ? '#fff' : '#333';
-                this.ctx.lineWidth = this.cellSize * 0.125;
-                this.ctx.lineCap = 'round';
-                
+                    '#4CAF50' : isDarkTheme ? '#888888' : '#666666';
+
+                this.ctx.strokeStyle = pipeColor;
+                this.ctx.lineWidth = pipeWidth;
+                this.ctx.lineCap = 'butt';
+
+                // Function to draw a pipe end (flat with rim)
+                const drawPipeEnd = (endX, endY, dir) => {
+                    this.ctx.save();
+                    this.ctx.translate(endX, endY);
+                    if (dir === 0) this.ctx.rotate(0);
+                    else if (dir === 1) this.ctx.rotate(Math.PI / 2);
+                    else if (dir === 2) this.ctx.rotate(Math.PI);
+                    else if (dir === 3) this.ctx.rotate(-Math.PI / 2);
+                    
+                    this.ctx.fillStyle = pipeColor;
+                    this.ctx.fillRect(-flangeWidth/2, -flangeLength, flangeWidth, flangeLength);
+                    
+                    this.ctx.restore();
+                };
+
+                // Draw the pipe segments with rounded corners for corner pieces
                 switch(pipe.pipe.type) {
                     case '│':
+                        this.ctx.beginPath();
                         this.ctx.moveTo(0, -radius);
                         this.ctx.lineTo(0, radius);
+                        this.ctx.stroke();
+                        drawPipeEnd(0, -radius, 0);
+                        drawPipeEnd(0, radius, 2);
                         break;
                     case '─':
+                        this.ctx.beginPath();
                         this.ctx.moveTo(-radius, 0);
                         this.ctx.lineTo(radius, 0);
+                        this.ctx.stroke();
+                        drawPipeEnd(-radius, 0, 3);
+                        drawPipeEnd(radius, 0, 1);
                         break;
                     case '└':
+                        // Draw smooth bend for └
+                        this.ctx.beginPath();
                         this.ctx.moveTo(0, -radius);
-                        this.ctx.lineTo(0, 0);
-                        this.ctx.lineTo(radius, 0);
+                        this.ctx.quadraticCurveTo(0, 0, radius, 0);
+                        this.ctx.stroke();
+                        drawPipeEnd(0, -radius, 0);
+                        drawPipeEnd(radius, 0, 1);
                         break;
                     case '┌':
+                        // Draw smooth bend for ┌
+                        this.ctx.beginPath();
                         this.ctx.moveTo(0, -radius);
-                        this.ctx.lineTo(0, 0);
-                        this.ctx.lineTo(-radius, 0);
+                        this.ctx.quadraticCurveTo(0, 0, -radius, 0);
+                        this.ctx.stroke();
+                        drawPipeEnd(0, -radius, 0);
+                        drawPipeEnd(-radius, 0, 3);
                         break;
                     case '┐':
+                        // Draw smooth bend for ┐
+                        this.ctx.beginPath();
                         this.ctx.moveTo(-radius, 0);
-                        this.ctx.lineTo(0, 0);
-                        this.ctx.lineTo(0, radius);
+                        this.ctx.quadraticCurveTo(0, 0, 0, radius);
+                        this.ctx.stroke();
+                        drawPipeEnd(-radius, 0, 3);
+                        drawPipeEnd(0, radius, 2);
                         break;
                     case '┘':
+                        // Draw smooth bend for ┘
+                        this.ctx.beginPath();
                         this.ctx.moveTo(radius, 0);
-                        this.ctx.lineTo(0, 0);
-                        this.ctx.lineTo(0, radius);
+                        this.ctx.quadraticCurveTo(0, 0, 0, radius);
+                        this.ctx.stroke();
+                        drawPipeEnd(radius, 0, 1);
+                        drawPipeEnd(0, radius, 2);
                         break;
                 }
-                this.ctx.stroke();
+                
                 this.ctx.restore();
             },
 

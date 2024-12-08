@@ -165,14 +165,16 @@
 		}
 
 		.gesture-hint .swipe-icon {
-		    width: 24px;
-		    height: 24px;
-		    background: white;
-		    border-radius: 50%;
+		    width: 40px;
+		    height: 8px;
+		    background: #0095DD;
 		    position: relative;
 		    animation: swipeAnim 2s infinite;
 		}
 
+        .swipe-text {
+        	padding-left: 5px;
+        }
 		@keyframes swipeAnim {
 		    0% { transform: translateX(-10px); }
 		    50% { transform: translateX(10px); }
@@ -221,7 +223,7 @@
         <div id="controlArea">
  		<div class="gesture-hint">
 			<div class="swipe-icon"></div>
-			Slide here to move
+			<span class="swipe-text">Slide here to move</span>
 		</div>
 
     </div>
