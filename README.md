@@ -49,7 +49,7 @@ Pilot your spaceship and navigate through an asteroid field. Shoot or evade aste
     <img src="https://raw.githubusercontent.com/jeremehancock/AI-Game-Collection/refs/heads/main/images/screenshots/waveform-game.png" width="300" alt="Waveform"/>
      <img src="https://raw.githubusercontent.com/jeremehancock/AI-Game-Collection/refs/heads/main/images/screenshots/bubble-pop-game.png" width="300" alt="Bubble Pop"/>
     <img src="https://raw.githubusercontent.com/jeremehancock/AI-Game-Collection/refs/heads/main/images/screenshots/breakout.png" width="300" alt="Breakout"/>
-    <img src="https://raw.githubusercontent.com/jeremehancock/AI-Game-Collection/refs/heads/main/images/screenshots/space-shooter.png" width="300" alt="Space Shooter"/>
+    <img src="https://raw.githubusercontent.com/jeremehancock/AI-Game-Collection/refs/heads/main/images/screenshots/space-shooter-game.png" width="300" alt="Space Shooter"/>
 </div>
 
 ## 🚀 Features
