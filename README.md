@@ -33,6 +33,9 @@ Pop the bubbles before they escape! A fast-paced game of precision and reflexes 
 ### Breakout
 Break the bricks, level up, and beat your high score! A fast-paced game of skill and strategy for all ages.
 
+### Space Shooter
+Pilot your spaceship and navigate through an asteroid field. Shoot or evade asteroids in this fast-paced arcade challenge.
+
 ## 📸 Screenshots
 <div align="center">
     <img src="https://raw.githubusercontent.com/jeremehancock/AI-Game-Collection/refs/heads/main/images/screenshots/home.png" width="300" alt="Game Menu"/>
@@ -46,6 +49,7 @@ Break the bricks, level up, and beat your high score! A fast-paced game of skill
     <img src="https://raw.githubusercontent.com/jeremehancock/AI-Game-Collection/refs/heads/main/images/screenshots/waveform-game.png" width="300" alt="Waveform"/>
      <img src="https://raw.githubusercontent.com/jeremehancock/AI-Game-Collection/refs/heads/main/images/screenshots/bubble-pop-game.png" width="300" alt="Bubble Pop"/>
     <img src="https://raw.githubusercontent.com/jeremehancock/AI-Game-Collection/refs/heads/main/images/screenshots/breakout.png" width="300" alt="Breakout"/>
+    <img src="https://raw.githubusercontent.com/jeremehancock/AI-Game-Collection/refs/heads/main/images/screenshots/space-shooter.png" width="300" alt="Space Shooter"/>
 </div>
 
 ## 🚀 Features
