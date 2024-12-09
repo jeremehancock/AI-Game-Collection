@@ -74,6 +74,11 @@
             .flags-count {
                 color: #f44336;
             }
+            /* Add dark mode specific colors */
+            html.dark .flags-count {
+                color: #ff8080; /* Lighter red for better visibility in dark mode */
+            }
+            
             .grid-container {
                 width: 100%;
                 display: flex;
@@ -237,7 +242,7 @@
                 gap: 16px;
                 justify-content: space-between;
                 min-width: 0;
-                color: red;
+				color: #f44336;
                 animation: pulse 2s infinite;
             }
             .game-over h2 {
@@ -249,6 +254,9 @@
                 margin: 0;
                 font-size: 1rem;
                 white-space: nowrap;
+            }
+            html.dark .game-over {
+                color: #ff8080; /* Lighter red for dark mode */
             }
 			@keyframes pulse {
 			  0% {

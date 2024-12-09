@@ -147,6 +147,7 @@
         let lastTime = 0;
         let bubbleInterval = 1500;
         let lastBubble = 0;
+        let speedMultiplier = 1.0; // New variable to control overall game speed
 
         function resizeCanvas() {
             canvas.width = gameContainer.clientWidth;
@@ -171,9 +172,9 @@
             }
 
             update() {
-                this.x += this.vx;
-                this.y += this.vy;
-                this.vy += 0.1; // Add gravity
+                this.x += this.vx * speedMultiplier;
+                this.y += this.vy * speedMultiplier;
+                this.vy += 0.1 * speedMultiplier;
                 this.life -= this.fadeSpeed;
                 this.alpha = this.life;
                 return this.life > 0;
@@ -199,7 +200,7 @@
                 this.x = Math.max(this.radius, Math.min(canvas.width - this.radius, this.x));
                 this.y = canvas.height + this.radius;
                 this.vx = (Math.random() - 0.5) * 2;
-                this.vy = -0.5 - Math.random() * 0.5;
+                this.vy = (-0.5 - Math.random() * 0.5) * speedMultiplier; // Initial velocity affected by speed multiplier
                 this.baseHue = Math.random() * 360;
                 this.points = Math.ceil((50 - this.radius) * 2);
                 this.active = true;
@@ -214,13 +215,13 @@
                     return this.alpha <= 0;
                 }
 
-                this.vy -= 0.05;
-                this.vx += (Math.random() - 0.5) * 0.1;
+                this.vy -= 0.05 * speedMultiplier; // Acceleration affected by speed multiplier
+                this.vx += (Math.random() - 0.5) * 0.1 * speedMultiplier;
                 this.vx *= 0.99;
                 this.vy *= 0.99;
                 
-                this.x += this.vx;
-                this.y += this.vy;
+                this.x += this.vx * speedMultiplier;
+                this.y += this.vy * speedMultiplier;
 
                 if (this.x - this.radius < 0) {
                     this.x = this.radius;
@@ -268,14 +269,12 @@
             }
 
             pop() {
-                // Create particles
                 const particleCount = Math.floor(this.radius);
                 const baseColor = `hsl(${this.baseHue}, 70%, 60%)`;
                 for (let i = 0; i < particleCount; i++) {
                     particles.push(new Particle(this.x, this.y, baseColor));
                 }
 
-                // Create ripple effect
                 ctx.beginPath();
                 ctx.arc(this.x, this.y, this.radius * 1.2, 0, Math.PI * 2);
                 ctx.strokeStyle = `hsla(${this.baseHue}, 90%, 60%, 0.5)`;
@@ -314,18 +313,18 @@
                 
                 const restitution = 0.6;
                 const j = -(1 + restitution) * velAlongNormal;
-                const impulseX = j * nx;
-                const impulseY = j * ny;
+                const impulseX = j * nx * speedMultiplier;
+                const impulseY = j * ny * speedMultiplier;
                 
                 b1.vx -= impulseX;
                 b1.vy -= impulseY;
                 b2.vx += impulseX;
                 b2.vy += impulseY;
                 
-                b1.vx += (Math.random() - 0.5) * 0.5;
-                b1.vy += (Math.random() - 0.5) * 0.5;
-                b2.vx += (Math.random() - 0.5) * 0.5;
-                b2.vy += (Math.random() - 0.5) * 0.5;
+                b1.vx += (Math.random() - 0.5) * 0.5 * speedMultiplier;
+                b1.vy += (Math.random() - 0.5) * 0.5 * speedMultiplier;
+                b2.vx += (Math.random() - 0.5) * 0.5 * speedMultiplier;
+                b2.vy += (Math.random() - 0.5) * 0.5 * speedMultiplier;
             }
         }
 
@@ -379,6 +378,7 @@
             particles = [];
             lastBubble = 0;
             bubbleInterval = 1500;
+            speedMultiplier = 1.0;
             scoreElement.textContent = 'Score: 0';
             requestAnimationFrame(gameLoop);
         }
@@ -388,6 +388,9 @@
 
             const deltaTime = timestamp - lastTime;
             lastTime = timestamp;
+
+            // Update speed multiplier based on score - extremely gradual increase
+            speedMultiplier = 1.0 + (score / 10000); // Increases by 0.0001 per point
 
             ctx.clearRect(0, 0, canvas.width, canvas.height);
 
@@ -438,6 +441,7 @@
             particles = [];
             lastBubble = 0;
             bubbleInterval = 1500;
+            speedMultiplier = 1.0;
             scoreElement.textContent = 'Score: 0';
             gameOverElement.style.display = 'none';
             requestAnimationFrame(gameLoop);
