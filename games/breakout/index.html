@@ -251,37 +251,37 @@
 				engineSound.start();
 			}
 
-		function playExplosionSound() {
-			if (!audioContext) return;
-			
-			const bufferSize = audioContext.sampleRate * 0.5;
-			const buffer = audioContext.createBuffer(1, bufferSize, audioContext.sampleRate);
-			const data = buffer.getChannelData(0);
-			
-			for (let i = 0; i < bufferSize; i++) {
-				const baseNoise = Math.random() * 2 - 1;
-				const lowFreq = Math.sin(i * 0.01) * 0.5;
-				data[i] = (baseNoise * 0.7 + lowFreq * 0.3) * (1 - i / bufferSize);
+			function playExplosionSound() {
+				if (!audioContext) return;
+				
+				const bufferSize = audioContext.sampleRate * 0.5;
+				const buffer = audioContext.createBuffer(1, bufferSize, audioContext.sampleRate);
+				const data = buffer.getChannelData(0);
+				
+				for (let i = 0; i < bufferSize; i++) {
+					const baseNoise = Math.random() * 2 - 1;
+					const lowFreq = Math.sin(i * 0.01) * 0.5;
+					data[i] = (baseNoise * 0.7 + lowFreq * 0.3) * (1 - i / bufferSize);
+				}
+				
+				const source = audioContext.createBufferSource();
+				const gainNode = audioContext.createGain();
+				const lowPassFilter = audioContext.createBiquadFilter();
+				
+				lowPassFilter.type = 'lowpass';
+				lowPassFilter.frequency.value = 1000;
+				lowPassFilter.Q.value = 0.5;
+				
+				source.buffer = buffer;
+				source.connect(lowPassFilter);
+				lowPassFilter.connect(gainNode);
+				gainNode.connect(audioContext.destination);
+				
+				gainNode.gain.setValueAtTime(0.8, audioContext.currentTime);
+				gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.7);
+				
+				source.start();
 			}
-			
-			const source = audioContext.createBufferSource();
-			const gainNode = audioContext.createGain();
-			const lowPassFilter = audioContext.createBiquadFilter();
-			
-			lowPassFilter.type = 'lowpass';
-			lowPassFilter.frequency.value = 1000;
-			lowPassFilter.Q.value = 0.5;
-			
-			source.buffer = buffer;
-			source.connect(lowPassFilter);
-			lowPassFilter.connect(gainNode);
-			gainNode.connect(audioContext.destination);
-			
-			gainNode.gain.setValueAtTime(0.8, audioContext.currentTime);
-			gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.7);
-			
-			source.start();
-		}
 
             const setCanvasSize = () => {
                 canvas.width = Math.min(0.95 * window.innerWidth, 400);
