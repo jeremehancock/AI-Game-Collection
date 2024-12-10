@@ -11,6 +11,7 @@ const urlsToCache = [
   'games/waveform/index.html',
   'games/bubble-pop/index.html',
   'games/breakout/index.html',
+  'games/space-shooter/index.html',
   'images/icons/web-app-manifest-192x192.png', 
   'images/icons/web-app-manifest-512x512.png'
 ];
