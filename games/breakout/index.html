@@ -540,6 +540,14 @@
                 document.getElementById("levelDisplay").textContent = currentLevel;
             }
 
+		    function resetGestureHint() {
+		        const gestureHint = document.querySelector('.gesture-hint');
+		        if (gestureHint) {
+		            gestureHint.style.display = 'flex';
+		        }
+		        hasInteracted = false;
+		    }
+
             function collisionDetection() {
                 for (let i = 0; i < bricks.length; i++) {
                     let brick = bricks[i];
@@ -724,6 +732,7 @@
                 paddle.x = (canvas.width - paddle.width) / 2;
                 resetBall();
                 createBricks();
+                resetGestureHint();
             }
 
             function draw(timestamp) {
