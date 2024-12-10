@@ -323,6 +323,8 @@
         let gameStarted = false;
         let score = 0;
         let hasInteracted = false;
+        let animationFrameId = null; // Add this to track the animation frame
+        let baseAsteroidSpeed = 1;
         
 		class FireballParticle {
 			constructor(x, y) {
@@ -550,7 +552,8 @@
                 this.size = Math.random() * 20 + 20;
                 this.x = Math.random() * (canvas.width - this.size * 2) + this.size;
                 this.y = -this.size;
-                this.speed = Math.random() * 2 + 1;
+                // Simplified speed calculation
+                this.speed = Math.random() + 1; // Base speed between 1-2
                 this.rotation = Math.random() * Math.PI * 2;
                 this.rotationSpeed = (Math.random() - 0.5) * 0.1;
                 this.vertices = [];
@@ -836,6 +839,9 @@
         }
 
 		function updateGame() {
+		    if (!gameStarted) {
+                return; // Don't continue animation if game isn't started
+            }
 			ctx.clearRect(0, 0, canvas.width, canvas.height);
 			
 			// Always update and draw fireballs, even during explosion
@@ -963,6 +969,10 @@
 		}
 
 		function startGame() {
+            if (animationFrameId) {
+                cancelAnimationFrame(animationFrameId);
+                animationFrameId = null;
+            }
 			if (gameOverTimeout) {
 				clearTimeout(gameOverTimeout);
 				gameOverTimeout = null;
@@ -974,6 +984,7 @@
 			}
 			gameStarted = true;
 			score = 0;
+			baseAsteroidSpeed = 1;
 			asteroids = [];
 			bullets = [];
 			explosions = [];
