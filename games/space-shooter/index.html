@@ -5,297 +5,281 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Space Game</title>
     <style>
-		body {
-			margin: 0;
-			padding: 0;
-			overflow: hidden;
-			width: 100vw;
-			height: 100vh;
-			background: #000;
-			font-family: Arial, sans-serif;
-			display: flex;
-			flex-direction: column;
-			align-items: center;
-		}
+        body {
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            width: 100vw;
+            height: 100vh;
+            background: #000;
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
 
-		#container {
-			width: 100%;
-			height: 100%;
-			max-width: 700px;
-			position: relative;
-			display: flex;
-			flex-direction: column;
-			align-items: center;
-			margin: 0 auto;
-			background: #000;
-		}
+        #container {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
 
-		canvas {
-			display: block;
-			background: #000;
-			width: 100%;
-			height: 100%;
-			max-width: 700px;
-		}
+        canvas {
+            display: block;
+            background: #000;
+            max-width: 100%;
+        }
 
-		#score {
-			position: fixed;
-			top: 20px;
-			left: 50%;
-			transform: translateX(-50%);
-			margin-left: -315px;
-			color: white;
-			font-size: 24px;
-			font-weight: bold;
-			text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
-			z-index: 10;
-		}
+        #score {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            color: white;
+            font-size: 24px;
+            font-weight: bold;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+            z-index: 10;
+        }
 
-		#start-screen {
-			position: fixed;
-			top: 50%;
-			left: 50%;
-			transform: translate(-50%, -50%);
-			text-align: center;
-			color: white;
-			z-index: 20;
-			width: 90%;
-			max-width: 700px;
-		}
+        #start-screen {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            color: white;
+            z-index: 20;
+            width: 90%;
+        }
 
-		#controlArea {
-			position: fixed;
-			bottom: 90px;
-			left: 50%;
-			transform: translateX(-50%);
-			width: 100%;
-			max-width: 700px;
-			height: 80px;
-			background: rgba(51, 51, 51, 0.95);
-			touch-action: pan-x;
-			display: none;
-			justify-content: center;
-			align-items: center;
-			-webkit-touch-callout: none;
-			-webkit-user-select: none;
-			user-select: none;
-			z-index: 100;
-		}
+        #controlArea {
+            position: fixed;
+            bottom: 90px;
+            left: 0;
+            width: 100%;
+            height: 80px;
+            background: rgba(51, 51, 51, 0.95);
+            touch-action: pan-x;
+            display: none;
+            justify-content: center;
+            align-items: center;
+            -webkit-touch-callout: none;
+            -webkit-user-select: none;
+            user-select: none;
+            z-index: 100;
+        }
 
-		.gesture-hint {
-			position: absolute;
-			left: 30%;
-			transform: translateX(-20%);
-			background: rgba(255, 255, 255, 0.2);
-			padding: 8px 16px;
-			border-radius: 20px;
-			pointer-events: none;
-			user-select: none;
-			display: flex;
-			align-items: center;
-			gap: 10px;
-			animation: fadeInOut 2s infinite;
-			z-index: 10;
-			color: white;
-		}
+        .gesture-hint {
+            position: absolute;
+            left: 30%;
+            transform: translateX(-20%);
+            background: rgba(255, 255, 255, 0.2);
+            padding: 8px 16px;
+            border-radius: 20px;
+            pointer-events: none;
+            user-select: none;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            animation: fadeInOut 2s infinite;
+            z-index: 10;
+            color: white;
+        }
 
-		.mini-ship {
-			width: 24px;
-			height: 24px;
-			position: relative;
-			margin-left: 10px;
-			animation: slideShip 2s infinite ease-in-out;
-		}
+        .mini-ship {
+            width: 24px;
+            height: 24px;
+            position: relative;
+            margin-left: 10px;
+            animation: slideShip 2s infinite ease-in-out;
+        }
 
-		.mini-ship::before {
-			content: '';
-			position: absolute;
-			top: 2px;
-			left: 50%;
-			transform: translateX(-50%);
-			width: 12px;
-			height: 20px;
-			background: linear-gradient(90deg, #2c3e50, #34495e, #95a5a6, #34495e, #2c3e50);
-			clip-path: polygon(50% 0%, 100% 100%, 0% 100%);
-		}
+        .mini-ship::before {
+            content: '';
+            position: absolute;
+            top: 2px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 12px;
+            height: 20px;
+            background: linear-gradient(90deg, #2c3e50, #34495e, #95a5a6, #34495e, #2c3e50);
+            clip-path: polygon(50% 0%, 100% 100%, 0% 100%);
+        }
 
-		.mini-ship::after {
-			content: '';
-			position: absolute;
-			top: 10px;
-			left: 50%;
-			transform: translateX(-50%);
-			width: 24px;
-			height: 12px;
-			background: #34495e;
-			clip-path: polygon(0 50%, 20% 100%, 80% 100%, 100% 50%, 80% 0, 20% 0);
-		}
+        .mini-ship::after {
+            content: '';
+            position: absolute;
+            top: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 24px;
+            height: 12px;
+            background: #34495e;
+            clip-path: polygon(0 50%, 20% 100%, 80% 100%, 100% 50%, 80% 0, 20% 0);
+        }
 
-		.mini-ship .cockpit {
-			position: absolute;
-			top: 8px;
-			left: 50%;
-			transform: translateX(-50%);
-			width: 6px;
-			height: 8px;
-			background: linear-gradient(180deg, rgba(52, 152, 219, 0.9), rgba(41, 128, 185, 0.7));
-			border-radius: 3px;
-			z-index: 1;
-		}
+        .mini-ship .cockpit {
+            position: absolute;
+            top: 8px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 6px;
+            height: 8px;
+            background: linear-gradient(180deg, rgba(52, 152, 219, 0.9), rgba(41, 128, 185, 0.7));
+            border-radius: 3px;
+            z-index: 1;
+        }
 
-		.mini-ship .engine {
-			position: absolute;
-			bottom: 0;
-			left: 50%;
-			transform: translateX(-50%);
-			width: 6px;
-			height: 4px;
-			background: rgba(52, 152, 219, 0.6);
-			border-radius: 0 0 3px 3px;
-			animation: engineGlow 1s infinite alternate;
-		}
+        .mini-ship .engine {
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 6px;
+            height: 4px;
+            background: rgba(52, 152, 219, 0.6);
+            border-radius: 0 0 3px 3px;
+            animation: engineGlow 1s infinite alternate;
+        }
 
-		.game-overlay {
-			position: fixed;
-			top: 50%;
-			left: 50%;
-			transform: translate(-50%, -50%);
-			width: 90%;
-			max-width: 700px;
-			height: 100%;
-			background: rgba(0, 0, 0, 0.85);
-			backdrop-filter: blur(5px);
-			display: flex;
-			justify-content: center;
-			align-items: center;
-			z-index: 1000;
-		}
+        @keyframes engineGlow {
+            from { opacity: 0.4; }
+            to { opacity: 0.8; }
+        }
 
-		.overlay-content {
-			background: rgba(25, 25, 25, 0.9);
-			border-radius: 15px;
-			padding: 2rem;
-			text-align: center;
-			color: white;
-			max-width: 90%;
-			width: 400px;
-			box-shadow: 0 0 40px rgba(0, 0, 0, 0.3);
-			border: 1px solid rgba(255, 255, 255, 0.1);
-		}
+        @keyframes slideShip {
+            0%, 100% { transform: translateX(-15px); }
+            50% { transform: translateX(15px); }
+        }
 
-		.overlay-title {
-			font-size: 3rem;
-			margin: 0 0 1rem;
-			background: linear-gradient(135deg, #3498db, #2ecc71);
-			-webkit-background-clip: text;
-			background-clip: text;
-			color: transparent;
-			text-shadow: none;
-		}
+        @keyframes fadeInOut {
+            0% { opacity: 0.7; }
+            50% { opacity: 1; }
+            100% { opacity: 0.7; }
+        }
 
-		.game-over .overlay-title {
-			background: linear-gradient(135deg, #e74c3c, #c0392b);
-			-webkit-background-clip: text;
-			background-clip: text;
-		}
+        .game-overlay {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 90%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(5px);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
 
-		.overlay-score {
-			font-size: 1.5rem;
-			margin: 1rem 0;
-			color: #bdc3c7;
-		}
+        .overlay-content {
+            background: rgba(25, 25, 25, 0.9);
+            border-radius: 15px;
+            padding: 2rem;
+            text-align: center;
+            color: white;
+            max-width: 90%;
+            width: 400px;
+            box-shadow: 0 0 40px rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
 
-		.overlay-button {
-			padding: 0.8rem 2rem;
-			font-size: 1.25rem;
-			background: linear-gradient(135deg, #3498db, #2980b9);
-			color: white;
-			border: none;
-			border-radius: 8px;
-			cursor: pointer;
-			transition: transform 0.2s, box-shadow 0.2s;
-			margin: 1rem 0;
-			text-transform: uppercase;
-			letter-spacing: 1px;
-			font-weight: bold;
-		}
+        .overlay-title {
+            font-size: 3rem;
+            margin: 0 0 1rem;
+            background: linear-gradient(135deg, #3498db, #2ecc71);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            text-shadow: none;
+        }
 
-		.overlay-button:hover {
-			transform: translateY(-2px);
-			box-shadow: 0 5px 15px rgba(52, 152, 219, 0.4);
-		}
+        .game-over .overlay-title {
+            background: linear-gradient(135deg, #e74c3c, #c0392b);
+            -webkit-background-clip: text;
+            background-clip: text;
+        }
 
-		.overlay-button:active {
-			transform: translateY(0);
-		}
+        .overlay-score {
+            font-size: 1.5rem;
+            margin: 1rem 0;
+            color: #bdc3c7;
+        }
 
-		.overlay-instructions {
-			margin: 1.5rem 0;
-			color: #95a5a6;
-			font-size: 1rem;
-			line-height: 1.6;
-		}
+        .overlay-button {
+            padding: 0.8rem 2rem;
+            font-size: 1.25rem;
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            margin: 1rem 0;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-weight: bold;
+        }
 
-		.overlay-instructions p {
-			margin: 0.5rem 0;
-		}
+        .overlay-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(52, 152, 219, 0.4);
+        }
 
-		.control-icon {
-			display: inline-block;
-			padding: 0.2rem 0.5rem;
-			background: rgba(255, 255, 255, 0.1);
-			border-radius: 4px;
-			margin: 0 0.2rem;
-			font-family: monospace;
-		}
+        .overlay-button:active {
+            transform: translateY(0);
+        }
 
-		.mobile-instructions {
-			display: none;
-		}
+        .overlay-instructions {
+            margin: 1.5rem 0;
+            color: #95a5a6;
+            font-size: 1rem;
+            line-height: 1.6;
+        }
 
-		.desktop-instructions {
-			display: block;
-		}
+        .overlay-instructions p {
+            margin: 0.5rem 0;
+        }
 
-		@keyframes engineGlow {
-			from { opacity: 0.4; }
-			to { opacity: 0.8; }
-		}
+        .control-icon {
+            display: inline-block;
+            padding: 0.2rem 0.5rem;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 4px;
+            margin: 0 0.2rem;
+            font-family: monospace;
+        }
 
-		@keyframes slideShip {
-			0%, 100% { transform: translateX(-15px); }
-			50% { transform: translateX(15px); }
-		}
+        .mobile-instructions {
+            display: none;
+        }
 
-		@keyframes fadeInOut {
-			0% { opacity: 0.7; }
-			50% { opacity: 1; }
-			100% { opacity: 0.7; }
-		}
+        .desktop-instructions {
+            display: block;
+        }
 
-		@media (max-width: 768px) {
-			.mobile-instructions {
-				display: block;
-			}
-			.desktop-instructions {
-				display: none;
-			}
-			.overlay-content {
-				padding: 1.5rem;
-			}
-			.overlay-title {
-				font-size: 2.5rem;
-			}
-			.overlay-button {
-				padding: 0.7rem 1.5rem;
-				font-size: 1.1rem;
-			}
-			#score {
-				left: 20px;
-				transform: none;
-				margin-left: 0;
-			}
-		}
+        @media (max-width: 768px) {
+            .mobile-instructions {
+                display: block;
+            }
+            .desktop-instructions {
+                display: none;
+            }
+            .overlay-content {
+                padding: 1.5rem;
+            }
+            .overlay-title {
+                font-size: 2.5rem;
+            }
+            .overlay-button {
+                padding: 0.7rem 1.5rem;
+                font-size: 1.1rem;
+            }
+        }
     </style>
 </head>
 <body>
@@ -327,345 +311,676 @@
     </div>
 
     <script>
-		const canvas = document.getElementById('gameCanvas');
-		const ctx = canvas.getContext('2d');
-		const startScreen = document.getElementById('start-screen');
-		const startButton = document.querySelector('.overlay-button');
-		const scoreElement = document.getElementById('score');
-		const controlArea = document.getElementById('controlArea');
-		const gameWrapper = document.getElementById('game-wrapper');
-		const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-		let gameStarted = false;
-		let score = 0;
-		let hasInteracted = false;
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        const startScreen = document.getElementById('start-screen');
+        const startButton = document.querySelector('.overlay-button');
+        const scoreElement = document.getElementById('score');
+        const controlArea = document.getElementById('controlArea');
+        const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+        let gameStarted = false;
+        let score = 0;
+        let hasInteracted = false;
 
-		// Audio Context setup
-		let audioContext;
-		let engineSound;
-		let engineGainNode;
+        // Audio Context setup
+        let audioContext;
+        let engineSound;
+        let engineGainNode;
+        
+        // Audio initialization function
+        async function initAudio() {
+            audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            engineGainNode = audioContext.createGain();
+            engineGainNode.gain.value = 0.1;
+            engineGainNode.connect(audioContext.destination);
+            
+            engineSound = audioContext.createOscillator();
+            engineSound.type = 'sine';
+            engineSound.frequency.value = 100;
+            engineSound.connect(engineGainNode);
+            engineSound.start();
+        }
 
-		// Audio initialization function
-		async function initAudio() {
-			audioContext = new (window.AudioContext || window.webkitAudioContext)();
-			engineGainNode = audioContext.createGain();
-			engineGainNode.gain.value = 0.1;
-			engineGainNode.connect(audioContext.destination);
-			
-			engineSound = audioContext.createOscillator();
-			engineSound.type = 'sine';
-			engineSound.frequency.value = 100;
-			engineSound.connect(engineGainNode);
-			engineSound.start();
-		}
+        function playLaserSound() {
+            if (!audioContext) return;
+            
+            const oscillator = audioContext.createOscillator();
+            const gainNode = audioContext.createGain();
+            
+            oscillator.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+            
+            oscillator.type = 'square';
+            oscillator.frequency.setValueAtTime(880, audioContext.currentTime);
+            oscillator.frequency.exponentialRampToValueAtTime(110, audioContext.currentTime + 0.1);
+            
+            gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.1);
+            
+            oscillator.start();
+            oscillator.stop(audioContext.currentTime + 0.1);
+        }
 
-		function playLaserSound() {
-			if (!audioContext) return;
-			
-			const oscillator = audioContext.createOscillator();
-			const gainNode = audioContext.createGain();
-			
-			oscillator.connect(gainNode);
-			gainNode.connect(audioContext.destination);
-			
-			oscillator.type = 'square';
-			oscillator.frequency.setValueAtTime(880, audioContext.currentTime);
-			oscillator.frequency.exponentialRampToValueAtTime(110, audioContext.currentTime + 0.1);
-			
-			gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
-			gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.1);
-			
-			oscillator.start();
-			oscillator.stop(audioContext.currentTime + 0.1);
-		}
+        function playExplosionSound() {
+            if (!audioContext) return;
+            
+            // Create multiple oscillators for a richer explosion sound
+            const bufferSize = audioContext.sampleRate * 0.5;
+            const buffer = audioContext.createBuffer(1, bufferSize, audioContext.sampleRate);
+            const data = buffer.getChannelData(0);
+            
+            // Generate layered noise for deeper explosion
+            for (let i = 0; i < bufferSize; i++) {
+                // Base explosion noise
+                const baseNoise = Math.random() * 2 - 1;
+                // Low frequency component
+                const lowFreq = Math.sin(i * 0.01) * 0.5;
+                // Combine with emphasis on low frequencies
+                data[i] = (baseNoise * 0.7 + lowFreq * 0.3) * (1 - i / bufferSize);
+            }
+            
+            const source = audioContext.createBufferSource();
+            const gainNode = audioContext.createGain();
+            const lowPassFilter = audioContext.createBiquadFilter();
+            
+            // Add low-pass filter for deeper sound
+            lowPassFilter.type = 'lowpass';
+            lowPassFilter.frequency.value = 1000;
+            lowPassFilter.Q.value = 0.5;
+            
+            source.buffer = buffer;
+            source.connect(lowPassFilter);
+            lowPassFilter.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+            
+            // Adjust volume curve for more impact
+            gainNode.gain.setValueAtTime(0.8, audioContext.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.7);
+            
+            source.start();
+        }
 
-		function playExplosionSound() {
-			if (!audioContext) return;
-			
-			const bufferSize = audioContext.sampleRate * 0.5;
-			const buffer = audioContext.createBuffer(1, bufferSize, audioContext.sampleRate);
-			const data = buffer.getChannelData(0);
-			
-			for (let i = 0; i < bufferSize; i++) {
-				const baseNoise = Math.random() * 2 - 1;
-				const lowFreq = Math.sin(i * 0.01) * 0.5;
-				data[i] = (baseNoise * 0.7 + lowFreq * 0.3) * (1 - i / bufferSize);
-			}
-			
-			const source = audioContext.createBufferSource();
-			const gainNode = audioContext.createGain();
-			const lowPassFilter = audioContext.createBiquadFilter();
-			
-			lowPassFilter.type = 'lowpass';
-			lowPassFilter.frequency.value = 1000;
-			lowPassFilter.Q.value = 0.5;
-			
-			source.buffer = buffer;
-			source.connect(lowPassFilter);
-			lowPassFilter.connect(gainNode);
-			gainNode.connect(audioContext.destination);
-			
-			gainNode.gain.setValueAtTime(0.8, audioContext.currentTime);
-			gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.7);
-			
-			source.start();
-		}
+        function setCanvasSize() {
+            canvas.width = window.innerWidth;
+            canvas.height = isMobile ? window.innerHeight - 120 : window.innerHeight;
+        }
 
-		function setCanvasSize() {
-			const wrapper = gameWrapper.getBoundingClientRect();
-			canvas.width = wrapper.width;
-			canvas.height = isMobile ? window.innerHeight - 120 : window.innerHeight;
-			
-			if (gameStarted && typeof ship !== 'undefined') {
-				ship.x = Math.min(ship.x, canvas.width - ship.size/2);
-				ship.targetX = ship.x;
-			}
-		}
+        setCanvasSize();
 
-		setCanvasSize();
+        window.addEventListener('resize', () => {
+            setCanvasSize();
+            if (gameStarted && typeof ship !== 'undefined') {
+                ship.y = canvas.height - 100;
+            }
+        });
 
-		window.addEventListener('resize', () => {
-			setCanvasSize();
-			if (gameStarted && typeof ship !== 'undefined') {
-				ship.y = canvas.height - 100;
-			}
-		});
+        const ship = {
+            x: canvas.width / 2,
+            y: canvas.height - 100,
+            size: 40,
+            targetX: canvas.width / 2
+        };
 
-		const ship = {
-			x: canvas.width / 2,
-			y: canvas.height - 100,
-			size: 40,
-			targetX: canvas.width / 2
-		};
+        class Bullet {
+            constructor(x, y) {
+                this.x = x;
+                this.y = y;
+                this.speed = 7;
+                this.size = 4;
+            }
 
-		let asteroids = [];
-		let bullets = [];
-		let explosions = [];
-		let lastShootTime = 0;
-		const shootCooldown = 250;
+            update() {
+                this.y -= this.speed;
+            }
 
-		// Existing class definitions for Bullet, ExplosionParticle, and Asteroid remain the same
+            draw() {
+                ctx.save();
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                const bulletGradient = ctx.createRadialGradient(
+                    this.x, this.y, 0,
+                    this.x, this.y, this.size
+                );
+                bulletGradient.addColorStop(0, '#fff');
+                bulletGradient.addColorStop(1, '#ff0');
+                ctx.fillStyle = bulletGradient;
+                ctx.fill();
+                ctx.restore();
+            }
+        }
 
-		function resetGestureHint() {
-			const gestureHint = document.querySelector('.gesture-hint');
-			if (gestureHint) {
-				gestureHint.style.display = 'flex';
-			}
-			hasInteracted = false;
-		}
+        class ExplosionParticle {
+            constructor(x, y) {
+                this.x = x;
+                this.y = y;
+                this.speed = Math.random() * 3 + 2;
+                this.angle = Math.random() * Math.PI * 2;
+                this.size = Math.random() * 3 + 2;
+                this.life = 1.0;
+                this.decay = Math.random() * 0.02 + 0.02;
+            }
 
-		function shoot() {
-			const now = Date.now();
-			if (now - lastShootTime >= shootCooldown) {
-				bullets.push(new Bullet(ship.x, ship.y - ship.size/2));
-				lastShootTime = now;
-				playLaserSound();
-			}
-		}
+            update() {
+                this.x += Math.cos(this.angle) * this.speed;
+                this.y += Math.sin(this.angle) * this.speed;
+                this.life -= this.decay;
+                this.size *= 0.99;
+            }
 
-		function createExplosion(x, y) {
-			for (let i = 0; i < 20; i++) {
-				explosions.push(new ExplosionParticle(x, y));
-			}
-		}
+            draw() {
+                ctx.save();
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                const bulletGradient = ctx.createRadialGradient(
+                    this.x, this.y, 0,
+                    this.x, this.y, this.size
+                );
+                bulletGradient.addColorStop(0, '#fff');
+                bulletGradient.addColorStop(1, '#ff0');
+                ctx.fillStyle = bulletGradient;
+                ctx.fill();
+                ctx.restore();
+            }
+        }
 
-		function checkCollision(asteroid) {
-			const shipPoints = [
-				{ x: ship.x, y: ship.y - ship.size/2 },
-				{ x: ship.x + ship.size/2, y: ship.y + ship.size/2 },
-				{ x: ship.x - ship.size/2, y: ship.y + ship.size/2 },
-				{ x: ship.x, y: ship.y + ship.size/3 },
-				{ x: ship.x, y: ship.y }
-			];
+        class Asteroid {
+            constructor() {
+                this.size = Math.random() * 20 + 20;
+                this.x = Math.random() * (canvas.width - this.size * 2) + this.size;
+                this.y = -this.size;
+                this.speed = Math.random() * 2 + 1;
+                this.rotation = Math.random() * Math.PI * 2;
+                this.rotationSpeed = (Math.random() - 0.5) * 0.1;
+                this.vertices = [];
+                
+                const vertices = Math.floor(Math.random() * 4) + 8;
+                for (let i = 0; i < vertices; i++) {
+                    const angle = (i / vertices) * Math.PI * 2;
+                    const radius = this.size * (0.7 + Math.random() * 0.6);
+                    const noise = this.size * (Math.random() * 0.2 - 0.1);
+                    this.vertices.push({
+                        x: Math.cos(angle) * radius + noise,
+                        y: Math.sin(angle) * radius + noise
+                    });
+                }
+            }
+            
+            update() {
+                this.y += this.speed;
+                this.rotation += this.rotationSpeed;
+            }
+            
+            draw() {
+                ctx.save();
+                ctx.translate(this.x, this.y);
+                ctx.rotate(this.rotation);
+                
+                ctx.beginPath();
+                ctx.moveTo(this.vertices[0].x, this.vertices[0].y);
+                for (let i = 1; i < this.vertices.length; i++) {
+                    ctx.lineTo(this.vertices[i].x, this.vertices[i].y);
+                }
+                ctx.closePath();
+                
+                const asteroidGradient = ctx.createRadialGradient(0, 0, 0, 0, 0, this.size);
+                asteroidGradient.addColorStop(0, '#777');
+                asteroidGradient.addColorStop(0.5, '#555');
+                asteroidGradient.addColorStop(1, '#333');
+                
+                ctx.fillStyle = asteroidGradient;
+                ctx.fill();
+                ctx.strokeStyle = '#222';
+                ctx.lineWidth = 2;
+                ctx.stroke();
+                
+                ctx.restore();
+            }
 
-			for (const point of shipPoints) {
-				if (asteroid.isNearEdge(point.x, point.y)) {
-				    return true;
-				}
-			}
+            isNearEdge(x, y) {
+                const dx = x - this.x;
+                const dy = y - this.y;
+                const rotatedX = dx * Math.cos(-this.rotation) - dy * Math.sin(-this.rotation);
+                const rotatedY = dx * Math.sin(-this.rotation) + dy * Math.cos(-this.rotation);
 
-			return false;
-		}
+                for (let i = 0; i < this.vertices.length; i++) {
+                    const v1 = this.vertices[i];
+                    const v2 = this.vertices[(i + 1) % this.vertices.length];
+                    
+                    const distance = this.pointToLineDistance(
+                        rotatedX, rotatedY,
+                        v1.x, v1.y,
+                        v2.x, v2.y
+                    );
+                    
+                    if (distance < 15) {
+                        return true;
+                    }
+                }
+                return false;
+            }
 
-		function checkBulletCollisions() {
-			for (let i = bullets.length - 1; i >= 0; i--) {
-				for (let j = asteroids.length - 1; j >= 0; j--) {
-				    if (asteroids[j].isNearEdge(bullets[i].x, bullets[i].y)) {
-				        createExplosion(asteroids[j].x, asteroids[j].y);
-				        asteroids.splice(j, 1);
-				        bullets.splice(i, 1);
-				        score += 2;
-				        scoreElement.textContent = `Score: ${score}`;
-				        playExplosionSound();
-				        break;
-				    }
-				}
-			}
-		}
+            pointToLineDistance(px, py, x1, y1, x2, y2) {
+                const A = px - x1;
+                const B = py - y1;
+                const C = x2 - x1;
+                const D = y2 - y1;
 
-		// Your existing drawShip function remains the same
+                const dot = A * C + B * D;
+                const lenSq = C * C + D * D;
+                let param = -1;
 
-		function updateShipPosition() {
-			if (!isMobile) {
-				const moveSpeed = 5;
-				if (keys.left) ship.targetX -= moveSpeed;
-				if (keys.right) ship.targetX += moveSpeed;
-			}
-			
-			const deltaX = ship.targetX - ship.x;
-			ship.x += deltaX * 0.3;
-			ship.x = Math.max(ship.size/2, Math.min(canvas.width - ship.size/2, ship.x));
-		}
+                if (lenSq !== 0) {
+                    param = dot / lenSq;
+                }
 
-		function updateGame() {
-			if (!gameStarted) return;
+                let xx, yy;
 
-			ctx.clearRect(0, 0, canvas.width, canvas.height);
-			
-			updateShipPosition();
-			
-			// Update and draw all game objects
-			// ... rest of your updateGame function remains the same ...
+                if (param < 0) {
+                    xx = x1;
+                    yy = y1;
+                } else if (param > 1) {
+                    xx = x2;
+                    yy = y2;
+                } else {
+                    xx = x1 + param * C;
+                    yy = y1 + param * D;
+                }
 
-			requestAnimationFrame(updateGame);
-		}
+                const dx = px - xx;
+                const dy = py - yy;
 
-		function gameOver() {
-			gameStarted = false;
-			
-			if (engineGainNode) {
-				engineGainNode.gain.setValueAtTime(engineGainNode.gain.value, audioContext.currentTime);
-				engineGainNode.gain.exponentialRampToValueAtTime(0.0001, audioContext.currentTime + 0.5);
-			}
-			
-			if (isMobile) {
-				controlArea.style.display = 'none';
-			}
-			
-			const overlay = document.createElement('div');
-			overlay.className = 'game-overlay game-over';
-			
-			const content = document.createElement('div');
-			content.className = 'overlay-content';
-			
-			// ... rest of your gameOver function remains the same ...
-		}
+                return Math.sqrt(dx * dx + dy * dy);
+            }
+        }
 
-		function startGame() {
-			if (!audioContext) {
-				initAudio();
-			}
-			gameStarted = true;
-			score = 0;
-			asteroids = [];
-			bullets = [];
-			explosions = [];
-			scoreElement.textContent = 'Score: 0';
-			startScreen.style.display = 'none';
-			
-			setCanvasSize();
-			ship.x = canvas.width / 2;
-			ship.y = canvas.height - 100;
-			ship.targetX = ship.x;
-			
-			if (isMobile) {
-				controlArea.style.display = 'flex';
-				resetGestureHint();
-			}
-			
-			requestAnimationFrame(updateGame);
-		}
+        let asteroids = [];
+        let bullets = [];
+        let explosions = [];
+        let lastShootTime = 0;
+        const shootCooldown = 250;
 
-		// Touch handling
-		let touchX = null;
-		let touchStartTime = 0;
-		let hasMoved = false;
-		const TAP_THRESHOLD = 200;
-		const MOVE_THRESHOLD = 10;
+        function resetGestureHint() {
+            const gestureHint = document.querySelector('.gesture-hint');
+            if (gestureHint) {
+                gestureHint.style.display = 'flex';
+            }
+            hasInteracted = false;
+        }
 
-		// Add your existing touch event listeners here
-		controlArea.addEventListener('touchstart', (e) => {
-			e.preventDefault();
-			if (!hasInteracted) {
-				const gestureHint = document.querySelector('.gesture-hint');
-				if (gestureHint) {
-				    gestureHint.style.display = 'none';
-				}
-				hasInteracted = true;
-			}
-			const touch = e.touches[0];
-			touchX = touch.clientX;
-			touchStartTime = Date.now();
-			hasMoved = false;
-		});
+        function shoot() {
+            const now = Date.now();
+            if (now - lastShootTime >= shootCooldown) {
+                bullets.push(new Bullet(ship.x, ship.y - ship.size/2));
+                lastShootTime = now;
+                playLaserSound();
+            }
+        }
 
-		controlArea.addEventListener('touchmove', (e) => {
-			e.preventDefault();
-			if (!gameStarted || touchX === null) return;
-			
-			const touch = e.touches[0];
-			const deltaX = touch.clientX - touchX;
-			
-			if (Math.abs(deltaX) > MOVE_THRESHOLD) {
-				hasMoved = true;
-			}
-			
-			ship.targetX = Math.max(ship.size/2, Math.min(canvas.width - ship.size/2, ship.x + deltaX));
-			touchX = touch.clientX;
-		});
+        function createExplosion(x, y) {
+            for (let i = 0; i < 20; i++) {
+                explosions.push(new ExplosionParticle(x, y));
+            }
+        }
 
-		controlArea.addEventListener('touchend', (e) => {
-			e.preventDefault();
-			
-			const touchDuration = Date.now() - touchStartTime;
-			if (!hasMoved && touchDuration < TAP_THRESHOLD) {
-				shoot();
-			}
-			
-			touchX = null;
-		});
+        function checkCollision(asteroid) {
+            const shipPoints = [
+                { x: ship.x, y: ship.y - ship.size/2 },
+                { x: ship.x + ship.size/2, y: ship.y + ship.size/2 },
+                { x: ship.x - ship.size/2, y: ship.y + ship.size/2 },
+                { x: ship.x, y: ship.y + ship.size/3 },
+                { x: ship.x, y: ship.y }
+            ];
 
-		// Keyboard controls
-		const keys = {
-			left: false,
-			right: false
-		};
+            for (const point of shipPoints) {
+                if (asteroid.isNearEdge(point.x, point.y)) {
+                    return true;
+                }
+            }
 
-		document.addEventListener('keydown', (e) => {
-			if (!gameStarted) return;
-			switch(e.key) {
-				case 'ArrowLeft':
-				    keys.left = true;
-				    e.preventDefault();
-				    break;
-				case 'ArrowRight':
-				    keys.right = true;
-				    e.preventDefault();
-				    break;
-				case ' ': // Spacebar
-				    shoot();
-				    e.preventDefault();
-				    break;
-			}
-		});
+            return false;
+        }
 
-		document.addEventListener('keyup', (e) => {
-			if (!gameStarted) return;
-			switch(e.key) {
-				case 'ArrowLeft':
-				    keys.left = false;
-				    e.preventDefault();
-				    break;
-				case 'ArrowRight':
-				    keys.right = false;
-				    e.preventDefault();
-				    break;
-			}
-		});
+        function checkBulletCollisions() {
+            for (let i = bullets.length - 1; i >= 0; i--) {
+                for (let j = asteroids.length - 1; j >= 0; j--) {
+                    if (asteroids[j].isNearEdge(bullets[i].x, bullets[i].y)) {
+                        createExplosion(asteroids[j].x, asteroids[j].y);
+                        asteroids.splice(j, 1);
+                        bullets.splice(i, 1);
+                        score += 2;
+                        scoreElement.textContent = `Score: ${score}`;
+                        playExplosionSound();
+                        break;
+                    }
+                }
+            }
+        }
 
-		document.addEventListener('DOMContentLoaded', () => {
-			const startButton = document.querySelector('.overlay-button');
-			startButton.addEventListener('click', startGame);
-		});
-			</script>
+        function drawShip() {
+            ctx.save();
+            ctx.translate(ship.x, ship.y);
+            
+            // Main hull
+            ctx.beginPath();
+            ctx.moveTo(0, -ship.size/2);
+            ctx.bezierCurveTo(
+                ship.size/3, -ship.size/2.5,
+                ship.size/2, ship.size/3,
+                ship.size/3, ship.size/2
+            );
+            ctx.lineTo(-ship.size/3, ship.size/2);
+            ctx.bezierCurveTo(
+                -ship.size/2, ship.size/3,
+                -ship.size/3, -ship.size/2.5,
+                0, -ship.size/2
+            );
+            
+            const hullGradient = ctx.createLinearGradient(-ship.size/2, 0, ship.size/2, 0);
+            hullGradient.addColorStop(0, '#2c3e50');
+            hullGradient.addColorStop(0.3, '#34495e');
+            hullGradient.addColorStop(0.5, '#95a5a6');
+            hullGradient.addColorStop(0.7, '#34495e');
+            hullGradient.addColorStop(1, '#2c3e50');
+            
+            ctx.fillStyle = hullGradient;
+            ctx.fill();
+            
+            ctx.strokeStyle = '#7f8c8d';
+            ctx.lineWidth = 1;
+            ctx.stroke();
+            
+            for (let side of [-1, 1]) {
+                ctx.beginPath();
+                ctx.moveTo(side * ship.size/6, -ship.size/4);
+                ctx.lineTo(side * ship.size/2, ship.size/3);
+                ctx.lineTo(side * ship.size/3, ship.size/2);
+                ctx.strokeStyle = '#95a5a6';
+                ctx.lineWidth = 2;
+                ctx.stroke();
+                
+                ctx.beginPath();
+                ctx.moveTo(side * ship.size/4, 0);
+                ctx.lineTo(side * ship.size/3, ship.size/4);
+                ctx.strokeStyle = '#3498db';
+                ctx.lineWidth = 1;
+                ctx.stroke();
+            }
+            
+            ctx.beginPath();
+            ctx.ellipse(0, -ship.size/6, ship.size/5, ship.size/3, 0, 0, Math.PI * 2);
+            
+            const cockpitGradient = ctx.createLinearGradient(0, -ship.size/2, 0, ship.size/6);
+            cockpitGradient.addColorStop(0, 'rgba(52, 152, 219, 0.9)');
+            cockpitGradient.addColorStop(0.5, 'rgba(41, 128, 185, 0.7)');
+            cockpitGradient.addColorStop(1, 'rgba(52, 152, 219, 0.9)');
+            
+            ctx.fillStyle = cockpitGradient;
+            ctx.fill();
+            
+            ctx.strokeStyle = '#2c3e50';
+            ctx.lineWidth = 2;
+            ctx.stroke();
+            
+            const time = Date.now() * 0.01;
+            const flameHeight = Math.sin(time) * 5 + 15;
+            
+            ctx.beginPath();
+            ctx.moveTo(-ship.size/6, ship.size/2);
+            ctx.lineTo(ship.size/6, ship.size/2);
+            ctx.lineTo(ship.size/8, ship.size/2 + 5);
+            ctx.lineTo(-ship.size/8, ship.size/2 + 5);
+            ctx.closePath();
+            ctx.fillStyle = '#34495e';
+            ctx.fill();
+            ctx.strokeStyle = '#2c3e50';
+            ctx.lineWidth = 1;
+            ctx.stroke();
+            
+            for (let i = -1; i <= 1; i += 0.5) {
+                ctx.beginPath();
+                ctx.moveTo(i * ship.size/8, ship.size/2);
+                
+                ctx.bezierCurveTo(
+                    i * ship.size/10, ship.size/2 + flameHeight/2,
+                    i * ship.size/12, ship.size/2 + flameHeight,
+                    0, ship.size/2 + flameHeight * 1.2
+                );
+                
+                const flameGradient = ctx.createLinearGradient(
+                    0, ship.size/2,
+                    0, ship.size/2 + flameHeight * 1.2
+                );
+                flameGradient.addColorStop(0, 'rgba(52, 152, 219, 0.9)');
+                flameGradient.addColorStop(0.3, 'rgba(41, 128, 185, 0.6)');
+                flameGradient.addColorStop(1, 'rgba(52, 152, 219, 0)');
+                
+                ctx.fillStyle = flameGradient;
+                ctx.fill();
+            }
+            
+            ctx.restore();
+        }
+
+        function updateShipPosition() {
+            if (!isMobile) {
+                const moveSpeed = 5;
+                if (keys.left) ship.targetX -= moveSpeed;
+                if (keys.right) ship.targetX += moveSpeed;
+            }
+            
+            const deltaX = ship.targetX - ship.x;
+            ship.x += deltaX * 0.3;
+            ship.x = Math.max(ship.size/2, Math.min(canvas.width - ship.size/2, ship.x));
+        }
+
+        function updateGame() {
+            if (!gameStarted) return;
+
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            updateShipPosition();
+            
+            for (let i = bullets.length - 1; i >= 0; i--) {
+                bullets[i].update();
+                bullets[i].draw();
+                
+                if (bullets[i].y < -bullets[i].size) {
+                    bullets.splice(i, 1);
+                }
+            }
+            
+            for (let i = explosions.length - 1; i >= 0; i--) {
+                explosions[i].update();
+                explosions[i].draw();
+                
+                if (explosions[i].life <= 0) {
+                    explosions.splice(i, 1);
+                }
+            }
+            
+            for (let i = asteroids.length - 1; i >= 0; i--) {
+                asteroids[i].update();
+                asteroids[i].draw();
+                
+                if (checkCollision(asteroids[i])) {
+                    gameOver();
+                    return;
+                }
+                
+                if (asteroids[i].y > canvas.height + asteroids[i].size) {
+                    asteroids.splice(i, 1);
+                    score++;
+                    scoreElement.textContent = `Score: ${score}`;
+                }
+            }
+            
+            checkBulletCollisions();
+            
+            if (Math.random() < 0.03) {
+                asteroids.push(new Asteroid());
+            }
+            
+            drawShip();
+            requestAnimationFrame(updateGame);
+        }
+
+        function gameOver() {
+            gameStarted = false;
+            
+            if (engineGainNode) {
+                engineGainNode.gain.setValueAtTime(engineGainNode.gain.value, audioContext.currentTime);
+                engineGainNode.gain.exponentialRampToValueAtTime(0.0001, audioContext.currentTime + 0.5);
+            }
+            
+            if (isMobile) {
+                controlArea.style.display = 'none';
+            }
+            
+            const overlay = document.createElement('div');
+            overlay.className = 'game-overlay game-over';
+            
+            const content = document.createElement('div');
+            content.className = 'overlay-content';
+            
+            const title = document.createElement('h1');
+            title.className = 'overlay-title';
+            title.textContent = 'Game Over';
+            
+            const scoreText = document.createElement('div');
+            scoreText.className = 'overlay-score';
+            scoreText.textContent = `Final Score: ${score}`;
+            
+            const restartButton = document.createElement('button');
+            restartButton.className = 'overlay-button';
+            restartButton.textContent = 'Play Again';
+            
+            restartButton.onclick = () => {
+                document.body.removeChild(overlay);
+                startGame();
+            };
+            
+            content.appendChild(title);
+            content.appendChild(scoreText);
+            content.appendChild(restartButton);
+            overlay.appendChild(content);
+            document.body.appendChild(overlay);
+        }
+
+        function startGame() {
+            if (!audioContext) {
+                initAudio();
+            }
+            gameStarted = true;
+            score = 0;
+            asteroids = [];
+            bullets = [];
+            explosions = [];
+            scoreElement.textContent = 'Score: 0';
+            startScreen.style.display = 'none';
+            
+            setCanvasSize();
+            ship.x = canvas.width / 2;
+            ship.y = canvas.height - 100;
+            ship.targetX = ship.x;
+            
+            if (isMobile) {
+                controlArea.style.display = 'flex';
+                resetGestureHint();
+            }
+            
+            requestAnimationFrame(updateGame);
+        }
+
+        // Touch handling
+        let touchX = null;
+        let touchStartTime = 0;
+        let hasMoved = false;
+        const TAP_THRESHOLD = 200;
+        const MOVE_THRESHOLD = 10;
+
+        controlArea.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            if (!hasInteracted) {
+                const gestureHint = document.querySelector('.gesture-hint');
+                if (gestureHint) {
+                    gestureHint.style.display = 'none';
+                }
+                hasInteracted = true;
+            }
+            const touch = e.touches[0];
+            touchX = touch.clientX;
+            touchStartTime = Date.now();
+            hasMoved = false;
+        });
+
+        controlArea.addEventListener('touchmove', (e) => {
+            e.preventDefault();
+            if (!gameStarted || touchX === null) return;
+            
+            const touch = e.touches[0];
+            const deltaX = touch.clientX - touchX;
+            
+            if (Math.abs(deltaX) > MOVE_THRESHOLD) {
+                hasMoved = true;
+            }
+            
+            ship.targetX = Math.max(ship.size/2, Math.min(canvas.width - ship.size/2, ship.x + deltaX));
+            touchX = touch.clientX;
+        });
+
+        controlArea.addEventListener('touchend', (e) => {
+            e.preventDefault();
+            
+            const touchDuration = Date.now() - touchStartTime;
+            if (!hasMoved && touchDuration < TAP_THRESHOLD) {
+                shoot();
+            }
+            
+            touchX = null;
+        });
+
+        // Keyboard controls
+        const keys = {
+            left: false,
+            right: false
+        };
+
+        document.addEventListener('keydown', (e) => {
+            if (!gameStarted) return;
+            switch(e.key) {
+                case 'ArrowLeft':
+                    keys.left = true;
+                    e.preventDefault();
+                    break;
+                case 'ArrowRight':
+                    keys.right = true;
+                    e.preventDefault();
+                    break;
+                case ' ': // Spacebar
+                    shoot();
+                    e.preventDefault();
+                    break;
+            }
+        });
+
+        document.addEventListener('keyup', (e) => {
+            if (!gameStarted) return;
+            switch(e.key) {
+                case 'ArrowLeft':
+                    keys.left = false;
+                    e.preventDefault();
+                    break;
+                case 'ArrowRight':
+                    keys.right = false;
+                    e.preventDefault();
+                    break;
+            }
+        });
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const startButton = document.querySelector('.overlay-button');
+            startButton.addEventListener('click', startGame);
+        });
+    </script>
 </body>
 </html>
