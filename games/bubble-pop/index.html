@@ -149,6 +149,78 @@
         let lastBubble = 0;
         let speedMultiplier = 1.0; // New variable to control overall game speed
 
+		// Audio Context setup
+		let audioContext;
+		let engineSound;
+		let engineGainNode;
+
+		// Audio initialization function
+		async function initAudio() {
+			audioContext = new (window.AudioContext || window.webkitAudioContext)();
+			engineGainNode = audioContext.createGain();
+			engineGainNode.gain.value = 0.1;
+			engineGainNode.connect(audioContext.destination);
+			
+			engineSound = audioContext.createOscillator();
+			engineSound.type = 'sine';
+			engineSound.frequency.value = 100;
+			engineSound.connect(engineGainNode);
+			engineSound.start();
+		}
+		
+function playBubblePopSound() {
+    if (!audioContext) return;
+
+    const duration = 0.25; // Slightly longer to accommodate wet effects
+    const sampleRate = audioContext.sampleRate;
+    const bufferSize = sampleRate * duration;
+    const buffer = audioContext.createBuffer(1, bufferSize, sampleRate);
+    const data = buffer.getChannelData(0);
+
+    // Generate the sound
+    for (let i = 0; i < bufferSize; i++) {
+        const t = i / sampleRate; // Time in seconds
+        const pop = Math.sin(2 * Math.PI * 1200 * t) * Math.exp(-40 * t); // Elastic high-pitched burst
+        const splash = Math.random() * 0.6 * Math.exp(-70 * t); // Wet random noise with quick fade
+        const ripple = Math.sin(2 * Math.PI * 300 * t) * Math.exp(-20 * t); // Low-pitched ripple for liquid feel
+        data[i] = (pop + splash + ripple * 0.5) * (1 - i / bufferSize); // Blend and taper off
+    }
+
+    const source = audioContext.createBufferSource();
+    const gainNode = audioContext.createGain();
+    const lowPassFilter = audioContext.createBiquadFilter();
+    const reverb = audioContext.createConvolver();
+
+    // Create a more liquid-like reverb effect
+    const reverbDuration = 0.3; // Short, tight reverb
+    const reverbBuffer = audioContext.createBuffer(1, sampleRate * reverbDuration, sampleRate);
+    const reverbData = reverbBuffer.getChannelData(0);
+    for (let i = 0; i < reverbData.length; i++) {
+        reverbData[i] = (Math.random() * 2 - 1) * Math.exp(-6 * (i / sampleRate)); // Noisy, liquid-like tail
+    }
+    reverb.buffer = reverbBuffer;
+
+    // Configure audio nodes
+    lowPassFilter.type = 'lowpass';
+    lowPassFilter.frequency.value = 1800; // Slightly higher for clearer wet sounds
+    lowPassFilter.Q.value = 1.2; // Sharper resonance for clarity
+
+    source.buffer = buffer;
+    source.connect(lowPassFilter);
+    lowPassFilter.connect(reverb);
+    reverb.connect(gainNode);
+    gainNode.connect(audioContext.destination);
+
+    // Volume envelope
+    gainNode.gain.setValueAtTime(0.5, audioContext.currentTime); // Start moderately loud
+    gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + duration); // Quick fade
+
+    source.start();
+}
+
+
+
+
         function resizeCanvas() {
             canvas.width = gameContainer.clientWidth;
             canvas.height = gameContainer.clientHeight;
@@ -361,6 +433,7 @@
                     const bubble = bubbles[i];
                     if (bubble.contains(x, y) && bubble.active) {
                         bubble.pop();
+                        playBubblePopSound()
                         score += bubble.points;
                         scoreElement.textContent = `Score: ${score}`;
                         bubbles.splice(i, 1);
@@ -371,6 +444,9 @@
         }
 
         function startGame() {
+			if (!audioContext) {
+				initAudio();
+			}
             startScreen.style.display = 'none';
             gameActive = true;
             score = 0;

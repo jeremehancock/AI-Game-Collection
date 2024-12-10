@@ -228,283 +228,574 @@
             </div>
         </div>
         <script>
-            const canvas = document.getElementById("gameCanvas"),
-                controlArea = document.getElementById("controlArea"),
-                ctx = canvas.getContext("2d"),
-                setCanvasSize = () => {
-                    (canvas.width = Math.min(0.95 * window.innerWidth, 400)), (canvas.height = 0.6 * window.innerHeight);
-                };
-            setCanvasSize(), window.addEventListener("resize", setCanvasSize);
-            const ball = { x: 0, y: 0, dx: 4, dy: -4, radius: 8, minSpeed: 2, baseSpeed: 5, speedMultiplier: 1 },
-                paddle = { width: 80, height: 12, x: 0, y: 0 },
-                paddleMovement = { left: !1, right: !1, speed: 8 };
-            let score = 0,
-                lives = 3,
-                currentLevel = 1,
-                gameStarted = !1,
-                gameOver = !1,
-                lastFrameTime = 0,
-                hasInteracted = !1;
+            const canvas = document.getElementById("gameCanvas");
+            const controlArea = document.getElementById("controlArea");
+            const ctx = canvas.getContext("2d");
+            
+            // Audio Context setup
+			let audioContext;
+			let engineSound;
+			let engineGainNode;
+
+			// Audio initialization function
+			async function initAudio() {
+				audioContext = new (window.AudioContext || window.webkitAudioContext)();
+				engineGainNode = audioContext.createGain();
+				engineGainNode.gain.value = 0.1;
+				engineGainNode.connect(audioContext.destination);
+				
+				engineSound = audioContext.createOscillator();
+				engineSound.type = 'sine';
+				engineSound.frequency.value = 100;
+				engineSound.connect(engineGainNode);
+				engineSound.start();
+			}
+
+		function playExplosionSound() {
+			if (!audioContext) return;
+			
+			const bufferSize = audioContext.sampleRate * 0.5;
+			const buffer = audioContext.createBuffer(1, bufferSize, audioContext.sampleRate);
+			const data = buffer.getChannelData(0);
+			
+			for (let i = 0; i < bufferSize; i++) {
+				const baseNoise = Math.random() * 2 - 1;
+				const lowFreq = Math.sin(i * 0.01) * 0.5;
+				data[i] = (baseNoise * 0.7 + lowFreq * 0.3) * (1 - i / bufferSize);
+			}
+			
+			const source = audioContext.createBufferSource();
+			const gainNode = audioContext.createGain();
+			const lowPassFilter = audioContext.createBiquadFilter();
+			
+			lowPassFilter.type = 'lowpass';
+			lowPassFilter.frequency.value = 1000;
+			lowPassFilter.Q.value = 0.5;
+			
+			source.buffer = buffer;
+			source.connect(lowPassFilter);
+			lowPassFilter.connect(gainNode);
+			gainNode.connect(audioContext.destination);
+			
+			gainNode.gain.setValueAtTime(0.8, audioContext.currentTime);
+			gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.7);
+			
+			source.start();
+		}
+
+            const setCanvasSize = () => {
+                canvas.width = Math.min(0.95 * window.innerWidth, 400);
+                canvas.height = 0.6 * window.innerHeight;
+            };
+            setCanvasSize();
+            window.addEventListener("resize", setCanvasSize);
+
+            // Game objects
+            const ball = {
+                x: 0,
+                y: 0,
+                dx: 4,
+                dy: -4,
+                radius: 8,
+                minSpeed: 2,
+                baseSpeed: 5,
+                speedMultiplier: 1
+            };
+
+            const paddle = {
+                width: 80,
+                height: 12,
+                x: 0,
+                y: 0
+            };
+
+            const paddleMovement = {
+                left: false,
+                right: false,
+                speed: 8
+            };
+
+            // Game state
+            let score = 0;
+            let lives = 3;
+            let currentLevel = 1;
+            let gameStarted = false;
+            let gameOver = false;
+            let lastFrameTime = 0;
+            let hasInteracted = false;
+            let particles = [];
+
             const gestureHint = document.querySelector(".gesture-hint");
-            function generateRandomColor() {
-                return (
-                    "#" +
-                    Math.floor(16777215 * Math.random())
-                        .toString(16)
-                        .padStart(6, "0")
-                );
-            }
-            const levels = [
-                    {
-                        pattern: [
-                            [1, 1, 1, 1, 1, 1],
-                            [1, 1, 1, 1, 1, 1],
-                            [1, 1, 1, 1, 1, 1],
-                        ],
-                        color: "#FF0000",
-                    },
-                    {
-                        pattern: [
-                            [0, 0, 1, 1, 0, 0],
-                            [0, 1, 1, 1, 1, 0],
-                            [1, 1, 1, 1, 1, 1],
-                        ],
-                        color: "#00FF00",
-                    },
-                    {
-                        pattern: [
-                            [1, 0, 1, 0, 1, 0],
-                            [0, 1, 0, 1, 0, 1],
-                            [1, 0, 1, 0, 1, 0],
-                            [0, 1, 0, 1, 0, 1],
-                        ],
-                        color: "#0000FF",
-                    },
-                    {
-                        pattern: [
-                            [0, 0, 1, 1, 0, 0],
-                            [0, 1, 0, 0, 1, 0],
-                            [1, 0, 0, 0, 0, 1],
-                            [0, 1, 0, 0, 1, 0],
-                            [0, 0, 1, 1, 0, 0],
-                        ],
-                        color: "#FF00FF",
-                    },
-                    {
-                        pattern: [
-                            [1, 0, 0, 0, 0, 1],
-                            [0, 1, 0, 0, 1, 0],
-                            [0, 0, 1, 1, 0, 0],
-                            [0, 0, 1, 1, 0, 0],
-                            [0, 1, 0, 0, 1, 0],
-                            [1, 0, 0, 0, 0, 1],
-                        ],
-                        color: "#FFFF00",
-                    },
-                ],
-                basePatterns = [
-                    () =>
-                        Array(6)
-                            .fill()
-                            .map((e, t) => (t % 2 == 0 ? [1, 1, 1, 1, 1, 1] : [0, 0, 0, 0, 0, 0])),
-                    () =>
-                        Array(6)
-                            .fill()
-                            .map((e, t) =>
-                                Array(6)
-                                    .fill()
-                                    .map((e, l) => (t + l) % 2)
-                            ),
-                    () => {
-                        const e = Array(4)
-                            .fill()
-                            .map(() =>
-                                Array(6)
-                                    .fill()
-                                    .map(() => (Math.random() > 0.5 ? 1 : 0))
-                            );
-                        return e.flat().reduce((e, t) => e + t, 0) < 0.3 * e.flat().length ? basePatterns[0]() : e;
-                    },
-                    () => [
-                        [1, 1, 1, 1, 1, 1],
-                        [1, 0, 0, 0, 0, 1],
-                        [1, 0, 1, 1, 0, 1],
-                        [1, 0, 0, 0, 0, 1],
-                        [1, 1, 1, 1, 1, 1],
-                    ],
-                    () => [
-                        [1, 0, 0, 0, 1, 1],
-                        [0, 1, 0, 1, 1, 0],
-                        [0, 0, 1, 1, 0, 0],
-                        [0, 1, 1, 0, 1, 0],
-                        [1, 1, 0, 0, 0, 1],
-                    ],
-                ];
-            for (let e = levels.length + 1; e <= 103; e++) {
-                const t = basePatterns[Math.floor(Math.random() * basePatterns.length)](),
-                    l = t.map((e) => e.map((e) => (Math.random() > 0.8 ? (1 === e ? 0 : 1) : e)));
-                levels.push({ pattern: l, color: generateRandomColor() });
-            }
-            let bricks = [];
-            function createBricks() {
-                const e = levels[currentLevel - 1].pattern,
-                    t = e[0].length,
-                    l = 4,
-                    n = Math.min(75, (canvas.width - l * (t + 1)) / t),
-                    a = 20,
-                    r = n * t + l * (t - 1),
-                    o = (canvas.width - r) / 2;
-                bricks = [];
-                for (let t = 0; t < e.length; t++) for (let r = 0; r < e[t].length; r++) 1 === e[t][r] && bricks.push({ x: o + r * (n + l), y: 30 + t * (a + l), width: n, height: a, status: 1 });
-            }
-            function drawBall() {
-                ctx.beginPath(), ctx.arc(ball.x, ball.y, ball.radius, 0, 2 * Math.PI), (ctx.fillStyle = "#FFFFFF"), ctx.fill(), ctx.closePath();
-            }
-            function drawPaddle() {
-                ctx.beginPath(), ctx.rect(paddle.x, paddle.y, paddle.width, paddle.height), (ctx.fillStyle = "#0095DD"), ctx.fill(), ctx.closePath();
-            }
-            function drawBricks() {
-                bricks.forEach((e) => {
-                    1 === e.status && (ctx.beginPath(), ctx.rect(e.x, e.y, e.width, e.height), (ctx.fillStyle = levels[currentLevel - 1].color), ctx.fill(), ctx.closePath());
-                });
-            }
-            function drawLifeBall(e) {
-                const t = e.getContext("2d");
-                t.clearRect(0, 0, e.width, e.height), t.beginPath(), t.arc(e.width / 2, e.height / 2, 6, 0, 2 * Math.PI), (t.fillStyle = "#FFFFFF"), t.fill(), t.closePath();
-            }
-            function updateLives() {
-                const e = document.getElementById("livesDisplay");
-                e.innerHTML = "";
-                for (let t = 0; t < lives; t++) {
-                    const t = document.createElement("canvas");
-                    (t.className = "life-ball"), (t.width = 16), (t.height = 16), drawLifeBall(t), e.appendChild(t);
+
+            // Particle class for brick breaking animation
+            class Particle {
+                constructor(x, y, color) {
+                    this.x = x;
+                    this.y = y;
+                    this.color = color;
+                    this.size = Math.random() * 3 + 2;
+                    this.speedX = (Math.random() - 0.5) * 8;
+                    this.speedY = (Math.random() - 0.5) * 8;
+                    this.gravity = 0.1;
+                    this.life = 1.0;
+                    this.decay = Math.random() * 0.02 + 0.02;
+                }
+
+                update() {
+                    this.x += this.speedX;
+                    this.y += this.speedY;
+                    this.speedY += this.gravity;
+                    this.life -= this.decay;
+                }
+
+                draw(ctx) {
+                    ctx.beginPath();
+                    ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                    ctx.fillStyle = `rgba(${this.getRGBComponents()}, ${this.life})`;
+                    ctx.fill();
+                    ctx.closePath();
+                }
+
+                getRGBComponents() {
+                    const hex = this.color.replace('#', '');
+                    const r = parseInt(hex.substr(0, 2), 16);
+                    const g = parseInt(hex.substr(2, 2), 16);
+                    const b = parseInt(hex.substr(4, 2), 16);
+                    return `${r}, ${g}, ${b}`;
                 }
             }
+
+            function generateRandomColor() {
+                return "#" + Math.floor(Math.random() * 16777215).toString(16).padStart(6, "0");
+            }
+
+            // Level definitions
+            const levels = [
+                {
+                    pattern: [
+                        [1, 1, 1, 1, 1, 1],
+                        [1, 1, 1, 1, 1, 1],
+                        [1, 1, 1, 1, 1, 1]
+                    ],
+                    color: "#FF0000"
+                },
+                {
+                    pattern: [
+                        [0, 0, 1, 1, 0, 0],
+                        [0, 1, 1, 1, 1, 0],
+                        [1, 1, 1, 1, 1, 1]
+                    ],
+                    color: "#00FF00"
+                },
+                {
+                    pattern: [
+                        [1, 0, 1, 0, 1, 0],
+                        [0, 1, 0, 1, 0, 1],
+                        [1, 0, 1, 0, 1, 0],
+                        [0, 1, 0, 1, 0, 1]
+                    ],
+                    color: "#0000FF"
+                },
+                {
+                    pattern: [
+                        [0, 0, 1, 1, 0, 0],
+                        [0, 1, 0, 0, 1, 0],
+                        [1, 0, 0, 0, 0, 1],
+                        [0, 1, 0, 0, 1, 0],
+                        [0, 0, 1, 1, 0, 0]
+                    ],
+                    color: "#FF00FF"
+                },
+                {
+                    pattern: [
+                        [1, 0, 0, 0, 0, 1],
+                        [0, 1, 0, 0, 1, 0],
+                        [0, 0, 1, 1, 0, 0],
+                        [0, 0, 1, 1, 0, 0],
+                        [0, 1, 0, 0, 1, 0],
+                        [1, 0, 0, 0, 0, 1]
+                    ],
+                    color: "#FFFF00"
+                }
+            ];
+
+            const basePatterns = [
+                () => Array(6).fill().map((e, t) => (t % 2 === 0 ? [1, 1, 1, 1, 1, 1] : [0, 0, 0, 0, 0, 0])),
+                () => Array(6).fill().map((e, t) => Array(6).fill().map((e, l) => (t + l) % 2)),
+                () => {
+                    const e = Array(4).fill().map(() => Array(6).fill().map(() => (Math.random() > 0.5 ? 1 : 0)));
+                    return e.flat().reduce((e, t) => e + t, 0) < 0.3 * e.flat().length ? basePatterns[0]() : e;
+                },
+                () => [
+                    [1, 1, 1, 1, 1, 1],
+                    [1, 0, 0, 0, 0, 1],
+                    [1, 0, 1, 1, 0, 1],
+                    [1, 0, 0, 0, 0, 1],
+                    [1, 1, 1, 1, 1, 1]
+                ],
+                () => [
+                    [1, 0, 0, 0, 1, 1],
+                    [0, 1, 0, 1, 1, 0],
+                    [0, 0, 1, 1, 0, 0],
+                    [0, 1, 1, 0, 1, 0],
+                    [1, 1, 0, 0, 0, 1]
+                ]
+            ];
+
+            // Generate additional levels
+            for (let e = levels.length + 1; e <= 103; e++) {
+                const pattern = basePatterns[Math.floor(Math.random() * basePatterns.length)]();
+                const randomizedPattern = pattern.map(row => 
+                    row.map(cell => Math.random() > 0.8 ? (cell === 1 ? 0 : 1) : cell)
+                );
+                levels.push({
+                    pattern: randomizedPattern,
+                    color: generateRandomColor()
+                });
+            }
+
+            let bricks = [];
+
+            function createBricks() {
+                const pattern = levels[currentLevel - 1].pattern;
+                const brickColumns = pattern[0].length;
+                const padding = 4;
+                const brickWidth = Math.min(75, (canvas.width - padding * (brickColumns + 1)) / brickColumns);
+                const brickHeight = 20;
+                const totalWidth = brickWidth * brickColumns + padding * (brickColumns - 1);
+                const offsetX = (canvas.width - totalWidth) / 2;
+
+                bricks = [];
+                for (let row = 0; row < pattern.length; row++) {
+                    for (let col = 0; col < pattern[row].length; col++) {
+                        if (pattern[row][col] === 1) {
+                            bricks.push({
+                                x: offsetX + col * (brickWidth + padding),
+                                y: 30 + row * (brickHeight + padding),
+                                width: brickWidth,
+                                height: brickHeight,
+                                status: 1
+                            });
+                        }
+                    }
+                }
+            }
+
+            function drawBall() {
+                ctx.beginPath();
+                ctx.arc(ball.x, ball.y, ball.radius, 0, Math.PI * 2);
+                ctx.fillStyle = "#FFFFFF";
+                ctx.fill();
+                ctx.closePath();
+            }
+
+            function drawPaddle() {
+                ctx.beginPath();
+                ctx.rect(paddle.x, paddle.y, paddle.width, paddle.height);
+                ctx.fillStyle = "#0095DD";
+                ctx.fill();
+                ctx.closePath();
+            }
+
+            function drawBricks() {
+                bricks.forEach(brick => {
+                    if (brick.status === 1) {
+                        ctx.beginPath();
+                        ctx.rect(brick.x, brick.y, brick.width, brick.height);
+                        ctx.fillStyle = levels[currentLevel - 1].color;
+                        ctx.fill();
+                        ctx.closePath();
+                    }
+                });
+            }
+
+            function drawLifeBall(canvas) {
+                const ctx = canvas.getContext("2d");
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                ctx.beginPath();
+                ctx.arc(canvas.width / 2, canvas.height / 2, 6, 0, Math.PI * 2);
+                ctx.fillStyle = "#FFFFFF";
+                ctx.fill();
+                ctx.closePath();
+            }
+
+            function updateLives() {
+                const livesDisplay = document.getElementById("livesDisplay");
+                livesDisplay.innerHTML = "";
+                for (let i = 0; i < lives; i++) {
+                    const canvas = document.createElement("canvas");
+                    canvas.className = "life-ball";
+                    canvas.width = 16;
+                    canvas.height = 16;
+                    drawLifeBall(canvas);
+                    livesDisplay.appendChild(canvas);
+                }
+            }
+
             function updateScore() {
                 document.getElementById("scoreDisplay").textContent = score;
             }
+
             function updateLevel() {
                 document.getElementById("levelDisplay").textContent = currentLevel;
             }
+
             function collisionDetection() {
-                for (let e = 0; e < bricks.length; e++) {
-                    let t = bricks[e];
-                    if (1 === t.status && ball.x + ball.radius > t.x && ball.x - ball.radius < t.x + t.width && ball.y + ball.radius > t.y && ball.y - ball.radius < t.y + t.height) {
-                        Math.abs(ball.dx) < ball.minSpeed && (ball.dx = ball.dx < 0 ? -ball.minSpeed : ball.minSpeed), (ball.dy = -ball.dy), (t.status = 0), (score += 10), updateScore();
-                        if (bricks.every((e) => 0 === e.status)) {
-                            if (currentLevel < levels.length) return currentLevel++, (ball.speedMultiplier = 1 + 0.1 * (currentLevel - 1)), updateLevel(), (lives = 3), updateLives(), createBricks(), void resetBall();
-                            return void showGameOver(!0);
+                for (let i = 0; i < bricks.length; i++) {
+                    let brick = bricks[i];
+                    if (brick.status === 1 && 
+                        ball.x + ball.radius > brick.x && 
+                        ball.x - ball.radius < brick.x + brick.width && 
+                        ball.y + ball.radius > brick.y && 
+                        ball.y - ball.radius < brick.y + brick.height) {
+                        
+                        // Create particles at the point of impact
+                        const brickColor = levels[currentLevel - 1].color;
+                        const particleCount = 15;
+                        for (let j = 0; j < particleCount; j++) {
+                            particles.push(new Particle(
+                                ball.x,
+                                ball.y,
+                                brickColor
+                            ));
                         }
+
+                        if (Math.abs(ball.dx) < ball.minSpeed) {
+                            ball.dx = ball.dx < 0 ? -ball.minSpeed : ball.minSpeed;
+                        }
+                        ball.dy = -ball.dy;
+                        brick.status = 0;
+                        score += 10;
+                        updateScore();
+
+                        if (bricks.every(b => b.status === 0)) {
+                            if (currentLevel < levels.length) {
+                                currentLevel++;
+                                ball.speedMultiplier = 1 + (currentLevel - 1) * 0.1;
+                                updateLevel();
+                                lives = 3;
+                                updateLives();
+                                createBricks();
+                                resetBall();
+                                return;
+                            }
+                            showGameOver(true);
+                            return;
+                        }
+                        playExplosionSound();
                         break;
                     }
                 }
-                ball.dy > 0 &&
-                    ball.y + ball.radius >= paddle.y &&
-                    ball.y - ball.radius <= paddle.y + paddle.height &&
-                    ball.x >= paddle.x &&
-                    ball.x <= paddle.x + paddle.width &&
-                    ((ball.dx = ball.baseSpeed * ball.speedMultiplier * Math.sin((((ball.x - (paddle.x + paddle.width / 2)) / (paddle.width / 2)) * Math.PI) / 3)),
-                    (ball.dy = -ball.baseSpeed * ball.speedMultiplier * Math.cos((((ball.x - (paddle.x + paddle.width / 2)) / (paddle.width / 2)) * Math.PI) / 3)),
-                    Math.abs(ball.dx) < ball.minSpeed && (ball.dx = ball.dx < 0 ? -ball.minSpeed : ball.minSpeed),
-                    (ball.y = paddle.y - ball.radius));
-            }
-            function resetBall() {
-                (ball.x = canvas.width / 2), (ball.y = canvas.height - 30);
-                const e = (Math.random() * Math.PI) / 3 - Math.PI / 6;
-                (ball.dx = ball.baseSpeed * ball.speedMultiplier * Math.sin(e)), (ball.dy = -ball.baseSpeed * ball.speedMultiplier * Math.cos(e));
-            }
-            document.addEventListener("keydown", (e) => {
-                "ArrowLeft" === e.key ? (paddleMovement.left = !0) : "ArrowRight" === e.key && (paddleMovement.right = !0);
-            }),
-                document.addEventListener("keyup", (e) => {
-                    "ArrowLeft" === e.key ? (paddleMovement.left = !1) : "ArrowRight" === e.key && (paddleMovement.right = !1);
-                });
-            let touchX = null;
-            controlArea.addEventListener("touchstart", (e) => {
-                hasInteracted || (gestureHint && ((hasInteracted = !0), (gestureHint.style.display = "none")));
-                const t = e.touches[0];
-                touchX = t.clientX;
-            }),
-                controlArea.addEventListener("touchmove", (e) => {
-                    e.preventDefault();
-                    const t = e.touches[0];
-                    if (null !== touchX) {
-                        const e = t.clientX - touchX;
-                        (paddle.x += e), paddle.x < 0 && (paddle.x = 0), paddle.x + paddle.width > canvas.width && (paddle.x = canvas.width - paddle.width), (touchX = t.clientX);
+
+                if (ball.dy > 0 && 
+                    ball.y + ball.radius >= paddle.y && 
+                    ball.y - ball.radius <= paddle.y + paddle.height && 
+                    ball.x >= paddle.x && 
+                    ball.x <= paddle.x + paddle.width) {
+                    
+                    ball.dx = ball.baseSpeed * ball.speedMultiplier * 
+                        Math.sin(((ball.x - (paddle.x + paddle.width/2))/(paddle.width/2)) * Math.PI/3);
+                    ball.dy = -ball.baseSpeed * ball.speedMultiplier * 
+                        Math.cos(((ball.x - (paddle.x + paddle.width/2))/(paddle.width/2)) * Math.PI/3);
+                    
+                    if (Math.abs(ball.dx) < ball.minSpeed) {
+                        ball.dx = ball.dx < 0 ? -ball.minSpeed : ball.minSpeed;
                     }
-                }),
-                controlArea.addEventListener("touchend", () => {
-                    touchX = null;
-                });
+                    ball.y = paddle.y - ball.radius;
+                }
+            }
+
+            function resetBall() {
+                ball.x = canvas.width / 2;
+                ball.y = canvas.height - 30;
+                const angle = Math.random() * Math.PI / 3 - Math.PI / 6;
+                ball.dx = ball.baseSpeed * ball.speedMultiplier * Math.sin(angle);
+                ball.dy = -ball.baseSpeed * ball.speedMultiplier * Math.cos(angle);
+            }
+
+            // Event Listeners
+            document.addEventListener("keydown", e => {
+                if (e.key === "ArrowLeft") {
+                    paddleMovement.left = true;
+                } else if (e.key === "ArrowRight") {
+                    paddleMovement.right = true;
+                }
+            });
+
+            document.addEventListener("keyup", e => {
+                if (e.key === "ArrowLeft") {
+                    paddleMovement.left = false;
+                } else if (e.key === "ArrowRight") {
+                    paddleMovement.right = false;
+                }
+            });
+
+            let touchX = null;
+            controlArea.addEventListener("touchstart", e => {
+                if (!hasInteracted) {
+                    if (gestureHint) {
+                        hasInteracted = true;
+                        gestureHint.style.display = "none";
+                    }
+                }
+                const touch = e.touches[0];
+                touchX = touch.clientX;
+            });
+
+            controlArea.addEventListener("touchmove", e => {
+                e.preventDefault();
+                const touch = e.touches[0];
+                if (touchX !== null) {
+                    const deltaX = touch.clientX - touchX;
+                    paddle.x += deltaX;
+                    if (paddle.x < 0) paddle.x = 0;
+                    if (paddle.x + paddle.width > canvas.width) {
+                        paddle.x = canvas.width - paddle.width;
+                    }
+                    touchX = touch.clientX;
+                }
+            });
+
+            controlArea.addEventListener("touchend", () => {
+                touchX = null;
+            });
+
             function showStartOverlay() {
-                const e = document.createElement("div");
-                e.className = "overlay";
-                const t = document.createElement("h1");
-                t.textContent = "BREAKOUT";
-                const l = document.createElement("button");
-                (l.className = "button"),
-                    (l.textContent = "Play Now"),
-                    (l.onclick = () => {
-                        e.remove(), (gameStarted = !0), (hasInteracted = !1), gestureHint && (gestureHint.style.display = "flex"), createBricks(), draw();
-                    }),
-                    e.appendChild(t),
-                    e.appendChild(l),
-                    document.body.appendChild(e);
-            }
-            function showGameOver(e = !1) {
-                gameOver = !0;
-                const t = document.createElement("div");
-                t.className = "overlay";
-                const l = document.createElement("h1");
-                l.textContent = e ? "You Won!" : "Game Over";
-                const n = document.createElement("div");
-                (n.className = "score"), (n.textContent = `Final Score: ${score}`);
-                const a = document.createElement("button");
-                (a.className = "button"),
-                    (a.textContent = "Play Again"),
-                    (a.onclick = () => {
-                        t.remove(), resetGame(), (gameStarted = !0), (gameOver = !1), draw();
-                    }),
-                    t.appendChild(l),
-                    t.appendChild(n),
-                    t.appendChild(a),
-                    document.body.appendChild(t);
-            }
-            function resetGame() {
-                (score = 0),
-                    (lives = 3),
-                    (currentLevel = 1),
-                    (ball.speedMultiplier = 1),
-                    updateScore(),
-                    updateLevel(),
-                    updateLives(),
-                    (paddle.y = canvas.height - paddle.height - 10),
-                    (paddle.x = (canvas.width - paddle.width) / 2),
-                    resetBall(),
+            if (!audioContext) {
+				initAudio();
+			}
+                const overlay = document.createElement("div");
+                overlay.className = "overlay";
+                const title = document.createElement("h1");
+                title.textContent = "BREAKOUT";
+                const button = document.createElement("button");
+                button.className = "button";
+                button.textContent = "Play Now";
+                button.onclick = () => {
+                    overlay.remove();
+                    gameStarted = true;
+                    hasInteracted = false;
+                    if (gestureHint) {
+                        gestureHint.style.display = "flex";
+                    }
                     createBricks();
+                    draw();
+                };
+                overlay.appendChild(title);
+                overlay.appendChild(button);
+                document.body.appendChild(overlay);
             }
-            function draw(e) {
+
+            function showGameOver(won = false) {
+                gameOver = true;
+                const overlay = document.createElement("div");
+                overlay.className = "overlay";
+                const title = document.createElement("h1");
+                title.textContent = won ? "You Won!" : "Game Over";
+                const scoreDiv = document.createElement("div");
+                scoreDiv.className = "score";
+                scoreDiv.textContent = `Final Score: ${score}`;
+                const button = document.createElement("button");
+                button.className = "button";
+                button.textContent = "Play Again";
+                button.onclick = () => {
+                    overlay.remove();
+                    resetGame();
+                    gameStarted = true;
+                    gameOver = false;
+                    draw();
+                };
+                overlay.appendChild(title);
+                overlay.appendChild(scoreDiv);
+                overlay.appendChild(button);
+                document.body.appendChild(overlay);
+            }
+
+            function resetGame() {
+                score = 0;
+                lives = 3;
+                currentLevel = 1;
+                ball.speedMultiplier = 1;
+                particles = [];
+                updateScore();
+                updateLevel();
+                updateLives();
+                paddle.y = canvas.height - paddle.height - 10;
+                paddle.x = (canvas.width - paddle.width) / 2;
+                resetBall();
+                createBricks();
+            }
+
+            function draw(timestamp) {
                 if (!gameStarted || gameOver) return;
-                if (lastFrameTime && e - lastFrameTime < 16) return void requestAnimationFrame(draw);
-                (lastFrameTime = e),
-                    ctx.clearRect(0, 0, canvas.width, canvas.height),
-                    drawBricks(),
-                    drawBall(),
-                    drawPaddle(),
-                    (ball.x + ball.radius > canvas.width || ball.x - ball.radius < 0) && ((ball.dx = -ball.dx * (0.95 + Math.random() * 0.1)), Math.abs(ball.dx) < ball.minSpeed && (ball.dx = ball.dx < 0 ? -ball.minSpeed : ball.minSpeed)),
-                    ball.y - ball.radius < 0 && (ball.dy = -ball.dy),
-                    ball.y + ball.radius > canvas.height && (lives--, updateLives(), lives <= 0 ? showGameOver(!1) : resetBall()),
-                    collisionDetection(),
-                    paddleMovement.left && (paddle.x -= paddleMovement.speed),
-                    paddleMovement.right && (paddle.x += paddleMovement.speed),
-                    paddle.x < 0 && (paddle.x = 0),
-                    paddle.x + paddle.width > canvas.width && (paddle.x = canvas.width - paddle.width),
-                    (ball.x += ball.dx),
-                    (ball.y += ball.dy),
+                
+                if (lastFrameTime && timestamp - lastFrameTime < 16) {
                     requestAnimationFrame(draw);
+                    return;
+                }
+                
+                lastFrameTime = timestamp;
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                
+                drawBricks();
+                drawBall();
+                drawPaddle();
+                
+                // Update and draw particles
+                for (let i = particles.length - 1; i >= 0; i--) {
+                    particles[i].update();
+                    particles[i].draw(ctx);
+                    
+                    if (particles[i].life <= 0) {
+                        particles.splice(i, 1);
+                    }
+                }
+
+                if (ball.x + ball.radius > canvas.width || ball.x - ball.radius < 0) {
+                    ball.dx = -ball.dx * (0.95 + Math.random() * 0.1);
+                    if (Math.abs(ball.dx) < ball.minSpeed) {
+                        ball.dx = ball.dx < 0 ? -ball.minSpeed : ball.minSpeed;
+                    }
+                }
+                
+                if (ball.y - ball.radius < 0) {
+                    ball.dy = -ball.dy;
+                }
+                
+                if (ball.y + ball.radius > canvas.height) {
+                    lives--;
+                    updateLives();
+                    if (lives <= 0) {
+                        showGameOver(false);
+                    } else {
+                        resetBall();
+                    }
+                }
+                
+                collisionDetection();
+                
+                if (paddleMovement.left) {
+                    paddle.x -= paddleMovement.speed;
+                }
+                if (paddleMovement.right) {
+                    paddle.x += paddleMovement.speed;
+                }
+                
+                if (paddle.x < 0) {
+                    paddle.x = 0;
+                }
+                if (paddle.x + paddle.width > canvas.width) {
+                    paddle.x = canvas.width - paddle.width;
+                }
+                
+                ball.x += ball.dx;
+                ball.y += ball.dy;
+                
+                requestAnimationFrame(draw);
             }
-            resetGame(), showStartOverlay();
+
+            resetGame();
+            showStartOverlay();
         </script>
     </body>
 </html>
-
