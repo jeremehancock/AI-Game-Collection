@@ -330,6 +330,99 @@
 		        transform: scale(0.9) translateY(-2px);
 		    }
 		}
+        .install-button {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: rgba(255, 255, 255, 0.1);
+            color: #fff;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 500;
+            display: none;
+            z-index: 1000;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+        }
+
+        .install-button:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+        }
+
+        /* iOS install prompt */
+        .ios-install-prompt {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: linear-gradient(135deg, rgba(26, 26, 46, 0.95) 0%, rgba(22, 33, 62, 0.95) 100%);
+            color: #fff;
+            padding: 20px;
+            border-radius: 12px;
+            text-align: left;
+            display: none;
+            z-index: 1000;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            max-width: 300px;
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+        }
+
+        .ios-install-prompt p {
+            margin: 0 0 15px 0;
+            color: #fff;
+        }
+
+        .ios-install-steps {
+            margin: 0;
+            padding-left: 20px;
+            color: #a0a0a0;
+        }
+
+        .ios-install-steps li {
+            margin-bottom: 8px;
+        }
+
+        .close-prompt {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: none;
+            border: none;
+            color: #fff;
+            font-size: 20px;
+            cursor: pointer;
+            opacity: 0.7;
+            transition: opacity 0.3s ease;
+        }
+
+        .close-prompt:hover {
+            opacity: 1;
+        }
+
+        /* When in game view, adjust install prompt positions */
+        .game-view .install-button,
+        .game-view .ios-install-prompt {
+            display: none !important;
+        }
+
+        @media (max-width: 768px) {
+            .install-button,
+            .ios-install-prompt {
+                top: auto;
+                bottom: 30px;
+                right: 50%;
+                transform: translateX(50%);
+            }
+            
+            .install-button:hover {
+                transform: translateX(50%) translateY(-2px);
+            }
+        }
 	</style>
 </head>
 <body>
@@ -418,8 +511,101 @@
         </svg>
     </button>
 
+    <button id="installButton" class="install-button">
+        Install App
+    </button>
+
+    <!-- iOS Install Prompt -->
+    <div id="iosInstallPrompt" class="ios-install-prompt">
+        <button class="close-prompt" onclick="closeIOSPrompt()">&times;</button>
+        <p>Install this web app on your iPhone:</p>
+        <ol class="ios-install-steps">
+            <li>Tap the Share button</li>
+            <li>Scroll down and tap "Add to Home Screen"</li>
+            <li>Tap "Add" to install</li>
+        </ol>
+    </div>
     <script>
     
+    
+        let deferredPrompt;
+        const installButton = document.getElementById('installButton');
+        const iosInstallPrompt = document.getElementById('iosInstallPrompt');
+
+        // Handle install prompt
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            installButton.style.display = 'block';
+        });
+
+        // Handle install button click
+        installButton.addEventListener('click', async () => {
+            if (deferredPrompt) {
+                deferredPrompt.prompt();
+                const { outcome } = await deferredPrompt.userChoice;
+                deferredPrompt = null;
+                installButton.style.display = 'none';
+            }
+        });
+
+        // Check if it's iOS
+        function isIOS() {
+            return /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+        }
+
+        // Show iOS install prompt
+        function showIOSInstall() {
+            if (isIOS() && !navigator.standalone) {
+                iosInstallPrompt.style.display = 'block';
+                installButton.style.display = 'none';
+            }
+        }
+
+        // Close iOS prompt
+        function closeIOSPrompt() {
+            iosInstallPrompt.style.display = 'none';
+        }
+
+        // Modify loadGame to handle install button visibility
+        function loadGame(gamePath) {
+            const container = document.getElementById('gameContainer');
+            const iframe = document.getElementById('gameFrame');
+            const backButton = document.getElementById('backButton');
+            
+            iframe.src = gamePath;
+            container.style.display = 'block';
+            backButton.style.display = 'block';
+            document.body.style.overflow = 'hidden';
+            document.body.classList.add('game-view');
+        }
+
+        // Modify goBack to handle install button visibility
+        function goBack() {
+            const container = document.getElementById('gameContainer');
+            const iframe = document.getElementById('gameFrame');
+            const backButton = document.getElementById('backButton');
+            
+            iframe.src = '';
+            container.style.display = 'none';
+            backButton.style.display = 'none';
+            document.body.style.overflow = 'auto';
+            document.body.classList.remove('game-view');
+            
+            // Show appropriate install button when returning to main page
+            if (isIOS() && !navigator.standalone) {
+                showIOSInstall();
+            } else if (deferredPrompt) {
+                installButton.style.display = 'block';
+            }
+        }
+
+        // Track installation
+        window.addEventListener('appinstalled', (evt) => {
+            installButton.style.display = 'none';
+            iosInstallPrompt.style.display = 'none';
+        });
+        
          // Function to get URL parameters
         function getUrlParameter(name) {
             name = name.replace(/[\[]/, '\\[').replace(/[\]]/, '\\]');
@@ -880,11 +1066,16 @@ m489 -117 c31 -26 31 -78 -1 -104 -22 -18 -39 -19 -226 -16 -220 3 -226 5
             const container = document.getElementById('gameContainer');
             const iframe = document.getElementById('gameFrame');
             const backButton = document.getElementById('backButton');
+            const installButton = document.getElementById('installButton');
+            const iosInstallPrompt = document.getElementById('iosInstallPrompt');
             
             iframe.src = gamePath;
             container.style.display = 'block';
             backButton.style.display = 'block';
             document.body.style.overflow = 'hidden';
+            // Hide install buttons when navigating to an app
+            if (installButton) installButton.style.display = 'none';
+            if (iosInstallPrompt) iosInstallPrompt.style.display = 'none';
         }
 
         // Function to go back to game selection
@@ -892,18 +1083,31 @@ m489 -117 c31 -26 31 -78 -1 -104 -22 -18 -39 -19 -226 -16 -220 3 -226 5
             const container = document.getElementById('gameContainer');
             const iframe = document.getElementById('gameFrame');
             const backButton = document.getElementById('backButton');
-            
+            const installButton = document.getElementById('installButton');
+            const iosInstallPrompt = document.getElementById('iosInstallPrompt');
             iframe.src = '';
             container.style.display = 'none';
             backButton.style.display = 'none';
             document.body.style.overflow = 'auto';
+            
+            // Show appropriate install button when returning to main page
+            if (isIOS() && !navigator.standalone) {
+                iosInstallPrompt.style.display = 'block';
+            } else if (deferredPrompt) {
+                installButton.style.display = 'block';
+            }
         }
-
+        
         // Initialize the page
         document.addEventListener('DOMContentLoaded', () => {
             createGameCards();
             document.getElementById('backButton').addEventListener('click', goBack);
-            handleGooglePlayButton(); // Handle Google Play button visibility
+            handleGooglePlayButton();
+            
+            // Check if it's iOS and show appropriate prompt
+            if (isIOS()) {
+                showIOSInstall();
+            }
         });
         
     if ('serviceWorker' in navigator) {
