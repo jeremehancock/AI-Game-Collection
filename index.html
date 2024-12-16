@@ -674,11 +674,11 @@
 			const isStandalone = window.matchMedia('(display-mode: standalone)').matches || 
                         document.referrer.includes('android-app://');
 
-			if ((isAndroid && isFullscreen) || modeParam === 'app') {
+			if ((isAndroid && isFullscreen) || modeParam === 'app' || isIOS()) {
 				googlePlayButton.style.display = 'none'; // Hide in Android PWA or app mode
 				mobileOptimizedText.style.display = 'none'; // Hide in Android PWA or app mode
 			}
-			else if (isAndroid && !isStandalone) {
+			else if ((isAndroid && !isStandalone) || isIOS()) {
         		googlePlayButton.style.display = 'none'; // Hide in Android PWA or app mode
         	    mobileOptimizedText.style.display = 'none'; // Hide in Android PWA or app mode
     		}
