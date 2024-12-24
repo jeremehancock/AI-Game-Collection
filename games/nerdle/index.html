@@ -136,13 +136,13 @@
                 display: flex;
                 flex-direction: column;
                 justify-content: center;
-                margin-top: -20px;
+                margin-top: -40px;
             }
             .grid {
                 display: grid;
                 grid-template-rows: repeat(6, 1fr);
                 gap: 5px;
-                margin-bottom: 1rem;
+                margin-bottom: 0.3rem;
             }
             .row {
                 display: grid;
@@ -159,41 +159,54 @@
                 font-weight: 700;
                 text-transform: uppercase;
             }
+            
 			.keyboard {
-				display: grid;
-				grid-template-rows: repeat(3, 1fr);
-				gap: 5px;
-				margin-bottom: 1rem;
-				max-width: 100%; /* Ensures the keyboard doesn't exceed the screen width */
-				width: 100%; /* Makes it flexible to grow based on screen size */
-				box-sizing: border-box;
-			}
+		        display: flex;
+		        flex-direction: column;
+		        gap: 8px;
+		        margin-bottom: 1rem;
+		        width: 100%;
+		        max-width: 500px;
+		        margin: 0 auto;
+		        padding: 0 4px;
+		    }
 
-			.keyboard-row {
-				display: flex;
-				justify-content: center;
-				gap: 5px;
-				width: 100%; /* Ensures the rows take up the full width */
-			}
+		    .keyboard-row {
+		        display: flex;
+		        justify-content: center;
+		        gap: 6px;
+		        width: 100%;
+		        height: 58px;  /* Set fixed height for row */
+		    }
 
-			.key {
-				background-color: var(--key-bg);
-				border: none;
-				border-radius: 4px;
-				color: var(--key-text);
-				cursor: pointer;
-				font-weight: 700;
-				min-width: 2rem;
-				padding: 1rem 0.5rem;
-				text-transform: uppercase;
-				touch-action: manipulation;
-				flex-grow: 1; /* Allows keys to grow and fill available space */
-			}
+		    /* Add inset to middle row */
+		    .keyboard-row:nth-child(2) {
+		        padding: 0 5%;
+		    }
 
-			.key.wide {
-				min-width: 4rem;
-				flex-grow: 2; /* Makes wide keys take up more space */
-			}
+		    .key {
+		        width: 40px;
+		        height: 100%;  /* Fill row height */
+		        background-color: var(--key-bg);
+		        border: none;
+		        border-radius: 4px;
+		        color: var(--key-text);
+		        cursor: pointer;
+		        font-weight: 700;
+		        font-size: 1.1rem;
+		        text-transform: uppercase;
+		        touch-action: manipulation;
+		        padding: 0;
+		        display: flex;
+		        align-items: center;
+		        justify-content: center;
+		        flex-shrink: 0;
+		    }
+
+		    .key.wide {
+		        width: 65px;
+		        font-size: 0.9rem;
+		    }
 
             .game-controls {
                 display: none;
@@ -456,23 +469,35 @@
 				border: none;
 				padding: .5rem
 			}
-            @media (max-width: 500px) {
-                .tile {
-                    font-size: 1.5rem;
-                }
-                .key {
-                    padding: 0.8rem 0.3rem;
-                    min-width: 1.8rem;
-                    font-size: 0.9rem;
-                }
-                .key.wide {
-                    min-width: 3rem;
-                }
-                .control-btn {
-                    font-size: 1rem;
-                    padding: 0.4rem 0.8rem;
-                }
-            }
+		    @media (max-width: 500px) {
+		        .keyboard-row {
+		            height: 52px;  /* Slightly smaller height on mobile */
+		        }
+		        .key {
+		            width: 9vw;
+		        }
+		        .key.wide {
+		            width: 15vw;
+		        }
+		        .keyboard-row:nth-child(2) {
+		            padding: 0 4%;
+		        }
+		    }
+
+		    @media (max-width: 500px) {
+		        .keyboard {
+		            gap: 4px;
+		        }
+		        .keyboard-row {
+		            gap: 4px;
+		        }
+		        .key {
+		            font-size: 0.9rem;
+		        }
+		        .key.wide {
+		            font-size: 0.8rem;
+		        }
+		    }
 			.header-btn svg {
 				width: 24px;
 				height: 24px;
