@@ -4,7 +4,7 @@
   "start_url": "index.html",
   "id": "ai-game-collection",
   "description": "This site and all games were built using AI with minimal code changes.",
-  "display": "standalone",
+  "display": "fullscreen",
   "orientation": "portrait-primary",
   "icons": [
     {

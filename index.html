@@ -575,51 +575,38 @@
 </div>
     <script>
 
-	document.addEventListener('DOMContentLoaded', () => {
-		const appPrompt = document.getElementById('appPrompt');
-		const openInAppBtn = document.getElementById('openInApp');
-		const stayInBrowserBtn = document.getElementById('stayInBrowser');
-		
-		// Check if we're on Android 
-		const isAndroid = /Android/i.test(navigator.userAgent);
-		
-		// Check if we're in standalone mode (PWA)
-		const isStandalone = window.matchMedia('(display-mode: standalone)').matches || 
-		                    window.navigator.standalone || 
-		                    document.referrer.includes('android-app://') ||
-		                    window.matchMedia('(display-mode: fullscreen)').matches ||
-		                    window.matchMedia('(display-mode: minimal-ui)').matches;
-
-		// Hide app prompt and Google Play button if we're in standalone mode
-		if (isStandalone) {
-		    if (appPrompt) appPrompt.style.display = 'none';
-		    const googlePlayButton = document.getElementById('googlePlayButton');
-		    const mobileOptimizedText = document.getElementById('mobileOptimizedText');
-		    if (googlePlayButton) googlePlayButton.style.display = 'none';
-		    if (mobileOptimizedText) mobileOptimizedText.style.display = 'none';
-		    return;
-		}
-
-		// Only show prompt if we're on Android and in a regular browser
-		if (isAndroid && !isStandalone) {
-		    if (appPrompt) appPrompt.style.display = 'flex';
-		}
-
-		openInAppBtn?.addEventListener('click', () => {
-		    window.location.href = 
-		        `intent://${window.location.host}${window.location.pathname}` +
-		        '#Intent;' +
-		        'scheme=https;' +
-		        'package=dev.jereme.games.twa;' +
-		        'action=android.intent.action.VIEW;' +
-		        'category=android.intent.category.BROWSABLE;' +
-		        'end';
-		});
-		
-		stayInBrowserBtn?.addEventListener('click', () => {
-		    if (appPrompt) appPrompt.style.display = 'none';
-		    handleGooglePlayButton();
-		});
+    document.addEventListener('DOMContentLoaded', () => {
+    const appPrompt = document.getElementById('appPrompt');
+    const openInAppBtn = document.getElementById('openInApp');
+    const stayInBrowserBtn = document.getElementById('stayInBrowser');
+    
+    // Check if we're on Android and not already in the app/PWA
+    const isAndroid = /Android/i.test(navigator.userAgent);
+    const isStandalone = window.matchMedia('(display-mode: standalone)').matches || 
+                        document.referrer.includes('android-app://');
+    
+    // Show prompt if we're on Android and not in the app
+    if (isAndroid && !isStandalone) {
+        appPrompt.style.display = 'flex';  // Changed to flex for centering
+    }
+    
+    // Handle opening in Android app
+    openInAppBtn.addEventListener('click', () => {
+        window.location.href = 
+            `intent://${window.location.host}${window.location.pathname}` +
+            '#Intent;' +
+            'scheme=https;' +
+            'package=dev.jereme.games.twa;' +
+            'action=android.intent.action.VIEW;' +
+            'category=android.intent.category.BROWSABLE;' +
+            'end';
+    });
+    
+    // Handle staying in browser
+    stayInBrowserBtn.addEventListener('click', () => {
+        appPrompt.style.display = 'none';
+        handleGooglePlayButton();
+    });
 	});
 	
         let deferredPrompt;
@@ -688,23 +675,28 @@
 
 		// Function to handle Google Play button visibility
 		function handleGooglePlayButton() {
+			const isAndroid = /Android/i.test(navigator.userAgent);
+			const modeParam = getUrlParameter('mode'); // Assumes this function extracts the "mode" URL parameter
+			const isFullscreen = window.matchMedia('(display-mode: fullscreen)').matches; // Detect PWA mode
 			const googlePlayButton = document.getElementById('googlePlayButton');
 			const mobileOptimizedText = document.getElementById('mobileOptimizedText');
-			const isAndroid = /Android/i.test(navigator.userAgent);
 			const isStandalone = window.matchMedia('(display-mode: standalone)').matches || 
-				                window.navigator.standalone || 
-				                document.referrer.includes('android-app://') ||
-				                window.matchMedia('(display-mode: fullscreen)').matches ||
-				                window.matchMedia('(display-mode: minimal-ui)').matches;
+                        document.referrer.includes('android-app://');
 
-			if (isStandalone) {
-				if (googlePlayButton) googlePlayButton.style.display = 'none';
-				if (mobileOptimizedText) mobileOptimizedText.style.display = 'none';
-			} else if (isAndroid) {
-				if (mobileOptimizedText) mobileOptimizedText.style.display = 'none';
-				if (googlePlayButton) googlePlayButton.style.display = 'block';
-			} else {
-				if (googlePlayButton) googlePlayButton.style.display = 'block';
+			if ((isAndroid && isFullscreen) || modeParam === 'app' || isIOS()) {
+				googlePlayButton.style.display = 'none'; // Hide in Android PWA or app mode
+				mobileOptimizedText.style.display = 'none'; // Hide in Android PWA or app mode
+			}
+			else if ((isAndroid && !isStandalone) || isIOS()) {
+        		googlePlayButton.style.display = 'none'; // Hide in Android PWA or app mode
+        	    mobileOptimizedText.style.display = 'none'; // Hide in Android PWA or app mode
+    		}
+			else if ((isAndroid && !isFullscreen)) {
+				mobileOptimizedText.style.display = 'none'; // Hide in Android PWA or app mode
+				googlePlayButton.style.display = 'block'; // Show otherwise
+			} 
+			else {
+				googlePlayButton.style.display = 'block'; // Show otherwise
 			}
 		}
         
