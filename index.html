@@ -586,7 +586,7 @@
                         document.referrer.includes('android-app://');
     
     // Show prompt if we're on Android and not in the app
-    if (isAndroid) {
+    if (isAndroid && !isStandalone) {
         appPrompt.style.display = 'flex';  // Changed to flex for centering
     }
     
