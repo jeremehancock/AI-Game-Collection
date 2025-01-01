@@ -583,27 +583,28 @@
 		// Check if we're on Android 
 		const isAndroid = /Android/i.test(navigator.userAgent);
 		
-		// More comprehensive check for standalone/PWA mode
-		const isPWA = () => {
-		    return window.matchMedia('(display-mode: standalone)').matches || // PWA
-		           window.navigator.standalone || // iOS home screen app
-		           document.referrer.includes('android-app://') || // Android app
-		           window.location.href.includes('?mode=pwa'); // Custom PWA check
-		};
+		// Check if we're in standalone mode (PWA)
+		const isStandalone = window.matchMedia('(display-mode: standalone)').matches || 
+		                    window.navigator.standalone || 
+		                    document.referrer.includes('android-app://') ||
+		                    window.matchMedia('(display-mode: fullscreen)').matches ||
+		                    window.matchMedia('(display-mode: minimal-ui)').matches;
 
-		// Only show prompts if we're on Android and in a regular browser
-		if (isAndroid && !isPWA()) {
-		    appPrompt.style.display = 'flex';
-		} else {
-		    // Hide all prompts if we're in PWA or app
-		    appPrompt.style.display = 'none';
+		// Hide app prompt and Google Play button if we're in standalone mode
+		if (isStandalone) {
+		    if (appPrompt) appPrompt.style.display = 'none';
 		    const googlePlayButton = document.getElementById('googlePlayButton');
-		    if (googlePlayButton) {
-		        googlePlayButton.style.display = 'none';
-		    }
+		    const mobileOptimizedText = document.getElementById('mobileOptimizedText');
+		    if (googlePlayButton) googlePlayButton.style.display = 'none';
+		    if (mobileOptimizedText) mobileOptimizedText.style.display = 'none';
+		    return;
 		}
 
-		// Update event listeners
+		// Only show prompt if we're on Android and in a regular browser
+		if (isAndroid && !isStandalone) {
+		    if (appPrompt) appPrompt.style.display = 'flex';
+		}
+
 		openInAppBtn?.addEventListener('click', () => {
 		    window.location.href = 
 		        `intent://${window.location.host}${window.location.pathname}` +
@@ -616,7 +617,7 @@
 		});
 		
 		stayInBrowserBtn?.addEventListener('click', () => {
-		    appPrompt.style.display = 'none';
+		    if (appPrompt) appPrompt.style.display = 'none';
 		    handleGooglePlayButton();
 		});
 	});
@@ -691,18 +692,19 @@
 			const mobileOptimizedText = document.getElementById('mobileOptimizedText');
 			const isAndroid = /Android/i.test(navigator.userAgent);
 			const isStandalone = window.matchMedia('(display-mode: standalone)').matches || 
-				                document.referrer.includes('android-app://');
+				                window.navigator.standalone || 
+				                document.referrer.includes('android-app://') ||
+				                window.matchMedia('(display-mode: fullscreen)').matches ||
+				                window.matchMedia('(display-mode: minimal-ui)').matches;
 
-			if ((isAndroid && isStandalone)) {
-				googlePlayButton.style.display = 'none'; // Hide in Android PWA or app mode
-				mobileOptimizedText.style.display = 'none'; // Hide in Android PWA or app mode
-			}
-			else if ((isAndroid && !isStandalone)) {
-				mobileOptimizedText.style.display = 'none';
-				googlePlayButton.style.display = 'block';
-			} 
-			else {
-				googlePlayButton.style.display = 'block'; // Show otherwise
+			if (isStandalone) {
+				if (googlePlayButton) googlePlayButton.style.display = 'none';
+				if (mobileOptimizedText) mobileOptimizedText.style.display = 'none';
+			} else if (isAndroid) {
+				if (mobileOptimizedText) mobileOptimizedText.style.display = 'none';
+				if (googlePlayButton) googlePlayButton.style.display = 'block';
+			} else {
+				if (googlePlayButton) googlePlayButton.style.display = 'block';
 			}
 		}
         
