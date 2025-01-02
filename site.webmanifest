@@ -1,7 +1,7 @@
 {
   "name": "AI Game Collection",
   "short_name": "AI Game Collection",
-  "start_url": "index.html",
+  "start_url": "/",
   "id": "ai-game-collection",
   "description": "This site and all games were built using AI with minimal code changes.",
   "display": "fullscreen",
@@ -21,7 +21,7 @@
     }
   ],
   "launch_handler": {
-    "route_to": "index.html",
+    "route_to": "/",
     "client_mode": "auto"
   },
   "scope_extensions": [
@@ -33,9 +33,7 @@
   "theme_color": "#181d34",	
   "background_color": "#181d34",
   "display_override": [
-    "fullscreen",
-    "window-controls-overlay",
-    "minimal-ui"
+    "fullscreen"
   ],
   "categories": ["games"],
   "edge_side_panel": {
