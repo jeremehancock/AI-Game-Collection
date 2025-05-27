@@ -1,9 +1,10 @@
 <!DOCTYPE html>
 <html>
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Space Game</title>
+    <title>Space Shooter</title>
     <style>
         body {
             margin: 0;
@@ -146,19 +147,39 @@
         }
 
         @keyframes engineGlow {
-            from { opacity: 0.4; }
-            to { opacity: 0.8; }
+            from {
+                opacity: 0.4;
+            }
+
+            to {
+                opacity: 0.8;
+            }
         }
 
         @keyframes slideShip {
-            0%, 100% { transform: translateX(-15px); }
-            50% { transform: translateX(15px); }
+
+            0%,
+            100% {
+                transform: translateX(-15px);
+            }
+
+            50% {
+                transform: translateX(15px);
+            }
         }
 
         @keyframes fadeInOut {
-            0% { opacity: 0.7; }
-            50% { opacity: 1; }
-            100% { opacity: 0.7; }
+            0% {
+                opacity: 0.7;
+            }
+
+            50% {
+                opacity: 1;
+            }
+
+            100% {
+                opacity: 0.7;
+            }
         }
 
         .game-overlay {
@@ -267,15 +288,19 @@
             .mobile-instructions {
                 display: block;
             }
+
             .desktop-instructions {
                 display: none;
             }
+
             .overlay-content {
                 padding: 1.5rem;
             }
+
             .overlay-title {
                 font-size: 2.5rem;
             }
+
             .overlay-button {
                 padding: 0.7rem 1.5rem;
                 font-size: 1.1rem;
@@ -283,6 +308,7 @@
         }
     </style>
 </head>
+
 <body>
     <div id="container">
         <canvas id="gameCanvas"></canvas>
@@ -320,148 +346,168 @@
         const controlArea = document.getElementById('controlArea');
         const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
         let isExploding = false;
-		let gameOverTimeout = null;
+        let gameOverTimeout = null;
         let gameStarted = false;
         let score = 0;
         let hasInteracted = false;
-        let animationFrameId = null; // Add this to track the animation frame
+        let animationFrameId = null;
         let baseAsteroidSpeed = 1;
-        
-		class FireballParticle {
-			constructor(x, y) {
-				this.x = x;
-				this.y = y;
-				this.radius = Math.random() * 20 + 10;
-				this.life = 1.0;
-				this.decay = Math.random() * 0.02 + 0.015;
-				this.speedX = (Math.random() - 0.5) * 8;
-				this.speedY = (Math.random() - 0.5) * 8;
-				this.rotation = Math.random() * Math.PI * 2;
-				this.rotationSpeed = (Math.random() - 0.5) * 0.2;
-			}
 
-			update() {
-				this.x += this.speedX;
-				this.y += this.speedY;
-				this.speedX *= 0.98;
-				this.speedY *= 0.98;
-				this.life -= this.decay;
-				this.rotation += this.rotationSpeed;
-				this.radius *= 0.99;
-			}
+        class FireballParticle {
+            constructor(x, y) {
+                this.x = x;
+                this.y = y;
+                this.radius = Math.random() * 20 + 10;
+                this.life = 1.0;
+                this.decay = Math.random() * 0.02 + 0.015;
+                this.speedX = (Math.random() - 0.5) * 8;
+                this.speedY = (Math.random() - 0.5) * 8;
+                this.rotation = Math.random() * Math.PI * 2;
+                this.rotationSpeed = (Math.random() - 0.5) * 0.2;
+            }
 
-			draw() {
-				ctx.save();
-				ctx.translate(this.x, this.y);
-				ctx.rotate(this.rotation);
-				
-				// Create gradient for the fireball
-				const gradient = ctx.createRadialGradient(0, 0, 0, 0, 0, this.radius);
-				gradient.addColorStop(0, `rgba(255, 200, 0, ${this.life})`);
-				gradient.addColorStop(0.4, `rgba(255, 100, 0, ${this.life * 0.8})`);
-				gradient.addColorStop(1, `rgba(255, 0, 0, 0)`);
-				
-				// Draw the main fireball
-				ctx.beginPath();
-				ctx.arc(0, 0, this.radius, 0, Math.PI * 2);
-				ctx.fillStyle = gradient;
-				ctx.fill();
-				
-				// Add flame details
-				for (let i = 0; i < 3; i++) {
-				    const angle = (i / 3) * Math.PI * 2;
-				    ctx.beginPath();
-				    ctx.moveTo(0, 0);
-				    ctx.quadraticCurveTo(
-				        Math.cos(angle) * this.radius * 1.5,
-				        Math.sin(angle) * this.radius * 1.5,
-				        Math.cos(angle + 0.4) * this.radius,
-				        Math.sin(angle + 0.4) * this.radius
-				    );
-				    ctx.strokeStyle = `rgba(255, 200, 0, ${this.life * 0.5})`;
-				    ctx.lineWidth = 2;
-				    ctx.stroke();
-				}
-				
-				ctx.restore();
-			}
-		}
+            update() {
+                this.x += this.speedX;
+                this.y += this.speedY;
+                this.speedX *= 0.98;
+                this.speedY *= 0.98;
+                this.life -= this.decay;
+                this.rotation += this.rotationSpeed;
+                this.radius *= 0.99;
+            }
+
+            draw() {
+                ctx.save();
+                ctx.translate(this.x, this.y);
+                ctx.rotate(this.rotation);
+
+                const gradient = ctx.createRadialGradient(0, 0, 0, 0, 0, this.radius);
+                gradient.addColorStop(0, `rgba(255, 200, 0, ${this.life})`);
+                gradient.addColorStop(0.4, `rgba(255, 100, 0, ${this.life * 0.8})`);
+                gradient.addColorStop(1, `rgba(255, 0, 0, 0)`);
+
+                ctx.beginPath();
+                ctx.arc(0, 0, this.radius, 0, Math.PI * 2);
+                ctx.fillStyle = gradient;
+                ctx.fill();
+
+                for (let i = 0; i < 3; i++) {
+                    const angle = (i / 3) * Math.PI * 2;
+                    ctx.beginPath();
+                    ctx.moveTo(0, 0);
+                    ctx.quadraticCurveTo(
+                        Math.cos(angle) * this.radius * 1.5,
+                        Math.sin(angle) * this.radius * 1.5,
+                        Math.cos(angle + 0.4) * this.radius,
+                        Math.sin(angle + 0.4) * this.radius
+                    );
+                    ctx.strokeStyle = `rgba(255, 200, 0, ${this.life * 0.5})`;
+                    ctx.lineWidth = 2;
+                    ctx.stroke();
+                }
+
+                ctx.restore();
+            }
+        }
 
         // Audio Context setup
         let audioContext;
         let engineSound;
         let engineGainNode;
-        
+        let isEngineRunning = false;
+
         // Audio initialization function
         async function initAudio() {
             audioContext = new (window.AudioContext || window.webkitAudioContext)();
+
+            // Create gain node for engine sound but don't start the oscillator yet
             engineGainNode = audioContext.createGain();
-            engineGainNode.gain.value = 0.1;
+            engineGainNode.gain.value = 0;
             engineGainNode.connect(audioContext.destination);
-            
+        }
+
+        function startEngineSound() {
+            if (!audioContext || isEngineRunning) return;
+
             engineSound = audioContext.createOscillator();
             engineSound.type = 'sine';
             engineSound.frequency.value = 100;
             engineSound.connect(engineGainNode);
             engineSound.start();
+
+            // Fade in the engine sound
+            engineGainNode.gain.setValueAtTime(0, audioContext.currentTime);
+            engineGainNode.gain.linearRampToValueAtTime(0.1, audioContext.currentTime + 0.3);
+
+            isEngineRunning = true;
+        }
+
+        function stopEngineSound() {
+            if (!audioContext || !isEngineRunning || !engineSound) return;
+
+            // Fade out the engine sound
+            engineGainNode.gain.setValueAtTime(engineGainNode.gain.value, audioContext.currentTime);
+            engineGainNode.gain.linearRampToValueAtTime(0, audioContext.currentTime + 0.5);
+
+            // Stop the oscillator after fade out
+            setTimeout(() => {
+                if (engineSound) {
+                    engineSound.stop();
+                    engineSound = null;
+                    isEngineRunning = false;
+                }
+            }, 500);
         }
 
         function playLaserSound() {
             if (!audioContext) return;
-            
+
             const oscillator = audioContext.createOscillator();
             const gainNode = audioContext.createGain();
-            
+
             oscillator.connect(gainNode);
             gainNode.connect(audioContext.destination);
-            
+
             oscillator.type = 'square';
             oscillator.frequency.setValueAtTime(880, audioContext.currentTime);
             oscillator.frequency.exponentialRampToValueAtTime(110, audioContext.currentTime + 0.1);
-            
+
             gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
             gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.1);
-            
+
             oscillator.start();
             oscillator.stop(audioContext.currentTime + 0.1);
         }
 
         function playExplosionSound() {
             if (!audioContext) return;
-            
-            // Create multiple oscillators for a richer explosion sound
+
             const bufferSize = audioContext.sampleRate * 0.5;
             const buffer = audioContext.createBuffer(1, bufferSize, audioContext.sampleRate);
             const data = buffer.getChannelData(0);
-            
-            // Generate layered noise for deeper explosion
+
             for (let i = 0; i < bufferSize; i++) {
-                // Base explosion noise
                 const baseNoise = Math.random() * 2 - 1;
-                // Low frequency component
                 const lowFreq = Math.sin(i * 0.01) * 0.5;
-                // Combine with emphasis on low frequencies
                 data[i] = (baseNoise * 0.7 + lowFreq * 0.3) * (1 - i / bufferSize);
             }
-            
+
             const source = audioContext.createBufferSource();
             const gainNode = audioContext.createGain();
             const lowPassFilter = audioContext.createBiquadFilter();
-            
-            // Add low-pass filter for deeper sound
+
             lowPassFilter.type = 'lowpass';
             lowPassFilter.frequency.value = 1000;
             lowPassFilter.Q.value = 0.5;
-            
+
             source.buffer = buffer;
             source.connect(lowPassFilter);
             lowPassFilter.connect(gainNode);
             gainNode.connect(audioContext.destination);
-            
-            // Adjust volume curve for more impact
+
             gainNode.gain.setValueAtTime(0.8, audioContext.currentTime);
             gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.7);
-            
+
             source.start();
         }
 
@@ -483,7 +529,8 @@
             x: canvas.width / 2,
             y: canvas.height - 100,
             size: 40,
-            targetX: canvas.width / 2
+            targetX: canvas.width / 2,
+            previousX: canvas.width / 2
         };
 
         class Bullet {
@@ -553,12 +600,11 @@
                 this.size = Math.random() * 20 + 20;
                 this.x = Math.random() * (canvas.width - this.size * 2) + this.size;
                 this.y = -this.size;
-                // Simplified speed calculation
-                this.speed = Math.random() + 1; // Base speed between 1-2
+                this.speed = Math.random() + 1;
                 this.rotation = Math.random() * Math.PI * 2;
                 this.rotationSpeed = (Math.random() - 0.5) * 0.1;
                 this.vertices = [];
-                
+
                 const vertices = Math.floor(Math.random() * 4) + 8;
                 for (let i = 0; i < vertices; i++) {
                     const angle = (i / vertices) * Math.PI * 2;
@@ -570,35 +616,35 @@
                     });
                 }
             }
-            
+
             update() {
                 this.y += this.speed;
                 this.rotation += this.rotationSpeed;
             }
-            
+
             draw() {
                 ctx.save();
                 ctx.translate(this.x, this.y);
                 ctx.rotate(this.rotation);
-                
+
                 ctx.beginPath();
                 ctx.moveTo(this.vertices[0].x, this.vertices[0].y);
                 for (let i = 1; i < this.vertices.length; i++) {
                     ctx.lineTo(this.vertices[i].x, this.vertices[i].y);
                 }
                 ctx.closePath();
-                
+
                 const asteroidGradient = ctx.createRadialGradient(0, 0, 0, 0, 0, this.size);
                 asteroidGradient.addColorStop(0, '#777');
                 asteroidGradient.addColorStop(0.5, '#555');
                 asteroidGradient.addColorStop(1, '#333');
-                
+
                 ctx.fillStyle = asteroidGradient;
                 ctx.fill();
                 ctx.strokeStyle = '#222';
                 ctx.lineWidth = 2;
                 ctx.stroke();
-                
+
                 ctx.restore();
             }
 
@@ -611,13 +657,13 @@
                 for (let i = 0; i < this.vertices.length; i++) {
                     const v1 = this.vertices[i];
                     const v2 = this.vertices[(i + 1) % this.vertices.length];
-                    
+
                     const distance = this.pointToLineDistance(
                         rotatedX, rotatedY,
                         v1.x, v1.y,
                         v2.x, v2.y
                     );
-                    
+
                     if (distance < 15) {
                         return true;
                     }
@@ -662,6 +708,7 @@
         let asteroids = [];
         let bullets = [];
         let explosions = [];
+        let fireballs = [];
         let lastShootTime = 0;
         const shootCooldown = 250;
 
@@ -676,7 +723,7 @@
         function shoot() {
             const now = Date.now();
             if (now - lastShootTime >= shootCooldown) {
-                bullets.push(new Bullet(ship.x, ship.y - ship.size/2));
+                bullets.push(new Bullet(ship.x, ship.y - ship.size / 2));
                 lastShootTime = now;
                 playLaserSound();
             }
@@ -690,10 +737,10 @@
 
         function checkCollision(asteroid) {
             const shipPoints = [
-                { x: ship.x, y: ship.y - ship.size/2 },
-                { x: ship.x + ship.size/2, y: ship.y + ship.size/2 },
-                { x: ship.x - ship.size/2, y: ship.y + ship.size/2 },
-                { x: ship.x, y: ship.y + ship.size/3 },
+                { x: ship.x, y: ship.y - ship.size / 2 },
+                { x: ship.x + ship.size / 2, y: ship.y + ship.size / 2 },
+                { x: ship.x - ship.size / 2, y: ship.y + ship.size / 2 },
+                { x: ship.x, y: ship.y + ship.size / 3 },
                 { x: ship.x, y: ship.y }
             ];
 
@@ -725,286 +772,287 @@
         function drawShip() {
             ctx.save();
             ctx.translate(ship.x, ship.y);
-            
-            // Main hull
+
             ctx.beginPath();
-            ctx.moveTo(0, -ship.size/2);
+            ctx.moveTo(0, -ship.size / 2);
             ctx.bezierCurveTo(
-                ship.size/3, -ship.size/2.5,
-                ship.size/2, ship.size/3,
-                ship.size/3, ship.size/2
+                ship.size / 3, -ship.size / 2.5,
+                ship.size / 2, ship.size / 3,
+                ship.size / 3, ship.size / 2
             );
-            ctx.lineTo(-ship.size/3, ship.size/2);
+            ctx.lineTo(-ship.size / 3, ship.size / 2);
             ctx.bezierCurveTo(
-                -ship.size/2, ship.size/3,
-                -ship.size/3, -ship.size/2.5,
-                0, -ship.size/2
+                -ship.size / 2, ship.size / 3,
+                -ship.size / 3, -ship.size / 2.5,
+                0, -ship.size / 2
             );
-            
-            const hullGradient = ctx.createLinearGradient(-ship.size/2, 0, ship.size/2, 0);
+
+            const hullGradient = ctx.createLinearGradient(-ship.size / 2, 0, ship.size / 2, 0);
             hullGradient.addColorStop(0, '#2c3e50');
             hullGradient.addColorStop(0.3, '#34495e');
             hullGradient.addColorStop(0.5, '#95a5a6');
             hullGradient.addColorStop(0.7, '#34495e');
             hullGradient.addColorStop(1, '#2c3e50');
-            
+
             ctx.fillStyle = hullGradient;
             ctx.fill();
-            
+
             ctx.strokeStyle = '#7f8c8d';
             ctx.lineWidth = 1;
             ctx.stroke();
-            
+
             for (let side of [-1, 1]) {
                 ctx.beginPath();
-                ctx.moveTo(side * ship.size/6, -ship.size/4);
-                ctx.lineTo(side * ship.size/2, ship.size/3);
-                ctx.lineTo(side * ship.size/3, ship.size/2);
+                ctx.moveTo(side * ship.size / 6, -ship.size / 4);
+                ctx.lineTo(side * ship.size / 2, ship.size / 3);
+                ctx.lineTo(side * ship.size / 3, ship.size / 2);
                 ctx.strokeStyle = '#95a5a6';
                 ctx.lineWidth = 2;
                 ctx.stroke();
-                
+
                 ctx.beginPath();
-                ctx.moveTo(side * ship.size/4, 0);
-                ctx.lineTo(side * ship.size/3, ship.size/4);
+                ctx.moveTo(side * ship.size / 4, 0);
+                ctx.lineTo(side * ship.size / 3, ship.size / 4);
                 ctx.strokeStyle = '#3498db';
                 ctx.lineWidth = 1;
                 ctx.stroke();
             }
-            
+
             ctx.beginPath();
-            ctx.ellipse(0, -ship.size/6, ship.size/5, ship.size/3, 0, 0, Math.PI * 2);
-            
-            const cockpitGradient = ctx.createLinearGradient(0, -ship.size/2, 0, ship.size/6);
+            ctx.ellipse(0, -ship.size / 6, ship.size / 5, ship.size / 3, 0, 0, Math.PI * 2);
+
+            const cockpitGradient = ctx.createLinearGradient(0, -ship.size / 2, 0, ship.size / 6);
             cockpitGradient.addColorStop(0, 'rgba(52, 152, 219, 0.9)');
             cockpitGradient.addColorStop(0.5, 'rgba(41, 128, 185, 0.7)');
             cockpitGradient.addColorStop(1, 'rgba(52, 152, 219, 0.9)');
-            
+
             ctx.fillStyle = cockpitGradient;
             ctx.fill();
-            
+
             ctx.strokeStyle = '#2c3e50';
             ctx.lineWidth = 2;
             ctx.stroke();
-            
+
             const time = Date.now() * 0.01;
             const flameHeight = Math.sin(time) * 5 + 15;
-            
+
             ctx.beginPath();
-            ctx.moveTo(-ship.size/6, ship.size/2);
-            ctx.lineTo(ship.size/6, ship.size/2);
-            ctx.lineTo(ship.size/8, ship.size/2 + 5);
-            ctx.lineTo(-ship.size/8, ship.size/2 + 5);
+            ctx.moveTo(-ship.size / 6, ship.size / 2);
+            ctx.lineTo(ship.size / 6, ship.size / 2);
+            ctx.lineTo(ship.size / 8, ship.size / 2 + 5);
+            ctx.lineTo(-ship.size / 8, ship.size / 2 + 5);
             ctx.closePath();
             ctx.fillStyle = '#34495e';
             ctx.fill();
             ctx.strokeStyle = '#2c3e50';
             ctx.lineWidth = 1;
             ctx.stroke();
-            
+
             for (let i = -1; i <= 1; i += 0.5) {
                 ctx.beginPath();
-                ctx.moveTo(i * ship.size/8, ship.size/2);
-                
+                ctx.moveTo(i * ship.size / 8, ship.size / 2);
+
                 ctx.bezierCurveTo(
-                    i * ship.size/10, ship.size/2 + flameHeight/2,
-                    i * ship.size/12, ship.size/2 + flameHeight,
-                    0, ship.size/2 + flameHeight * 1.2
+                    i * ship.size / 10, ship.size / 2 + flameHeight / 2,
+                    i * ship.size / 12, ship.size / 2 + flameHeight,
+                    0, ship.size / 2 + flameHeight * 1.2
                 );
-                
+
                 const flameGradient = ctx.createLinearGradient(
-                    0, ship.size/2,
-                    0, ship.size/2 + flameHeight * 1.2
+                    0, ship.size / 2,
+                    0, ship.size / 2 + flameHeight * 1.2
                 );
                 flameGradient.addColorStop(0, 'rgba(52, 152, 219, 0.9)');
                 flameGradient.addColorStop(0.3, 'rgba(41, 128, 185, 0.6)');
                 flameGradient.addColorStop(1, 'rgba(52, 152, 219, 0)');
-                
+
                 ctx.fillStyle = flameGradient;
                 ctx.fill();
             }
-            
+
             ctx.restore();
         }
 
         function updateShipPosition() {
+            ship.previousX = ship.x;
+
             if (!isMobile) {
                 const moveSpeed = 5;
                 if (keys.left) ship.targetX -= moveSpeed;
                 if (keys.right) ship.targetX += moveSpeed;
             }
-            
+
             const deltaX = ship.targetX - ship.x;
             ship.x += deltaX * 0.3;
-            ship.x = Math.max(ship.size/2, Math.min(canvas.width - ship.size/2, ship.x));
+            ship.x = Math.max(ship.size / 2, Math.min(canvas.width - ship.size / 2, ship.x));
+
+            // Check if ship is moving and manage engine sound
+            const isMoving = Math.abs(ship.x - ship.previousX) > 0.1 || keys.left || keys.right;
+
+            if (isMoving && !isEngineRunning && gameStarted && !isExploding) {
+                startEngineSound();
+            } else if (!isMoving && isEngineRunning) {
+                stopEngineSound();
+            }
         }
 
-		function updateGame() {
-		    if (!gameStarted) {
-                return; // Don't continue animation if game isn't started
+        function updateGame() {
+            if (!gameStarted) {
+                return;
             }
-			ctx.clearRect(0, 0, canvas.width, canvas.height);
-			
-			// Always update and draw fireballs, even during explosion
-			for (let i = fireballs.length - 1; i >= 0; i--) {
-				fireballs[i].update();
-				fireballs[i].draw();
-				if (fireballs[i].life <= 0) {
-				    fireballs.splice(i, 1);
-				}
-			}
-			
-			// Only update game elements if the game is still running and not exploding
-			if (gameStarted && !isExploding) {
-				updateShipPosition();
-				
-				// Update bullets
-				for (let i = bullets.length - 1; i >= 0; i--) {
-				    bullets[i].update();
-				    bullets[i].draw();
-				    if (bullets[i].y < -bullets[i].size) {
-				        bullets.splice(i, 1);
-				    }
-				}
-				
-				// Update explosions
-				for (let i = explosions.length - 1; i >= 0; i--) {
-				    explosions[i].update();
-				    explosions[i].draw();
-				    if (explosions[i].life <= 0) {
-				        explosions.splice(i, 1);
-				    }
-				}
-				
-				// Update asteroids
-				for (let i = asteroids.length - 1; i >= 0; i--) {
-				    asteroids[i].update();
-				    asteroids[i].draw();
-				    
-				    if (checkCollision(asteroids[i])) {
-				        gameOver();
-				        break;
-				    }
-				    
-				    if (asteroids[i].y > canvas.height + asteroids[i].size) {
-				        asteroids.splice(i, 1);
-				        score++;
-				        scoreElement.textContent = `Score: ${score}`;
-				    }
-				}
-				
-				checkBulletCollisions();
-				
-				if (Math.random() < 0.03) {
-				    asteroids.push(new Asteroid());
-				}
-				
-				drawShip();
-			} else if (isExploding) {
-				// During explosion, still draw the asteroids and ship
-				asteroids.forEach(asteroid => asteroid.draw());
-				drawShip();
-			}
-			
-			requestAnimationFrame(updateGame);
-		}
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-		function gameOver() {
-			if (isExploding) return; // Prevent multiple explosions
-			
-			isExploding = true;
-			
-			// Create the fireball explosion
-			for (let i = 0; i < 30; i++) {
-				fireballs.push(new FireballParticle(ship.x, ship.y));
-			}
-			
-			// Play explosion sound
-			playExplosionSound();
-			
-			// Stop the engine sound
-			if (engineGainNode) {
-				engineGainNode.gain.setValueAtTime(engineGainNode.gain.value, audioContext.currentTime);
-				engineGainNode.gain.exponentialRampToValueAtTime(0.0001, audioContext.currentTime + 0.5);
-			}
-			
-			// Hide mobile controls if needed
-			if (isMobile) {
-				controlArea.style.display = 'none';
-			}
+            for (let i = fireballs.length - 1; i >= 0; i--) {
+                fireballs[i].update();
+                fireballs[i].draw();
+                if (fireballs[i].life <= 0) {
+                    fireballs.splice(i, 1);
+                }
+            }
 
-			// Set a timeout to show the game over screen
-			gameOverTimeout = setTimeout(() => {
-				gameStarted = false;
-				isExploding = false;
-				
-				const overlay = document.createElement('div');
-				overlay.className = 'game-overlay game-over';
-				
-				const content = document.createElement('div');
-				content.className = 'overlay-content';
-				
-				const title = document.createElement('h1');
-				title.className = 'overlay-title';
-				title.textContent = 'Game Over';
-				
-				const scoreText = document.createElement('div');
-				scoreText.className = 'overlay-score';
-				scoreText.textContent = `Final Score: ${score}`;
-				
-				const restartButton = document.createElement('button');
-				restartButton.className = 'overlay-button';
-				restartButton.textContent = 'Play Again';
-				
-				restartButton.onclick = () => {
-				    document.body.removeChild(overlay);
-				    startGame();
-				};
-				
-				content.appendChild(title);
-				content.appendChild(scoreText);
-				content.appendChild(restartButton);
-				overlay.appendChild(content);
-				document.body.appendChild(overlay);
-			}, 1000);
-		}
+            if (gameStarted && !isExploding) {
+                updateShipPosition();
 
-		function startGame() {
+                for (let i = bullets.length - 1; i >= 0; i--) {
+                    bullets[i].update();
+                    bullets[i].draw();
+                    if (bullets[i].y < -bullets[i].size) {
+                        bullets.splice(i, 1);
+                    }
+                }
+
+                for (let i = explosions.length - 1; i >= 0; i--) {
+                    explosions[i].update();
+                    explosions[i].draw();
+                    if (explosions[i].life <= 0) {
+                        explosions.splice(i, 1);
+                    }
+                }
+
+                for (let i = asteroids.length - 1; i >= 0; i--) {
+                    asteroids[i].update();
+                    asteroids[i].draw();
+
+                    if (checkCollision(asteroids[i])) {
+                        gameOver();
+                        break;
+                    }
+
+                    if (asteroids[i].y > canvas.height + asteroids[i].size) {
+                        asteroids.splice(i, 1);
+                        score++;
+                        scoreElement.textContent = `Score: ${score}`;
+                    }
+                }
+
+                checkBulletCollisions();
+
+                if (Math.random() < 0.03) {
+                    asteroids.push(new Asteroid());
+                }
+
+                drawShip();
+            } else if (isExploding) {
+                asteroids.forEach(asteroid => asteroid.draw());
+                drawShip();
+            }
+
+            requestAnimationFrame(updateGame);
+        }
+
+        function gameOver() {
+            if (isExploding) return;
+
+            isExploding = true;
+
+            // Stop engine sound immediately
+            stopEngineSound();
+
+            for (let i = 0; i < 30; i++) {
+                fireballs.push(new FireballParticle(ship.x, ship.y));
+            }
+
+            playExplosionSound();
+
+            if (isMobile) {
+                controlArea.style.display = 'none';
+            }
+
+            gameOverTimeout = setTimeout(() => {
+                gameStarted = false;
+                isExploding = false;
+
+                const overlay = document.createElement('div');
+                overlay.className = 'game-overlay game-over';
+
+                const content = document.createElement('div');
+                content.className = 'overlay-content';
+
+                const title = document.createElement('h1');
+                title.className = 'overlay-title';
+                title.textContent = 'Game Over';
+
+                const scoreText = document.createElement('div');
+                scoreText.className = 'overlay-score';
+                scoreText.textContent = `Final Score: ${score}`;
+
+                const restartButton = document.createElement('button');
+                restartButton.className = 'overlay-button';
+                restartButton.textContent = 'Play Again';
+
+                restartButton.onclick = () => {
+                    document.body.removeChild(overlay);
+                    startGame();
+                };
+
+                content.appendChild(title);
+                content.appendChild(scoreText);
+                content.appendChild(restartButton);
+                overlay.appendChild(content);
+                document.body.appendChild(overlay);
+            }, 1000);
+        }
+
+        function startGame() {
             if (animationFrameId) {
                 cancelAnimationFrame(animationFrameId);
                 animationFrameId = null;
             }
-			if (gameOverTimeout) {
-				clearTimeout(gameOverTimeout);
-				gameOverTimeout = null;
-			}
-			isExploding = false;
-			
-			if (!audioContext) {
-				initAudio();
-			}
-			gameStarted = true;
-			score = 0;
-			baseAsteroidSpeed = 1;
-			asteroids = [];
-			bullets = [];
-			explosions = [];
-			fireballs = [];
-			scoreElement.textContent = 'Score: 0';
-			startScreen.style.display = 'none';
-			
-			setCanvasSize();
-			ship.x = canvas.width / 2;
-			ship.y = canvas.height - 100;
-			ship.targetX = ship.x;
-			
-			if (isMobile) {
-				controlArea.style.display = 'flex';
-				resetGestureHint();
-			}
-			
-			requestAnimationFrame(updateGame);
-		}
+            if (gameOverTimeout) {
+                clearTimeout(gameOverTimeout);
+                gameOverTimeout = null;
+            }
+            isExploding = false;
+
+            // Stop any existing engine sound
+            stopEngineSound();
+
+            if (!audioContext) {
+                initAudio();
+            }
+            gameStarted = true;
+            score = 0;
+            baseAsteroidSpeed = 1;
+            asteroids = [];
+            bullets = [];
+            explosions = [];
+            fireballs = [];
+            scoreElement.textContent = 'Score: 0';
+            startScreen.style.display = 'none';
+
+            setCanvasSize();
+            ship.x = canvas.width / 2;
+            ship.y = canvas.height - 100;
+            ship.targetX = ship.x;
+            ship.previousX = ship.x;
+
+            if (isMobile) {
+                controlArea.style.display = 'flex';
+                resetGestureHint();
+            }
+
+            requestAnimationFrame(updateGame);
+        }
 
         // Touch handling
         let touchX = null;
@@ -1031,26 +1079,26 @@
         controlArea.addEventListener('touchmove', (e) => {
             e.preventDefault();
             if (!gameStarted || touchX === null) return;
-            
+
             const touch = e.touches[0];
             const deltaX = touch.clientX - touchX;
-            
+
             if (Math.abs(deltaX) > MOVE_THRESHOLD) {
                 hasMoved = true;
             }
-            
-            ship.targetX = Math.max(ship.size/2, Math.min(canvas.width - ship.size/2, ship.x + deltaX));
+
+            ship.targetX = Math.max(ship.size / 2, Math.min(canvas.width - ship.size / 2, ship.x + deltaX));
             touchX = touch.clientX;
         });
 
         controlArea.addEventListener('touchend', (e) => {
             e.preventDefault();
-            
+
             const touchDuration = Date.now() - touchStartTime;
             if (!hasMoved && touchDuration < TAP_THRESHOLD) {
                 shoot();
             }
-            
+
             touchX = null;
         });
 
@@ -1062,7 +1110,7 @@
 
         document.addEventListener('keydown', (e) => {
             if (!gameStarted) return;
-            switch(e.key) {
+            switch (e.key) {
                 case 'ArrowLeft':
                     keys.left = true;
                     e.preventDefault();
@@ -1080,7 +1128,7 @@
 
         document.addEventListener('keyup', (e) => {
             if (!gameStarted) return;
-            switch(e.key) {
+            switch (e.key) {
                 case 'ArrowLeft':
                     keys.left = false;
                     e.preventDefault();
@@ -1098,4 +1146,5 @@
         });
     </script>
 </body>
+
 </html>
