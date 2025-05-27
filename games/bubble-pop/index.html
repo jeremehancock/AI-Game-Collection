@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html>
+
 <head>
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>Bubble Pop</title>
@@ -15,20 +16,24 @@
             align-items: center;
             min-height: 100vh;
         }
+
         .game-container {
             background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
         }
+
         .game-container {
             width: 100%;
             max-width: 700px;
             height: 100vh;
             position: relative;
         }
+
         #gameCanvas {
             width: 100%;
             height: 100%;
             touch-action: none;
         }
+
         .overlay {
             position: absolute;
             top: 0;
@@ -41,6 +46,7 @@
             align-items: center;
             z-index: 10;
         }
+
         .content {
             background: rgba(255, 255, 255, 0.1);
             backdrop-filter: blur(10px);
@@ -49,8 +55,9 @@
             text-align: center;
             color: white;
             max-width: 80%;
-            box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
         }
+
         .content h1 {
             margin: 0 0 1rem 0;
             font-size: 2.5rem;
@@ -58,20 +65,23 @@
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
         }
+
         .content p {
             margin: 1rem 0;
             line-height: 1.6;
             font-size: 1.1rem;
         }
+
         #score {
             position: absolute;
             top: 20px;
             left: 20px;
             color: white;
             font-size: 24px;
-            text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
             z-index: 1;
         }
+
         .overlay-screen {
             position: absolute;
             top: 50%;
@@ -84,8 +94,9 @@
             border-radius: 15px;
             text-align: center;
             display: none;
-            box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
         }
+
         button {
             background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
             border: none;
@@ -101,15 +112,18 @@
             box-shadow: 0 4px 15px rgba(76, 175, 80, 0.3);
             transition: transform 0.2s, box-shadow 0.2s;
         }
+
         button:hover {
             transform: translateY(-2px);
             box-shadow: 0 6px 20px rgba(76, 175, 80, 0.4);
         }
+
         #startScreen {
             display: flex;
         }
     </style>
 </head>
+
 <body>
     <div class="game-container">
         <div id="startScreen" class="overlay">
@@ -147,79 +161,65 @@
         let lastTime = 0;
         let bubbleInterval = 1500;
         let lastBubble = 0;
-        let speedMultiplier = 1.0; // New variable to control overall game speed
+        let speedMultiplier = 1.0;
 
-		// Audio Context setup
-		let audioContext;
-		let engineSound;
-		let engineGainNode;
+        // Audio Context setup - only for bubble pop sounds
+        let audioContext;
 
-		// Audio initialization function
-		async function initAudio() {
-			audioContext = new (window.AudioContext || window.webkitAudioContext)();
-			engineGainNode = audioContext.createGain();
-			engineGainNode.gain.value = 0.1;
-			engineGainNode.connect(audioContext.destination);
-			
-			engineSound = audioContext.createOscillator();
-			engineSound.type = 'sine';
-			engineSound.frequency.value = 100;
-			engineSound.connect(engineGainNode);
-			engineSound.start();
-		}
-		
-function playBubblePopSound() {
-    if (!audioContext) return;
+        // Audio initialization function
+        async function initAudio() {
+            audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        }
 
-    const duration = 0.25; // Slightly longer to accommodate wet effects
-    const sampleRate = audioContext.sampleRate;
-    const bufferSize = sampleRate * duration;
-    const buffer = audioContext.createBuffer(1, bufferSize, sampleRate);
-    const data = buffer.getChannelData(0);
+        function playBubblePopSound() {
+            if (!audioContext) return;
 
-    // Generate the sound
-    for (let i = 0; i < bufferSize; i++) {
-        const t = i / sampleRate; // Time in seconds
-        const pop = Math.sin(2 * Math.PI * 1200 * t) * Math.exp(-40 * t); // Elastic high-pitched burst
-        const splash = Math.random() * 0.6 * Math.exp(-70 * t); // Wet random noise with quick fade
-        const ripple = Math.sin(2 * Math.PI * 300 * t) * Math.exp(-20 * t); // Low-pitched ripple for liquid feel
-        data[i] = (pop + splash + ripple * 0.5) * (1 - i / bufferSize); // Blend and taper off
-    }
+            const duration = 0.25;
+            const sampleRate = audioContext.sampleRate;
+            const bufferSize = sampleRate * duration;
+            const buffer = audioContext.createBuffer(1, bufferSize, sampleRate);
+            const data = buffer.getChannelData(0);
 
-    const source = audioContext.createBufferSource();
-    const gainNode = audioContext.createGain();
-    const lowPassFilter = audioContext.createBiquadFilter();
-    const reverb = audioContext.createConvolver();
+            // Generate the sound
+            for (let i = 0; i < bufferSize; i++) {
+                const t = i / sampleRate;
+                const pop = Math.sin(2 * Math.PI * 1200 * t) * Math.exp(-40 * t);
+                const splash = Math.random() * 0.6 * Math.exp(-70 * t);
+                const ripple = Math.sin(2 * Math.PI * 300 * t) * Math.exp(-20 * t);
+                data[i] = (pop + splash + ripple * 0.5) * (1 - i / bufferSize);
+            }
 
-    // Create a more liquid-like reverb effect
-    const reverbDuration = 0.3; // Short, tight reverb
-    const reverbBuffer = audioContext.createBuffer(1, sampleRate * reverbDuration, sampleRate);
-    const reverbData = reverbBuffer.getChannelData(0);
-    for (let i = 0; i < reverbData.length; i++) {
-        reverbData[i] = (Math.random() * 2 - 1) * Math.exp(-6 * (i / sampleRate)); // Noisy, liquid-like tail
-    }
-    reverb.buffer = reverbBuffer;
+            const source = audioContext.createBufferSource();
+            const gainNode = audioContext.createGain();
+            const lowPassFilter = audioContext.createBiquadFilter();
+            const reverb = audioContext.createConvolver();
 
-    // Configure audio nodes
-    lowPassFilter.type = 'lowpass';
-    lowPassFilter.frequency.value = 1800; // Slightly higher for clearer wet sounds
-    lowPassFilter.Q.value = 1.2; // Sharper resonance for clarity
+            // Create reverb effect
+            const reverbDuration = 0.3;
+            const reverbBuffer = audioContext.createBuffer(1, sampleRate * reverbDuration, sampleRate);
+            const reverbData = reverbBuffer.getChannelData(0);
+            for (let i = 0; i < reverbData.length; i++) {
+                reverbData[i] = (Math.random() * 2 - 1) * Math.exp(-6 * (i / sampleRate));
+            }
+            reverb.buffer = reverbBuffer;
 
-    source.buffer = buffer;
-    source.connect(lowPassFilter);
-    lowPassFilter.connect(reverb);
-    reverb.connect(gainNode);
-    gainNode.connect(audioContext.destination);
+            // Configure audio nodes
+            lowPassFilter.type = 'lowpass';
+            lowPassFilter.frequency.value = 1800;
+            lowPassFilter.Q.value = 1.2;
 
-    // Volume envelope
-    gainNode.gain.setValueAtTime(0.5, audioContext.currentTime); // Start moderately loud
-    gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + duration); // Quick fade
+            source.buffer = buffer;
+            source.connect(lowPassFilter);
+            lowPassFilter.connect(reverb);
+            reverb.connect(gainNode);
+            gainNode.connect(audioContext.destination);
 
-    source.start();
-}
+            // Volume envelope
+            gainNode.gain.setValueAtTime(0.5, audioContext.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + duration);
 
-
-
+            source.start();
+        }
 
         function resizeCanvas() {
             canvas.width = gameContainer.clientWidth;
@@ -266,13 +266,13 @@ function playBubblePopSound() {
         class Bubble {
             constructor(groupX = null) {
                 this.radius = 25 + Math.random() * 25;
-                this.x = groupX !== null ? 
-                    groupX + (Math.random() - 0.5) * 60 : 
+                this.x = groupX !== null ?
+                    groupX + (Math.random() - 0.5) * 60 :
                     Math.random() * (canvas.width - this.radius * 2) + this.radius;
                 this.x = Math.max(this.radius, Math.min(canvas.width - this.radius, this.x));
                 this.y = canvas.height + this.radius;
                 this.vx = (Math.random() - 0.5) * 2;
-                this.vy = (-0.5 - Math.random() * 0.5) * speedMultiplier; // Initial velocity affected by speed multiplier
+                this.vy = (-0.5 - Math.random() * 0.5) * speedMultiplier;
                 this.baseHue = Math.random() * 360;
                 this.points = Math.ceil((50 - this.radius) * 2);
                 this.active = true;
@@ -287,11 +287,11 @@ function playBubblePopSound() {
                     return this.alpha <= 0;
                 }
 
-                this.vy -= 0.05 * speedMultiplier; // Acceleration affected by speed multiplier
+                this.vy -= 0.05 * speedMultiplier;
                 this.vx += (Math.random() - 0.5) * 0.1 * speedMultiplier;
                 this.vx *= 0.99;
                 this.vy *= 0.99;
-                
+
                 this.x += this.vx * speedMultiplier;
                 this.y += this.vy * speedMultiplier;
 
@@ -311,7 +311,7 @@ function playBubblePopSound() {
                     this.x - this.radius * 0.3, this.y - this.radius * 0.3, this.radius * 0.1,
                     this.x, this.y, this.radius
                 );
-                
+
                 gradient.addColorStop(0, `hsla(${this.baseHue}, 100%, 90%, 0.8)`);
                 gradient.addColorStop(0.4, `hsla(${this.baseHue}, 70%, 60%, 0.6)`);
                 gradient.addColorStop(1, `hsla(${this.baseHue}, 90%, 40%, 0.4)`);
@@ -327,7 +327,7 @@ function playBubblePopSound() {
                 );
                 highlightGradient.addColorStop(0, 'rgba(255, 255, 255, 0.4)');
                 highlightGradient.addColorStop(1, 'rgba(255, 255, 255, 0)');
-                
+
                 ctx.beginPath();
                 ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
                 ctx.fillStyle = highlightGradient;
@@ -366,33 +366,33 @@ function playBubblePopSound() {
             const dx = b2.x - b1.x;
             const dy = b2.y - b1.y;
             const distance = Math.sqrt(dx * dx + dy * dy);
-            
+
             if (distance < b1.radius + b2.radius) {
                 const nx = dx / distance;
                 const ny = dy / distance;
-                
+
                 const overlap = (b1.radius + b2.radius - distance) / 2;
                 b1.x -= nx * overlap;
                 b1.y -= ny * overlap;
                 b2.x += nx * overlap;
                 b2.y += ny * overlap;
-                
+
                 const dvx = b2.vx - b1.vx;
                 const dvy = b2.vy - b1.vy;
                 const velAlongNormal = dvx * nx + dvy * ny;
-                
+
                 if (velAlongNormal > 0) return;
-                
+
                 const restitution = 0.6;
                 const j = -(1 + restitution) * velAlongNormal;
                 const impulseX = j * nx * speedMultiplier;
                 const impulseY = j * ny * speedMultiplier;
-                
+
                 b1.vx -= impulseX;
                 b1.vy -= impulseY;
                 b2.vx += impulseX;
                 b2.vy += impulseY;
-                
+
                 b1.vx += (Math.random() - 0.5) * 0.5 * speedMultiplier;
                 b1.vy += (Math.random() - 0.5) * 0.5 * speedMultiplier;
                 b2.vx += (Math.random() - 0.5) * 0.5 * speedMultiplier;
@@ -417,23 +417,23 @@ function playBubblePopSound() {
 
         function handleTouch(e) {
             if (!gameActive) return;
-            
+
             e.preventDefault();
             const rect = canvas.getBoundingClientRect();
             const scaleX = canvas.width / rect.width;
             const scaleY = canvas.height / rect.height;
-            
+
             const touches = e.touches || [e];
-            
+
             for (let touch of touches) {
                 const x = (touch.clientX - rect.left) * scaleX;
                 const y = (touch.clientY - rect.top) * scaleY;
-                
+
                 for (let i = bubbles.length - 1; i >= 0; i--) {
                     const bubble = bubbles[i];
                     if (bubble.contains(x, y) && bubble.active) {
                         bubble.pop();
-                        playBubblePopSound()
+                        playBubblePopSound();
                         score += bubble.points;
                         scoreElement.textContent = `Score: ${score}`;
                         bubbles.splice(i, 1);
@@ -444,9 +444,9 @@ function playBubblePopSound() {
         }
 
         function startGame() {
-			if (!audioContext) {
-				initAudio();
-			}
+            if (!audioContext) {
+                initAudio();
+            }
             startScreen.style.display = 'none';
             gameActive = true;
             score = 0;
@@ -465,15 +465,15 @@ function playBubblePopSound() {
             const deltaTime = timestamp - lastTime;
             lastTime = timestamp;
 
-            // Update speed multiplier based on score - extremely gradual increase
-            speedMultiplier = 1.0 + (score / 10000); // Increases by 0.0001 per point
+            // Update speed multiplier based on score
+            speedMultiplier = 1.0 + (score / 10000);
 
             ctx.clearRect(0, 0, canvas.width, canvas.height);
 
             if (timestamp - lastBubble > bubbleInterval) {
                 createBubbleGroup();
                 lastBubble = timestamp;
-                bubbleInterval = Math.max(1000, 1500 - Math.floor(score/20));
+                bubbleInterval = Math.max(1000, 1500 - Math.floor(score / 20));
             }
 
             // Update and draw particles
@@ -527,4 +527,5 @@ function playBubblePopSound() {
         canvas.addEventListener('mousedown', handleTouch);
     </script>
 </body>
+
 </html>
