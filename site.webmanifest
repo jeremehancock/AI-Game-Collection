@@ -32,7 +32,6 @@
   ],
   "theme_color": "#181d34",
   "background_color": "#181d34",
-  "display_override": ["fullscreen", "window-controls-overlay", "minimal-ui"],
   "categories": ["games"],
   "edge_side_panel": {
     "preferred_width": 0
