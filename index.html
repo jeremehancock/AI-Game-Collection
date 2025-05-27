@@ -1,16 +1,18 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-    <meta charset="UTF-8">
+	<meta charset="UTF-8">
 	<meta name="mobile-web-app-capable" content="yes">
 	<meta name="apple-mobile-web-app-capable" content="yes">
 	<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+	<meta name="viewport"
+		content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 	<meta name="full-screen" content="yes">
 	<meta name="browsermode" content="application">
 	<meta name="x5-fullscreen" content="true">
 	<meta name="x5-page-mode" content="app">
-    <title>AI Game Collection</title>
+	<title>AI Game Collection</title>
 	<link rel="icon" type="image/png" href="images/icons/favicon-96x96.png" sizes="96x96" />
 	<link rel="icon" type="image/svg+xml" href="images/icons/favicon.svg" />
 	<link rel="shortcut icon" href="images/icons/favicon.ico" />
@@ -22,7 +24,7 @@
 	<!-- Open Graph / Facebook -->
 	<meta property="og:type" content="website">
 	<meta property="og:url" content="https://aigamecollection.com/>
-	<meta property="og:title" content="AI Game Collection - aigamecollection.com">
+	<meta property=" og:title" content="AI Game Collection - aigamecollection.com">
 	<meta property="og:description" content="This site and all games were built using AI with minimal code changes.">
 	<meta property="og:image" content="https://aigamecollection.com/images/icons/web-app-manifest-512x512.png">
 
@@ -37,365 +39,359 @@
 	<link rel="canonical" href="https://aigamecollection.com/">
 	<meta property="og:site_name" content="aigamecollection.com">
 	<meta property="og:locale" content="en_US">
-	
+
 	<link rel="preconnect" href="https://fonts.googleapis.com">
 	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 	<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 
 	<style>
 		* {
-		    margin: 0;
-		    padding: 0;
-		    box-sizing: border-box;
-		    font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+			margin: 0;
+			padding: 0;
+			box-sizing: border-box;
+			font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
 		}
 
 		body {
-		    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
-		    color: #fff;
-		    min-height: 100vh;
-		    padding: 2rem;
-		    -webkit-font-smoothing: antialiased;
-		    -moz-osx-font-smoothing: grayscale;
-		    letter-spacing: -0.015em;
-		     /* Add padding for iOS safe area */
-			padding-top: env(safe-area-inset-top);
-			padding-bottom: env(safe-area-inset-bottom);
-			padding-left: env(safe-area-inset-left);
-			padding-right: env(safe-area-inset-right);
-			/* Ensure proper viewport height on iOS */
-			min-height: -webkit-fill-available;
+			background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+			color: #fff;
+			min-height: 100vh;
+			padding: 2rem;
+			-webkit-font-smoothing: antialiased;
+			-moz-osx-font-smoothing: grayscale;
+			letter-spacing: -0.015em;
 		}
 
 		.container {
-		    max-width: 1200px;
-		    margin: 0 auto;
-		        padding-top: max(2rem, env(safe-area-inset-top));
+			max-width: 1200px;
+			margin: 0 auto;
 		}
 
 		header {
-		    text-align: center;
-		    padding-bottom: max(2rem, env(safe-area-inset-top));
+			text-align: center;
 		}
 
 		h1 {
-		    font-size: 2.5rem;
-		    margin-bottom: 1rem;
-		    color: #fff;
-		    font-weight: 700;
-		    letter-spacing: -0.025em;
+			font-size: 2.5rem;
+			margin-bottom: 1rem;
+			color: #fff;
+			font-weight: 700;
+			letter-spacing: -0.025em;
 		}
 
 		.subtitle {
-		    color: #a0a0a0;
-		    font-size: 1.1rem;
-		    font-weight: 400;
-		    line-height: 1.6;
+			color: #a0a0a0;
+			font-size: 1.1rem;
+			font-weight: 400;
+			line-height: 1.6;
 		}
 
 		.games-grid {
-		    display: grid;
-		    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-		    gap: 2rem;
-		    padding: 1rem;
+			display: grid;
+			grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+			gap: 2rem;
+			padding: 1rem;
 		}
 
 		.game-card {
-		    background: rgba(255, 255, 255, 0.05);
-		    border-radius: 15px;
-		    padding: 1.5rem;
-		    cursor: pointer;
-		    transition: all 0.3s ease;
-		    border: 1px solid rgba(255, 255, 255, 0.1);
-		    position: relative;
-		    overflow: hidden;
-		    display: flex;
-		    flex-direction: column;
-		    height: 100%;
+			background: rgba(255, 255, 255, 0.05);
+			border-radius: 15px;
+			padding: 1.5rem;
+			cursor: pointer;
+			transition: all 0.3s ease;
+			border: 1px solid rgba(255, 255, 255, 0.1);
+			position: relative;
+			overflow: hidden;
+			display: flex;
+			flex-direction: column;
+			height: 100%;
 		}
 
 		.game-card:hover {
-		    transform: translateY(-5px);
-		    background: rgba(255, 255, 255, 0.1);
-		    border-color: rgba(255, 255, 255, 0.2);
+			transform: translateY(-5px);
+			background: rgba(255, 255, 255, 0.1);
+			border-color: rgba(255, 255, 255, 0.2);
 		}
 
 		.game-card::before {
-		    content: '';
-		    position: absolute;
-		    top: 0;
-		    left: 0;
-		    width: 100%;
-		    height: 100%;
-		    background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.05));
-		    pointer-events: none;
+			content: '';
+			position: absolute;
+			top: 0;
+			left: 0;
+			width: 100%;
+			height: 100%;
+			background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.05));
+			pointer-events: none;
 		}
 
 		.game-icon {
-		    width: 48px;
-		    height: 48px;
-		    margin-bottom: 1rem;
+			width: 48px;
+			height: 48px;
+			margin-bottom: 1rem;
 		}
 
 		.game-icon svg {
-		    width: 100%;
-		    height: 100%;
+			width: 100%;
+			height: 100%;
 		}
 
 		.game-title {
-		    font-size: 1.5rem;
-		    margin-bottom: 0.5rem;
-		    color: #fff;
-		    font-weight: 600;
-		    letter-spacing: -0.015em;
+			font-size: 1.5rem;
+			margin-bottom: 0.5rem;
+			color: #fff;
+			font-weight: 600;
+			letter-spacing: -0.015em;
 		}
 
 		.game-description {
-		    color: #a0a0a0;
-		    font-size: 1rem;
-		    line-height: 1.5;
-		    margin-bottom: 20px;
-		    font-weight: 400;
+			color: #a0a0a0;
+			font-size: 1rem;
+			line-height: 1.5;
+			margin-bottom: 20px;
+			font-weight: 400;
 		}
 
 		.game-meta {
-		    margin-top: 1rem;
-		    font-size: 0.8rem;
-		    color: #666;
-		    margin-bottom: auto;
+			margin-top: 1rem;
+			font-size: 0.8rem;
+			color: #666;
+			margin-bottom: auto;
 		}
 
 		.play-button {
-					display: inline-block;
-					width: auto;
-					max-width: fit-content;
-					padding: 0.5rem 1rem;
-					background: rgba(255, 255, 255, 0.1);
-					border: 1px solid rgba(255, 255, 255, 0.2);
-					border-radius: 5px;
-					color: #fff;
-					text-decoration: none;
-					transition: all 0.3s ease;
-					margin-top: auto;
-					margin-left: auto;
-					text-align: left;
-					cursor: pointer;
-					font-weight: 500;
-					letter-spacing: 0.01em;
-					align-self: flex-end;
+			display: inline-block;
+			width: auto;
+			max-width: fit-content;
+			padding: 0.5rem 1rem;
+			background: rgba(255, 255, 255, 0.1);
+			border: 1px solid rgba(255, 255, 255, 0.2);
+			border-radius: 5px;
+			color: #fff;
+			text-decoration: none;
+			transition: all 0.3s ease;
+			margin-top: auto;
+			margin-left: auto;
+			text-align: left;
+			cursor: pointer;
+			font-weight: 500;
+			letter-spacing: 0.01em;
+			align-self: flex-end;
 		}
 
 		.play-button:hover {
-		    background: rgba(255, 255, 255, 0.2);
+			background: rgba(255, 255, 255, 0.2);
 		}
 
 		.game-iframe-container {
-		    position: fixed;
-		    top: 0;
-		    left: 0;
-		    width: 100%;
-		    height: 100%;
-		    background: #000;
-		    z-index: 1000;
-		    display: none;
-		    padding-top: env(safe-area-inset-top);
+			position: fixed;
+			top: 0;
+			left: 0;
+			width: 100%;
+			height: 100%;
+			background: #000;
+			z-index: 1000;
+			display: none;
+			padding-top: env(safe-area-inset-top);
 		}
 
 		.game-iframe {
-		    width: 100%;
-		    height: 100%;
-		    border: none;
+			width: 100%;
+			height: 100%;
+			border: none;
 		}
 
 		.back-button {
-		    position: fixed;
-		    bottom: 30px;
-		    left: 30px;
-		    z-index: 1001;
-		    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
-		    color: white;
-		    border: none;
-		    padding: 12px;
-		    border-radius: 50%;
-		    cursor: pointer;
-		    display: none;
-		    transition: all 0.3s ease;
-		    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-		    align-items: center;
-		    justify-content: center;
-		    width: 48px;
-		    height: 48px;
+			position: fixed;
+			bottom: 30px;
+			left: 30px;
+			z-index: 1001;
+			background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+			color: white;
+			border: none;
+			padding: 12px;
+			border-radius: 50%;
+			cursor: pointer;
+			display: none;
+			transition: all 0.3s ease;
+			box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+			align-items: center;
+			justify-content: center;
+			width: 48px;
+			height: 48px;
 		}
 
 		.back-button:hover {
-		    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
-		    transform: translateY(-2px);
-		    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4);
-		    opacity: 90%;
+			background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+			transform: translateY(-2px);
+			box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4);
+			opacity: 90%;
 		}
 
 		.back-button:active {
-		    transform: translateY(0);
-		    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+			transform: translateY(0);
+			box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
 		}
 
 		.back-button svg {
-		    width: 24px;
-		    height: 24px;
+			width: 24px;
+			height: 24px;
 		}
 
 		.footer-container {
-		    display: flex;
-		    justify-content: space-between;
-		    align-items: center;
-		    padding: 1rem 2rem;
+			display: flex;
+			justify-content: space-between;
+			align-items: center;
+			padding: 1rem 2rem;
 		}
 
 		.footer-text {
-		    color: #a0a0a0;
-		    font-size: 1rem;
-		    font-weight: 400;
+			color: #a0a0a0;
+			font-size: 1rem;
+			font-weight: 400;
 		}
 
 		.footer-link {
-		    color: #fff;
-		    text-decoration: none;
-		    transition: opacity 0.3s ease;
-		    font-weight: 500;
+			color: #fff;
+			text-decoration: none;
+			transition: opacity 0.3s ease;
+			font-weight: 500;
 		}
 
 		.footer-link:hover {
-		    opacity: 0.8;
+			opacity: 0.8;
 		}
 
 		.icon-container {
-		    display: flex;
-		    gap: 1rem;
+			display: flex;
+			gap: 1rem;
 		}
 
-		.github-link, .dockerhub-link {
-		    opacity: 0.7;
-		    transition: all 0.3s ease;
-		    background: rgba(255, 255, 255, 0.05);
-		    padding: 0.75rem;
-		    border-radius: 50%;
-		    border: 1px solid rgba(255, 255, 255, 0.1);
-		    display: flex;
-		    align-items: center;
-		    justify-content: center;
+		.github-link,
+		.dockerhub-link {
+			opacity: 0.7;
+			transition: all 0.3s ease;
+			background: rgba(255, 255, 255, 0.05);
+			padding: 0.75rem;
+			border-radius: 50%;
+			border: 1px solid rgba(255, 255, 255, 0.1);
+			display: flex;
+			align-items: center;
+			justify-content: center;
 		}
 
-		.github-link:hover, .dockerhub-link:hover {
-		    opacity: 1;
-		    background: rgba(255, 255, 255, 0.1);
-		    border-color: rgba(255, 255, 255, 0.2);
-		    transform: translateY(-2px);
+		.github-link:hover,
+		.dockerhub-link:hover {
+			opacity: 1;
+			background: rgba(255, 255, 255, 0.1);
+			border-color: rgba(255, 255, 255, 0.2);
+			transform: translateY(-2px);
 		}
 
 		.google-play-container {
-		    display: flex;
-		    justify-content: center; 
-		    margin-top: 50px;  
+			display: flex;
+			justify-content: center;
+			margin-top: 50px;
 		}
-		
+
 		#googlePlayButton {
-		    display: none;
+			display: none;
 		}
-		
+
 		#mobileOptimizedText {
-	       margin-bottom: 50px;   
+			margin-bottom: 50px;
 		}
 
 		@media (max-width: 768px) {
-		    body {
-		        padding: 1rem;
-		    }
+			body {
+				padding: 1rem;
+			}
 
-		    h1 {
-		        font-size: 2rem;
-		    }
+			h1 {
+				font-size: 2rem;
+			}
 
-		    .games-grid {
-		        grid-template-columns: 1fr;
-		    }
+			.games-grid {
+				grid-template-columns: 1fr;
+			}
 
-		    .footer-container {
-		        padding: 1rem;
-		    }
-		    
-		    .footer-text {
-		        font-size: 0.9rem;
-		    }
-		    
-		    .icon-container {
-		        gap: 0.75rem;
-		    }
-		    
-		    .github-link, .dockerhub-link {
-		        transform: scale(0.9);
-		    }
-		    
-		    .github-link:hover, .dockerhub-link:hover {
-		        transform: scale(0.9) translateY(-2px);
-		    }
+			.footer-container {
+				padding: 1rem;
+			}
+
+			.footer-text {
+				font-size: 0.9rem;
+			}
+
+			.icon-container {
+				gap: 0.75rem;
+			}
+
+			.github-link,
+			.dockerhub-link {
+				transform: scale(0.9);
+			}
+
+			.github-link:hover,
+			.dockerhub-link:hover {
+				transform: scale(0.9) translateY(-2px);
+			}
 		}
 
-        /* iOS install prompt */
-        .ios-install-prompt {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            background: linear-gradient(135deg, rgba(26, 26, 46, 0.95) 0%, rgba(22, 33, 62, 0.95) 100%);
-            color: #fff;
-            padding: 20px;
-            border-radius: 12px;
-            text-align: left;
-            display: none;
-            z-index: 1000;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            max-width: 300px;
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-        }
+		/* iOS install prompt */
+		.ios-install-prompt {
+			position: fixed;
+			top: 20px;
+			right: 20px;
+			background: linear-gradient(135deg, rgba(26, 26, 46, 0.95) 0%, rgba(22, 33, 62, 0.95) 100%);
+			color: #fff;
+			padding: 20px;
+			border-radius: 12px;
+			text-align: left;
+			display: none;
+			z-index: 1000;
+			box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+			border: 1px solid rgba(255, 255, 255, 0.1);
+			max-width: 300px;
+			backdrop-filter: blur(10px);
+			-webkit-backdrop-filter: blur(10px);
+		}
 
-        .ios-install-prompt p {
-            margin: 0 0 15px 0;
-            color: #fff;
-        }
+		.ios-install-prompt p {
+			margin: 0 0 15px 0;
+			color: #fff;
+		}
 
-        .ios-install-steps {
-            margin: 0;
-            padding-left: 20px;
-            color: #a0a0a0;
-        }
+		.ios-install-steps {
+			margin: 0;
+			padding-left: 20px;
+			color: #a0a0a0;
+		}
 
-        .ios-install-steps li {
-            margin-bottom: 8px;
-        }
+		.ios-install-steps li {
+			margin-bottom: 8px;
+		}
 
-        .close-prompt {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            background: none;
-            border: none;
-            color: #fff;
-            font-size: 20px;
-            cursor: pointer;
-            opacity: 0.7;
-            transition: opacity 0.3s ease;
-        }
+		.close-prompt {
+			position: absolute;
+			top: 10px;
+			right: 10px;
+			background: none;
+			border: none;
+			color: #fff;
+			font-size: 20px;
+			cursor: pointer;
+			opacity: 0.7;
+			transition: opacity 0.3s ease;
+		}
 
-        .close-prompt:hover {
-            opacity: 1;
-        }
+		.close-prompt:hover {
+			opacity: 1;
+		}
 
-        /* When in game view, adjust install prompt positions */
-        .game-view 
-        .game-view .ios-install-prompt {
-            display: none !important;
-        }
+		/* When in game view, adjust install prompt positions */
+		.game-view .game-view .ios-install-prompt {
+			display: none !important;
+		}
 
 		.app-prompt {
 			position: fixed;
@@ -467,211 +463,281 @@
 		}
 	</style>
 </head>
+
 <body>
-    <div class="container">
+	<div class="container">
 		<header>
 			<h1>AI Game Collection</h1>
 			<p class="subtitle">This site and all games were built using AI with minimal code changes.</p>
-			
-			 <p class="subtitle" id="mobileOptimizedText">All games are optimized for mobile. For the best experience visit this site on your mobile device or install the Android app.</p>
-            <!-- Add Google Play button container -->
-            <div class="google-play-container" id="googlePlayButton">
-                <a href="https://play.google.com/store/apps/details?id=dev.jereme.games.twa" target="_blank">
-				<svg width="200px" viewBox="0 0 135 40" xmlns="http://www.w3.org/2000/svg">
-				<style>.st0{fill:#a6a6a6}.st1{stroke:#ffffff;stroke-width:.2;stroke-miterlimit:10}.st1,.st2{fill:#fff}.st3{fill:url(#d)}.st4{fill:url(#c)}.st5{fill:url(#b)}.st6{fill:url(#a)}.st7,.st8,.st9{opacity:.2;enable-background:new}.st8,.st9{opacity:.12}.st9{opacity:.25;fill:#fff}</style>
-				<path d="M130 40H5c-2.8 0-5-2.2-5-5V5c0-2.8 2.2-5 5-5h125c2.8 0 5 2.2 5 5v30c0 2.8-2.2 5-5 5z"/>
-				<path class="st0" d="M130 .8c2.3 0 4.2 1.9 4.2 4.2v30c0 2.3-1.9 4.2-4.2 4.2H5C2.7 39.2.8 37.3.8 35V5C.8 2.7 2.7.8 5 .8h125m0-.8H5C2.2 0 0 2.3 0 5v30c0 2.8 2.2 5 5 5h125c2.8 0 5-2.2 5-5V5c0-2.7-2.2-5-5-5z"/>
-				<path class="st1" d="M47.4 10.2c0 .8-.2 1.5-.7 2-.6.6-1.3.9-2.2.9-.9 0-1.6-.3-2.2-.9-.6-.6-.9-1.3-.9-2.2 0-.9.3-1.6.9-2.2.6-.6 1.3-.9 2.2-.9.4 0 .8.1 1.2.3.4.2.7.4.9.7l-.5.5c-.4-.5-.9-.7-1.6-.7-.6 0-1.2.2-1.6.7-.5.4-.7 1-.7 1.7s.2 1.3.7 1.7c.5.4 1 .7 1.6.7.7 0 1.2-.2 1.7-.7.3-.3.5-.7.5-1.2h-2.2v-.8h2.9v.4zM52 7.7h-2.7v1.9h2.5v.7h-2.5v1.9H52v.8h-3.5V7H52v.7zM55.3 13h-.8V7.7h-1.7V7H57v.7h-1.7V13zM59.9 13V7h.8v6h-.8zM64.1 13h-.8V7.7h-1.7V7h4.1v.7H64V13zM73.6 12.2c-.6.6-1.3.9-2.2.9-.9 0-1.6-.3-2.2-.9-.6-.6-.9-1.3-.9-2.2s.3-1.6.9-2.2c.6-.6 1.3-.9 2.2-.9.9 0 1.6.3 2.2.9.6.6.9 1.3.9 2.2 0 .9-.3 1.6-.9 2.2zm-3.8-.5c.4.4 1 .7 1.6.7.6 0 1.2-.2 1.6-.7.4-.4.7-1 .7-1.7s-.2-1.3-.7-1.7c-.4-.4-1-.7-1.6-.7-.6 0-1.2.2-1.6.7-.4.4-.7 1-.7 1.7s.2 1.3.7 1.7zM75.6 13V7h.9l2.9 4.7V7h.8v6h-.8l-3.1-4.9V13h-.7z"/>
-				<path class="st2" d="M68.1 21.8c-2.4 0-4.3 1.8-4.3 4.3 0 2.4 1.9 4.3 4.3 4.3s4.3-1.8 4.3-4.3c0-2.6-1.9-4.3-4.3-4.3zm0 6.8c-1.3 0-2.4-1.1-2.4-2.6s1.1-2.6 2.4-2.6c1.3 0 2.4 1 2.4 2.6 0 1.5-1.1 2.6-2.4 2.6zm-9.3-6.8c-2.4 0-4.3 1.8-4.3 4.3 0 2.4 1.9 4.3 4.3 4.3s4.3-1.8 4.3-4.3c0-2.6-1.9-4.3-4.3-4.3zm0 6.8c-1.3 0-2.4-1.1-2.4-2.6s1.1-2.6 2.4-2.6c1.3 0 2.4 1 2.4 2.6 0 1.5-1.1 2.6-2.4 2.6zm-11.1-5.5v1.8H52c-.1 1-.5 1.8-1 2.3-.6.6-1.6 1.3-3.3 1.3-2.7 0-4.7-2.1-4.7-4.8s2.1-4.8 4.7-4.8c1.4 0 2.5.6 3.3 1.3l1.3-1.3c-1.1-1-2.5-1.8-4.5-1.8-3.6 0-6.7 3-6.7 6.6 0 3.6 3.1 6.6 6.7 6.6 2 0 3.4-.6 4.6-1.9 1.2-1.2 1.6-2.9 1.6-4.2 0-.4 0-.8-.1-1.1h-6.2zm45.4 1.4c-.4-1-1.4-2.7-3.6-2.7s-4 1.7-4 4.3c0 2.4 1.8 4.3 4.2 4.3 1.9 0 3.1-1.2 3.5-1.9l-1.4-1c-.5.7-1.1 1.2-2.1 1.2s-1.6-.4-2.1-1.3l5.7-2.4-.2-.5zm-5.8 1.4c0-1.6 1.3-2.5 2.2-2.5.7 0 1.4.4 1.6.9l-3.8 1.6zM82.6 30h1.9V17.5h-1.9V30zm-3-7.3c-.5-.5-1.3-1-2.3-1-2.1 0-4.1 1.9-4.1 4.3s1.9 4.2 4.1 4.2c1 0 1.8-.5 2.2-1h.1v.6c0 1.6-.9 2.5-2.3 2.5-1.1 0-1.9-.8-2.1-1.5l-1.6.7c.5 1.1 1.7 2.5 3.8 2.5 2.2 0 4-1.3 4-4.4V22h-1.8v.7zm-2.2 5.9c-1.3 0-2.4-1.1-2.4-2.6s1.1-2.6 2.4-2.6c1.3 0 2.3 1.1 2.3 2.6s-1 2.6-2.3 2.6zm24.4-11.1h-4.5V30h1.9v-4.7h2.6c2.1 0 4.1-1.5 4.1-3.9s-2-3.9-4.1-3.9zm.1 6h-2.7v-4.3h2.7c1.4 0 2.2 1.2 2.2 2.1-.1 1.1-.9 2.2-2.2 2.2zm11.5-1.8c-1.4 0-2.8.6-3.3 1.9l1.7.7c.4-.7 1-.9 1.7-.9 1 0 1.9.6 2 1.6v.1c-.3-.2-1.1-.5-1.9-.5-1.8 0-3.6 1-3.6 2.8 0 1.7 1.5 2.8 3.1 2.8 1.3 0 1.9-.6 2.4-1.2h.1v1h1.8v-4.8c-.2-2.2-1.9-3.5-4-3.5zm-.2 6.9c-.6 0-1.5-.3-1.5-1.1 0-1 1.1-1.3 2-1.3.8 0 1.2.2 1.7.4-.2 1.2-1.2 2-2.2 2zm10.5-6.6l-2.1 5.4h-.1l-2.2-5.4h-2l3.3 7.6-1.9 4.2h1.9l5.1-11.8h-2zm-16.8 8h1.9V17.5h-1.9V30z"/>
-				<linearGradient id="d" x1="21.8" x2="5.017" y1="33.29" y2="16.508" gradientTransform="matrix(1 0 0 -1 0 42)" gradientUnits="userSpaceOnUse">
-				<stop stop-color="#00a0ff" offset="0"/>
-				<stop stop-color="#00a1ff" offset=".007"/>
-				<stop stop-color="#00beff" offset=".26"/>
-				<stop stop-color="#00d2ff" offset=".512"/>
-				<stop stop-color="#00dfff" offset=".76"/>
-				<stop stop-color="#00e3ff" offset="1"/>
-				</linearGradient>
-				<path class="st3" d="M10.4 7.5c-.3.3-.4.8-.4 1.4V31c0 .6.2 1.1.5 1.4l.1.1L23 20.1v-.2L10.4 7.5z"/>
-				<linearGradient id="c" x1="33.834" x2="9.637" y1="21.999" y2="21.999" gradientTransform="matrix(1 0 0 -1 0 42)" gradientUnits="userSpaceOnUse">
-				<stop stop-color="#ffe000" offset="0"/>
-				<stop stop-color="#ffbd00" offset=".409"/>
-				<stop stop-color="orange" offset=".775"/>
-				<stop stop-color="#ff9c00" offset="1"/>
-				</linearGradient>
-				<path class="st4" d="M27 24.3l-4.1-4.1V19.9l4.1-4.1.1.1 4.9 2.8c1.4.8 1.4 2.1 0 2.9l-5 2.7z"/>
-				<linearGradient id="b" x1="24.827" x2="2.069" y1="19.704" y2="-3.054" gradientTransform="matrix(1 0 0 -1 0 42)" gradientUnits="userSpaceOnUse">
-				<stop stop-color="#ff3a44" offset="0"/>
-				<stop stop-color="#c31162" offset="1"/>
-				</linearGradient>
-				<path class="st5" d="M27.1 24.2L22.9 20 10.4 32.5c.5.5 1.2.5 2.1.1l14.6-8.4"/>
-				<linearGradient id="a" x1="7.297" x2="17.46" y1="41.824" y2="31.661" gradientTransform="matrix(1 0 0 -1 0 42)" gradientUnits="userSpaceOnUse">
-				<stop stop-color="#32a071" offset="0"/>
-				<stop stop-color="#2da771" offset=".069"/>
-				<stop stop-color="#15cf74" offset=".476"/>
-				<stop stop-color="#06e775" offset=".801"/>
-				<stop stop-color="#00f076" offset="1"/>
-				</linearGradient>
-				<path class="st6" d="M27.1 15.8L12.5 7.5c-.9-.5-1.6-.4-2.1.1L22.9 20l4.2-4.2z"/>
-				<path class="st7" d="M27 24.1l-14.5 8.2c-.8.5-1.5.4-2 0l-.1.1.1.1c.5.4 1.2.5 2 0L27 24.1z"/>
-				<path class="st8" d="M10.4 32.3c-.3-.3-.4-.8-.4-1.4v.1c0 .6.2 1.1.5 1.4v-.1h-.1zM32 21.3l-5 2.8.1.1 4.9-2.8c.7-.4 1-.9 1-1.4 0 .5-.4.9-1 1.3z"/>
-				<path class="st9" d="M12.5 7.6L32 18.7c.6.4 1 .8 1 1.3 0-.5-.3-1-1-1.4L12.5 7.5c-1.4-.8-2.5-.2-2.5 1.4V9c0-1.5 1.1-2.2 2.5-1.4z"/>
-				</svg>
-                </a>
-            </div>
+
+			<p class="subtitle" id="mobileOptimizedText">All games are optimized for mobile. For the best experience
+				visit this site on your mobile device or install the Android app.</p>
+			<!-- Add Google Play button container -->
+			<div class="google-play-container" id="googlePlayButton">
+				<a href="https://play.google.com/store/apps/details?id=dev.jereme.games.twa" target="_blank">
+					<svg width="200px" viewBox="0 0 135 40" xmlns="http://www.w3.org/2000/svg">
+						<style>
+							.st0 {
+								fill: #a6a6a6
+							}
+
+							.st1 {
+								stroke: #ffffff;
+								stroke-width: .2;
+								stroke-miterlimit: 10
+							}
+
+							.st1,
+							.st2 {
+								fill: #fff
+							}
+
+							.st3 {
+								fill: url(#d)
+							}
+
+							.st4 {
+								fill: url(#c)
+							}
+
+							.st5 {
+								fill: url(#b)
+							}
+
+							.st6 {
+								fill: url(#a)
+							}
+
+							.st7,
+							.st8,
+							.st9 {
+								opacity: .2;
+								enable-background: new
+							}
+
+							.st8,
+							.st9 {
+								opacity: .12
+							}
+
+							.st9 {
+								opacity: .25;
+								fill: #fff
+							}
+						</style>
+						<path
+							d="M130 40H5c-2.8 0-5-2.2-5-5V5c0-2.8 2.2-5 5-5h125c2.8 0 5 2.2 5 5v30c0 2.8-2.2 5-5 5z" />
+						<path class="st0"
+							d="M130 .8c2.3 0 4.2 1.9 4.2 4.2v30c0 2.3-1.9 4.2-4.2 4.2H5C2.7 39.2.8 37.3.8 35V5C.8 2.7 2.7.8 5 .8h125m0-.8H5C2.2 0 0 2.3 0 5v30c0 2.8 2.2 5 5 5h125c2.8 0 5-2.2 5-5V5c0-2.7-2.2-5-5-5z" />
+						<path class="st1"
+							d="M47.4 10.2c0 .8-.2 1.5-.7 2-.6.6-1.3.9-2.2.9-.9 0-1.6-.3-2.2-.9-.6-.6-.9-1.3-.9-2.2 0-.9.3-1.6.9-2.2.6-.6 1.3-.9 2.2-.9.4 0 .8.1 1.2.3.4.2.7.4.9.7l-.5.5c-.4-.5-.9-.7-1.6-.7-.6 0-1.2.2-1.6.7-.5.4-.7 1-.7 1.7s.2 1.3.7 1.7c.5.4 1 .7 1.6.7.7 0 1.2-.2 1.7-.7.3-.3.5-.7.5-1.2h-2.2v-.8h2.9v.4zM52 7.7h-2.7v1.9h2.5v.7h-2.5v1.9H52v.8h-3.5V7H52v.7zM55.3 13h-.8V7.7h-1.7V7H57v.7h-1.7V13zM59.9 13V7h.8v6h-.8zM64.1 13h-.8V7.7h-1.7V7h4.1v.7H64V13zM73.6 12.2c-.6.6-1.3.9-2.2.9-.9 0-1.6-.3-2.2-.9-.6-.6-.9-1.3-.9-2.2s.3-1.6.9-2.2c.6-.6 1.3-.9 2.2-.9.9 0 1.6.3 2.2.9.6.6.9 1.3.9 2.2 0 .9-.3 1.6-.9 2.2zm-3.8-.5c.4.4 1 .7 1.6.7.6 0 1.2-.2 1.6-.7.4-.4.7-1 .7-1.7s-.2-1.3-.7-1.7c-.4-.4-1-.7-1.6-.7-.6 0-1.2.2-1.6.7-.4.4-.7 1-.7 1.7s.2 1.3.7 1.7zM75.6 13V7h.9l2.9 4.7V7h.8v6h-.8l-3.1-4.9V13h-.7z" />
+						<path class="st2"
+							d="M68.1 21.8c-2.4 0-4.3 1.8-4.3 4.3 0 2.4 1.9 4.3 4.3 4.3s4.3-1.8 4.3-4.3c0-2.6-1.9-4.3-4.3-4.3zm0 6.8c-1.3 0-2.4-1.1-2.4-2.6s1.1-2.6 2.4-2.6c1.3 0 2.4 1 2.4 2.6 0 1.5-1.1 2.6-2.4 2.6zm-9.3-6.8c-2.4 0-4.3 1.8-4.3 4.3 0 2.4 1.9 4.3 4.3 4.3s4.3-1.8 4.3-4.3c0-2.6-1.9-4.3-4.3-4.3zm0 6.8c-1.3 0-2.4-1.1-2.4-2.6s1.1-2.6 2.4-2.6c1.3 0 2.4 1 2.4 2.6 0 1.5-1.1 2.6-2.4 2.6zm-11.1-5.5v1.8H52c-.1 1-.5 1.8-1 2.3-.6.6-1.6 1.3-3.3 1.3-2.7 0-4.7-2.1-4.7-4.8s2.1-4.8 4.7-4.8c1.4 0 2.5.6 3.3 1.3l1.3-1.3c-1.1-1-2.5-1.8-4.5-1.8-3.6 0-6.7 3-6.7 6.6 0 3.6 3.1 6.6 6.7 6.6 2 0 3.4-.6 4.6-1.9 1.2-1.2 1.6-2.9 1.6-4.2 0-.4 0-.8-.1-1.1h-6.2zm45.4 1.4c-.4-1-1.4-2.7-3.6-2.7s-4 1.7-4 4.3c0 2.4 1.8 4.3 4.2 4.3 1.9 0 3.1-1.2 3.5-1.9l-1.4-1c-.5.7-1.1 1.2-2.1 1.2s-1.6-.4-2.1-1.3l5.7-2.4-.2-.5zm-5.8 1.4c0-1.6 1.3-2.5 2.2-2.5.7 0 1.4.4 1.6.9l-3.8 1.6zM82.6 30h1.9V17.5h-1.9V30zm-3-7.3c-.5-.5-1.3-1-2.3-1-2.1 0-4.1 1.9-4.1 4.3s1.9 4.2 4.1 4.2c1 0 1.8-.5 2.2-1h.1v.6c0 1.6-.9 2.5-2.3 2.5-1.1 0-1.9-.8-2.1-1.5l-1.6.7c.5 1.1 1.7 2.5 3.8 2.5 2.2 0 4-1.3 4-4.4V22h-1.8v.7zm-2.2 5.9c-1.3 0-2.4-1.1-2.4-2.6s1.1-2.6 2.4-2.6c1.3 0 2.3 1.1 2.3 2.6s-1 2.6-2.3 2.6zm24.4-11.1h-4.5V30h1.9v-4.7h2.6c2.1 0 4.1-1.5 4.1-3.9s-2-3.9-4.1-3.9zm.1 6h-2.7v-4.3h2.7c1.4 0 2.2 1.2 2.2 2.1-.1 1.1-.9 2.2-2.2 2.2zm11.5-1.8c-1.4 0-2.8.6-3.3 1.9l1.7.7c.4-.7 1-.9 1.7-.9 1 0 1.9.6 2 1.6v.1c-.3-.2-1.1-.5-1.9-.5-1.8 0-3.6 1-3.6 2.8 0 1.7 1.5 2.8 3.1 2.8 1.3 0 1.9-.6 2.4-1.2h.1v1h1.8v-4.8c-.2-2.2-1.9-3.5-4-3.5zm-.2 6.9c-.6 0-1.5-.3-1.5-1.1 0-1 1.1-1.3 2-1.3.8 0 1.2.2 1.7.4-.2 1.2-1.2 2-2.2 2zm10.5-6.6l-2.1 5.4h-.1l-2.2-5.4h-2l3.3 7.6-1.9 4.2h1.9l5.1-11.8h-2zm-16.8 8h1.9V17.5h-1.9V30z" />
+						<linearGradient id="d" x1="21.8" x2="5.017" y1="33.29" y2="16.508"
+							gradientTransform="matrix(1 0 0 -1 0 42)" gradientUnits="userSpaceOnUse">
+							<stop stop-color="#00a0ff" offset="0" />
+							<stop stop-color="#00a1ff" offset=".007" />
+							<stop stop-color="#00beff" offset=".26" />
+							<stop stop-color="#00d2ff" offset=".512" />
+							<stop stop-color="#00dfff" offset=".76" />
+							<stop stop-color="#00e3ff" offset="1" />
+						</linearGradient>
+						<path class="st3"
+							d="M10.4 7.5c-.3.3-.4.8-.4 1.4V31c0 .6.2 1.1.5 1.4l.1.1L23 20.1v-.2L10.4 7.5z" />
+						<linearGradient id="c" x1="33.834" x2="9.637" y1="21.999" y2="21.999"
+							gradientTransform="matrix(1 0 0 -1 0 42)" gradientUnits="userSpaceOnUse">
+							<stop stop-color="#ffe000" offset="0" />
+							<stop stop-color="#ffbd00" offset=".409" />
+							<stop stop-color="orange" offset=".775" />
+							<stop stop-color="#ff9c00" offset="1" />
+						</linearGradient>
+						<path class="st4" d="M27 24.3l-4.1-4.1V19.9l4.1-4.1.1.1 4.9 2.8c1.4.8 1.4 2.1 0 2.9l-5 2.7z" />
+						<linearGradient id="b" x1="24.827" x2="2.069" y1="19.704" y2="-3.054"
+							gradientTransform="matrix(1 0 0 -1 0 42)" gradientUnits="userSpaceOnUse">
+							<stop stop-color="#ff3a44" offset="0" />
+							<stop stop-color="#c31162" offset="1" />
+						</linearGradient>
+						<path class="st5" d="M27.1 24.2L22.9 20 10.4 32.5c.5.5 1.2.5 2.1.1l14.6-8.4" />
+						<linearGradient id="a" x1="7.297" x2="17.46" y1="41.824" y2="31.661"
+							gradientTransform="matrix(1 0 0 -1 0 42)" gradientUnits="userSpaceOnUse">
+							<stop stop-color="#32a071" offset="0" />
+							<stop stop-color="#2da771" offset=".069" />
+							<stop stop-color="#15cf74" offset=".476" />
+							<stop stop-color="#06e775" offset=".801" />
+							<stop stop-color="#00f076" offset="1" />
+						</linearGradient>
+						<path class="st6" d="M27.1 15.8L12.5 7.5c-.9-.5-1.6-.4-2.1.1L22.9 20l4.2-4.2z" />
+						<path class="st7" d="M27 24.1l-14.5 8.2c-.8.5-1.5.4-2 0l-.1.1.1.1c.5.4 1.2.5 2 0L27 24.1z" />
+						<path class="st8"
+							d="M10.4 32.3c-.3-.3-.4-.8-.4-1.4v.1c0 .6.2 1.1.5 1.4v-.1h-.1zM32 21.3l-5 2.8.1.1 4.9-2.8c.7-.4 1-.9 1-1.4 0 .5-.4.9-1 1.3z" />
+						<path class="st9"
+							d="M12.5 7.6L32 18.7c.6.4 1 .8 1 1.3 0-.5-.3-1-1-1.4L12.5 7.5c-1.4-.8-2.5-.2-2.5 1.4V9c0-1.5 1.1-2.2 2.5-1.4z" />
+					</svg>
+				</a>
+			</div>
 		</header>
 
-        <div class="games-grid" id="gamesContainer">
-            <!-- Games will be dynamically inserted here -->
-        </div>
-        <div class="footer-container">
-            <div class="footer-text">
-                AI project by: <a href="https://jeremehancock.com" target="_blank" class="footer-link">Jereme Hancock</a>
-            </div>
-            <div class="icon-container">
-                <a href="https://hub.docker.com/repository/docker/bozodev/ai-game-collection/general" target="_blank" class="dockerhub-link" title="Check it out on Docker Hub">
-                    <svg xmlns="http://www.w3.org/2000/svg" height="32" width="32"  viewBox="49 140 442 235">
-                        <path stroke="#ffffff" stroke-width="38" d="M296 226h42m-92 0h42m-91 0h42m-91 0h41m-91 0h42m8-46h41m8 0h42m7 0h42m-42-46h42"/>
-                        <path fill="#ffffff" d="m472 228s-18-17-55-11c-4-29-35-46-35-46s-29 35-8 74c-6 3-16 7-31 7H68c-5 19-5 145 133 145 99 0 173-46 208-130 52 4 63-39 63-39"/>
-                    </svg>
-                </a>
-                <a href="https://github.com/jeremehancock/AI-Game-Collection?tab=readme-ov-file#ai-game-collection" target="_blank" class="github-link" title="Check it out on GitHub">
-                    <svg height="24" width="24" viewBox="0 0 24 24" style="margin: 4px" fill="none" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"></path>
-                    </svg>
-                </a>
-            </div>
-        </div>
-    </div>
+		<div class="games-grid" id="gamesContainer">
+			<!-- Games will be dynamically inserted here -->
+		</div>
+		<div class="footer-container">
+			<div class="footer-text">
+				AI project by: <a href="https://jeremehancock.com" target="_blank" class="footer-link">Jereme
+					Hancock</a>
+			</div>
+			<div class="icon-container">
+				<a href="https://hub.docker.com/repository/docker/bozodev/ai-game-collection/general" target="_blank"
+					class="dockerhub-link" title="Check it out on Docker Hub">
+					<svg xmlns="http://www.w3.org/2000/svg" height="32" width="32" viewBox="49 140 442 235">
+						<path stroke="#ffffff" stroke-width="38"
+							d="M296 226h42m-92 0h42m-91 0h42m-91 0h41m-91 0h42m8-46h41m8 0h42m7 0h42m-42-46h42" />
+						<path fill="#ffffff"
+							d="m472 228s-18-17-55-11c-4-29-35-46-35-46s-29 35-8 74c-6 3-16 7-31 7H68c-5 19-5 145 133 145 99 0 173-46 208-130 52 4 63-39 63-39" />
+					</svg>
+				</a>
+				<a href="https://github.com/jeremehancock/AI-Game-Collection?tab=readme-ov-file#ai-game-collection"
+					target="_blank" class="github-link" title="Check it out on GitHub">
+					<svg height="24" width="24" viewBox="0 0 24 24" style="margin: 4px" fill="none" stroke="#ffffff"
+						stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+						<path
+							d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22">
+						</path>
+					</svg>
+				</a>
+			</div>
+		</div>
+	</div>
 
-    <!-- New elements for iframe and back button -->
-    <div class="game-iframe-container" id="gameContainer">
-        <iframe class="game-iframe" id="gameFrame"></iframe>
-    </div>
-    <button class="back-button" id="backButton" aria-label="Return to game selection">
-        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M15 18L9 12L15 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-        </svg>
-    </button>
+	<!-- New elements for iframe and back button -->
+	<div class="game-iframe-container" id="gameContainer">
+		<iframe class="game-iframe" id="gameFrame"></iframe>
+	</div>
+	<button class="back-button" id="backButton" aria-label="Return to game selection">
+		<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+			<path d="M15 18L9 12L15 6" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+				stroke-linejoin="round" />
+		</svg>
+	</button>
 
-    <!-- iOS Install Prompt -->
-    <div id="iosInstallPrompt" class="ios-install-prompt">
-        <button class="close-prompt" onclick="closeIOSPrompt()">&times;</button>
-        <p>Install this web app on your iPhone:</p>
-        <ol class="ios-install-steps">
-            <li>Tap the Share button</li>
-            <li>Scroll down and tap "Add to Home Screen"</li>
-            <li>Tap "Add" to install</li>
-        </ol>
-    </div>
-    
-<div id="appPrompt" class="app-prompt" style="display: none;">
-    <div class="app-prompt-content">
-        <h3>Open AI Game Collection App</h3>
-        <p>Would you like to open the installed app?</p>
-        <button id="openInApp" class="app-prompt-button">Open App</button>
-        <button id="stayInBrowser" class="app-prompt-button secondary">Continue in Browser</button>
-    </div>
-</div>
-</div>
-    <script>
+	<!-- iOS Install Prompt -->
+	<div id="iosInstallPrompt" class="ios-install-prompt">
+		<button class="close-prompt" onclick="closeIOSPrompt()">&times;</button>
+		<p>Install this web app on your iPhone:</p>
+		<ol class="ios-install-steps">
+			<li>Tap the Share button</li>
+			<li>Scroll down and tap "Add to Home Screen"</li>
+			<li>Tap "Add" to install</li>
+		</ol>
+	</div>
 
-    document.addEventListener('DOMContentLoaded', () => {
-    const appPrompt = document.getElementById('appPrompt');
-    const openInAppBtn = document.getElementById('openInApp');
-    const stayInBrowserBtn = document.getElementById('stayInBrowser');
-    
-    // Check if we're on Android and not already in the app/PWA
-    const isAndroid = /Android/i.test(navigator.userAgent);
-    const isStandalone = window.matchMedia('(display-mode: standalone)').matches || 
-                        document.referrer.includes('android-app://');
-    
-    // Show prompt if we're on Android and not in the app
-    if (isAndroid && !isStandalone) {
-        appPrompt.style.display = 'flex';  // Changed to flex for centering
-    }
-    
-    // Handle opening in Android app
-    openInAppBtn.addEventListener('click', () => {
-        window.location.href = 
-            `intent://${window.location.host}${window.location.pathname}` +
-            '#Intent;' +
-            'scheme=https;' +
-            'package=dev.jereme.games.twa;' +
-            'action=android.intent.action.VIEW;' +
-            'category=android.intent.category.BROWSABLE;' +
-            'end';
-    });
-    
-    // Handle staying in browser
-    stayInBrowserBtn.addEventListener('click', () => {
-        appPrompt.style.display = 'none';
-        handleGooglePlayButton();
-    });
-	});
-	
-        let deferredPrompt;
-        const iosInstallPrompt = document.getElementById('iosInstallPrompt');
+	<div id="appPrompt" class="app-prompt" style="display: none;">
+		<div class="app-prompt-content">
+			<h3>Open AI Game Collection App</h3>
+			<p>Would you like to open the installed app?</p>
+			<button id="openInApp" class="app-prompt-button">Open App</button>
+			<button id="stayInBrowser" class="app-prompt-button secondary">Continue in Browser</button>
+		</div>
+	</div>
+	</div>
+	<script>
 
-        // Check if it's iOS
-        function isIOS() {
-            return /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
-        }
+		document.addEventListener('DOMContentLoaded', () => {
+			const appPrompt = document.getElementById('appPrompt');
+			const openInAppBtn = document.getElementById('openInApp');
+			const stayInBrowserBtn = document.getElementById('stayInBrowser');
 
-        // Show iOS install prompt
-        function showIOSInstall() {
-            if (isIOS() && !navigator.standalone) {
-                iosInstallPrompt.style.display = 'block';
-            }
-        }
+			// Check if we're on Android and not already in the app/PWA
+			const isAndroid = /Android/i.test(navigator.userAgent);
+			const isStandalone = window.matchMedia('(display-mode: standalone)').matches ||
+				document.referrer.includes('android-app://');
 
-        // Close iOS prompt
-        function closeIOSPrompt() {
-            iosInstallPrompt.style.display = 'none';
-        }
+			// Show prompt if we're on Android and not in the app
+			if (isAndroid && !isStandalone) {
+				appPrompt.style.display = 'flex';  // Changed to flex for centering
+			}
 
-        // Modify loadGame to handle install button visibility
-        function loadGame(gamePath) {
-            const container = document.getElementById('gameContainer');
-            const iframe = document.getElementById('gameFrame');
-            const backButton = document.getElementById('backButton');
-            
-            iframe.src = gamePath;
-            container.style.display = 'block';
-            backButton.style.display = 'block';
-            document.body.style.overflow = 'hidden';
-            document.body.classList.add('game-view');
-        }
+			// Handle opening in Android app
+			openInAppBtn.addEventListener('click', () => {
+				window.location.href =
+					`intent://${window.location.host}${window.location.pathname}` +
+					'#Intent;' +
+					'scheme=https;' +
+					'package=dev.jereme.games.twa;' +
+					'action=android.intent.action.VIEW;' +
+					'category=android.intent.category.BROWSABLE;' +
+					'end';
+			});
 
-        // Modify goBack to handle install button visibility
-        function goBack() {
-            const container = document.getElementById('gameContainer');
-            const iframe = document.getElementById('gameFrame');
-            const backButton = document.getElementById('backButton');
-            
-            iframe.src = '';
-            container.style.display = 'none';
-            backButton.style.display = 'none';
-            document.body.style.overflow = 'auto';
-            document.body.classList.remove('game-view');
-            
-            // Show appropriate install button when returning to main page
-            if (isIOS() && !navigator.standalone) {
-                showIOSInstall();
-            } 
-        }
+			// Handle staying in browser
+			stayInBrowserBtn.addEventListener('click', () => {
+				appPrompt.style.display = 'none';
+				handleGooglePlayButton();
+			});
+		});
 
-        // Track installation
-        window.addEventListener('appinstalled', (evt) => {
-            iosInstallPrompt.style.display = 'none';
-        });
-        
-         // Function to get URL parameters
-        function getUrlParameter(name) {
-            name = name.replace(/[\[]/, '\\[').replace(/[\]]/, '\\]');
-            var regex = new RegExp('[\\?&]' + name + '=([^&#]*)');
-            var results = regex.exec(location.search);
-            return results === null ? '' : decodeURIComponent(results[1].replace(/\+/g, ' '));
-        }
+		let deferredPrompt;
+		const iosInstallPrompt = document.getElementById('iosInstallPrompt');
+
+		// Check if it's iOS
+		function isIOS() {
+			return /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+		}
+
+		// Show iOS install prompt
+		function showIOSInstall() {
+			if (isIOS() && !navigator.standalone) {
+				iosInstallPrompt.style.display = 'block';
+			}
+		}
+
+		// Close iOS prompt
+		function closeIOSPrompt() {
+			iosInstallPrompt.style.display = 'none';
+		}
+
+		// Modify loadGame to handle install button visibility
+		function loadGame(gamePath) {
+			const container = document.getElementById('gameContainer');
+			const iframe = document.getElementById('gameFrame');
+			const backButton = document.getElementById('backButton');
+
+			iframe.src = gamePath;
+			container.style.display = 'block';
+			backButton.style.display = 'block';
+			document.body.style.overflow = 'hidden';
+			document.body.classList.add('game-view');
+		}
+
+		// Modify goBack to handle install button visibility
+		function goBack() {
+			const container = document.getElementById('gameContainer');
+			const iframe = document.getElementById('gameFrame');
+			const backButton = document.getElementById('backButton');
+
+			iframe.src = '';
+			container.style.display = 'none';
+			backButton.style.display = 'none';
+			document.body.style.overflow = 'auto';
+			document.body.classList.remove('game-view');
+
+			// Show appropriate install button when returning to main page
+			if (isIOS() && !navigator.standalone) {
+				showIOSInstall();
+			}
+		}
+
+		// Track installation
+		window.addEventListener('appinstalled', (evt) => {
+			iosInstallPrompt.style.display = 'none';
+		});
+
+		// Function to get URL parameters
+		function getUrlParameter(name) {
+			name = name.replace(/[\[]/, '\\[').replace(/[\]]/, '\\]');
+			var regex = new RegExp('[\\?&]' + name + '=([^&#]*)');
+			var results = regex.exec(location.search);
+			return results === null ? '' : decodeURIComponent(results[1].replace(/\+/g, ' '));
+		}
 
 		// Function to handle Google Play button visibility
 		function handleGooglePlayButton() {
@@ -680,29 +746,29 @@
 			const isFullscreen = window.matchMedia('(display-mode: fullscreen)').matches; // Detect PWA mode
 			const googlePlayButton = document.getElementById('googlePlayButton');
 			const mobileOptimizedText = document.getElementById('mobileOptimizedText');
-			const isStandalone = window.matchMedia('(display-mode: standalone)').matches || 
-                        document.referrer.includes('android-app://');
+			const isStandalone = window.matchMedia('(display-mode: standalone)').matches ||
+				document.referrer.includes('android-app://');
 
 			if ((isAndroid && isFullscreen) || modeParam === 'app' || isIOS()) {
 				googlePlayButton.style.display = 'none'; // Hide in Android PWA or app mode
 				mobileOptimizedText.style.display = 'none'; // Hide in Android PWA or app mode
 			}
 			else if ((isAndroid && !isStandalone) || isIOS()) {
-        		googlePlayButton.style.display = 'none'; // Hide in Android PWA or app mode
-        	    mobileOptimizedText.style.display = 'none'; // Hide in Android PWA or app mode
-    		}
+				googlePlayButton.style.display = 'none'; // Hide in Android PWA or app mode
+				mobileOptimizedText.style.display = 'none'; // Hide in Android PWA or app mode
+			}
 			else if ((isAndroid && !isFullscreen)) {
 				mobileOptimizedText.style.display = 'none'; // Hide in Android PWA or app mode
 				googlePlayButton.style.display = 'block'; // Show otherwise
-			} 
+			}
 			else {
 				googlePlayButton.style.display = 'block'; // Show otherwise
 			}
 		}
-        
-        // Game collection data with SVG icons
-        const games = {
-		    nerdle: {
+
+		// Game collection data with SVG icons
+		const games = {
+			nerdle: {
 				title: 'Nerdle',
 				path: '/games/nerdle/',
 				description: 'A nerdy twist on the famous word game. Guess the hidden "nerdy" word in 6 tries.',
@@ -713,12 +779,12 @@
 			  <path fill="white" d="M41.404 45.15c-3.223 2.269-8.353 3.834-13.66 2.433-1.421-.377-2.535 3.31-1.018 3.733 5.767 1.55 12.049.429 16.93-3.014 1.205-.868-1.054-4.027-2.252-3.152"/>
 			</svg>`,
 				mobileOnly: false
-	},
-            pipes: {
-                title: 'Pipes',
-                path: '/games/pipes/',
-                description: 'Connect the pipes to create a continuous flow. A challenging puzzle game that will test your logical thinking.',
-                icon: `<svg viewBox="0 0 32 32" version="1.1" xmlns="http://www.w3.org/2000/svg" fill="white">
+			},
+			pipes: {
+				title: 'Pipes',
+				path: '/games/pipes/',
+				description: 'Connect the pipes to create a continuous flow. A challenging puzzle game that will test your logical thinking.',
+				icon: `<svg viewBox="0 0 32 32" version="1.1" xmlns="http://www.w3.org/2000/svg" fill="white">
                     <g>
                         <path d="M18.8,25c-0.5,0.5-0.8,1.2-0.8,2v2c0,0.6,0.4,1,1,1h10c0.6,0,1-0.4,1-1v-2c0-0.8-0.3-1.5-0.8-2H18.8z"/>
                         <path d="M13.2,7C13.7,6.5,14,5.8,14,5V3c0-0.6-0.4-1-1-1H3C2.4,2,2,2.4,2,3v2c0,0.8,0.3,1.5,0.8,2H13.2z"/>
@@ -726,13 +792,13 @@
                             c-0.1,0-0.2-0.1-0.2-0.2V9H4v4c0,3.9,3.1,7,7,7h2.3c0.3,0.6,1,1,1.7,1h2C17.7,21,18.4,20.6,18.7,20z"/>
                     </g>
                 </svg>`,
-                mobileOnly: false
-            },
-            memory: {
-                title: 'Memory',
-                path: '/games/memory/',
-                description: 'Test your memory by matching pairs of cards. A classic game that improves concentration and recall.',
-                icon: `<svg height="800px" width="800px" version="1.1" id="_x32_" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" 
+				mobileOnly: false
+			},
+			memory: {
+				title: 'Memory',
+				path: '/games/memory/',
+				description: 'Test your memory by matching pairs of cards. A classic game that improves concentration and recall.',
+				icon: `<svg height="800px" width="800px" version="1.1" id="_x32_" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" 
 	 viewBox="0 0 512 512"  xml:space="preserve">
 <style type="text/css">
 	.st0{fill:#fff;}
@@ -835,8 +901,8 @@
 		c27.616,32.17,41.938,74.898,41.938,119.674C452.356,207.812,452.113,213.73,451.611,219.664z"/>
 </g>
 </svg>`,
-mobileOnly: false
-            },
+				mobileOnly: false
+			},
 			minesweeper: {
 				title: 'Minesweeper',
 				path: '/games/minesweeper/',
@@ -851,7 +917,7 @@ mobileOnly: false
     <path d="m436.98,75.605c3.125,3.125 7.219,4.688 11.313,4.688 4.094,0 8.188-1.563 11.313-4.688l32-32c6.25-6.25 6.25-16.375 0-22.625s-16.375-6.25-22.625,0l-32,32c-6.251,6.25-6.251,16.375-0.001,22.625z"/>
   </g>
 </svg>`,
-mobileOnly: false
+				mobileOnly: false
 			},
 			snake: {
 				title: 'Snake',
@@ -903,13 +969,13 @@ mobileOnly: false
 		c5.825,0,10.55-4.733,10.55-10.55C179.772,86.931,175.047,82.207,169.222,82.207z"/>
 </g>
 </svg>`,
-mobileOnly: false
+				mobileOnly: false
 			},
-            soccerJuggle: {
-                title: 'Soccer Juggle',
-                path: '/games/soccer-juggle/',
-                description: 'Keep the soccer ball in the air as long as you can. How many juggles can you achieve?',
-                icon: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="-2500 -2500 5000 5000">
+			soccerJuggle: {
+				title: 'Soccer Juggle',
+				path: '/games/soccer-juggle/',
+				description: 'Keep the soccer ball in the air as long as you can. How many juggles can you achieve?',
+				icon: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="-2500 -2500 5000 5000">
                     <title>soccer ball</title>
                     <g stroke="#000" stroke-width="24">
                         <circle fill="#fff" r="2376"/>
@@ -917,8 +983,8 @@ mobileOnly: false
                     </g>
                     <path fill="#000" d="m-1624-1700c243-153 498-303 856-424 141 117 253 307 372 492-288 275-562 544-724 756-274-25-410-2-740-60 3-244 84-499 236-764zm2904-40c271 248 537 498 724 788-55 262-105 553-180 704-234-35-536-125-820-200-138-357-231-625-340-924 210-156 417-296 616-368zm-3273 3033a2376 2376 0 0 1-378-1392l59-7c54 342 124 674 311 928-36 179-2 323 51 458zm1197-1125c365 60 717 120 1060 180 106 333 120 667 156 1000-263 218-625 287-944 420-372-240-523-508-736-768 122-281 257-561 464-832zm3013 678a2376 2376 0 0 1-925 1147l-116-5c84-127 114-297 118-488 232-111 464-463 696-772 86 30 159 72 227 118zm-2287 1527a2376 2376 0 0 1-993-251c199 74 367 143 542 83 53 75 176 134 451 168z"/>
                 </svg>`,
-                mobileOnly: false
-            },
+				mobileOnly: false
+			},
 			waterRingToss: {
 				title: 'Water Ring Toss',
 				path: '/games/water-ring-toss/',
@@ -982,20 +1048,20 @@ c-84 -42 -203 -88 -209 -82 -2 2 -6 48 -10 101 l-6 98 32 -6 c18 -3 69 -14
 -320 58 -65 20 -65 21 -42 37 60 42 387 160 449 162 13 0 14 -14 9 -97z"/>
 </g>
 </svg>`,
-mobileOnly: true
+				mobileOnly: true
 			},
-		waveform: {
-			title: 'Waveform',
-			path: '/games/waveform/',
-			description: 'Guide particles to their targets by shaping a wave using frequency, amplitude, and phase controls while avoiding obstacles in this unique physics puzzle.',
-			icon: `<svg class="svg-icon" style="vertical-align: middle;fill: #fff;overflow: hidden;" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg"><path d="M512 51.2c-253.44 0-460.8 207.36-460.8 460.8s207.36 460.8 460.8 460.8 460.8-207.36 460.8-460.8-207.36-460.8-460.8-460.8z m0 51.2c217.6 0 394.24 168.96 407.04 384h-48.64c-43.52 0-76.8 33.28-76.8 76.8v51.2c0 15.36-10.24 25.6-25.6 25.6s-25.6-10.24-25.6-25.6v-204.8c0-43.52-33.28-76.8-76.8-76.8s-76.8 33.28-76.8 76.8v204.8c0 15.36-10.24 25.6-25.6 25.6s-25.6-10.24-25.6-25.6v-204.8c0-43.52-33.28-76.8-76.8-76.8s-76.8 33.28-76.8 76.8v204.8c0 15.36-10.24 25.6-25.6 25.6s-25.6-10.24-25.6-25.6v-179.2c0-43.52-33.28-76.8-76.8-76.8s-76.8 33.28-76.8 76.8v25.6c0 15.36-10.24 25.6-25.6 25.6h-48.64c12.8-215.04 189.44-384 407.04-384z m0 819.2c-217.6 0-394.24-168.96-407.04-384h48.64c43.52 0 76.8-33.28 76.8-76.8v-25.6c0-15.36 10.24-25.6 25.6-25.6s25.6 10.24 25.6 25.6v179.2c0 43.52 33.28 76.8 76.8 76.8s76.8-33.28 76.8-76.8v-204.8c0-15.36 10.24-25.6 25.6-25.6s25.6 10.24 25.6 25.6v204.8c0 43.52 33.28 76.8 76.8 76.8s76.8-33.28 76.8-76.8v-204.8c0-15.36 10.24-25.6 25.6-25.6s25.6 10.24 25.6 25.6v204.8c0 43.52 33.28 76.8 76.8 76.8s76.8-33.28 76.8-76.8v-51.2c0-15.36 10.24-25.6 25.6-25.6h48.64c-12.8 215.04-189.44 384-407.04 384z"  /></svg>`,
-			mobileOnly: false
-		},
-            bubblePop: {
-                title: 'Bubble Pop',
-                path: '/games/bubble-pop/',
-                description: 'Pop the bubbles before they escape! A fast-paced game of precision and reflexes that will keep you on your toes.',
-                icon: `<svg fill="#fff" height="800px" width="800px" version="1.1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 363.188 363.188" xmlns:xlink="http://www.w3.org/1999/xlink" enable-background="new 0 0 363.188 363.188">
+			waveform: {
+				title: 'Waveform',
+				path: '/games/waveform/',
+				description: 'Guide particles to their targets by shaping a wave using frequency, amplitude, and phase controls while avoiding obstacles in this unique physics puzzle.',
+				icon: `<svg class="svg-icon" style="vertical-align: middle;fill: #fff;overflow: hidden;" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg"><path d="M512 51.2c-253.44 0-460.8 207.36-460.8 460.8s207.36 460.8 460.8 460.8 460.8-207.36 460.8-460.8-207.36-460.8-460.8-460.8z m0 51.2c217.6 0 394.24 168.96 407.04 384h-48.64c-43.52 0-76.8 33.28-76.8 76.8v51.2c0 15.36-10.24 25.6-25.6 25.6s-25.6-10.24-25.6-25.6v-204.8c0-43.52-33.28-76.8-76.8-76.8s-76.8 33.28-76.8 76.8v204.8c0 15.36-10.24 25.6-25.6 25.6s-25.6-10.24-25.6-25.6v-204.8c0-43.52-33.28-76.8-76.8-76.8s-76.8 33.28-76.8 76.8v204.8c0 15.36-10.24 25.6-25.6 25.6s-25.6-10.24-25.6-25.6v-179.2c0-43.52-33.28-76.8-76.8-76.8s-76.8 33.28-76.8 76.8v25.6c0 15.36-10.24 25.6-25.6 25.6h-48.64c12.8-215.04 189.44-384 407.04-384z m0 819.2c-217.6 0-394.24-168.96-407.04-384h48.64c43.52 0 76.8-33.28 76.8-76.8v-25.6c0-15.36 10.24-25.6 25.6-25.6s25.6 10.24 25.6 25.6v179.2c0 43.52 33.28 76.8 76.8 76.8s76.8-33.28 76.8-76.8v-204.8c0-15.36 10.24-25.6 25.6-25.6s25.6 10.24 25.6 25.6v204.8c0 43.52 33.28 76.8 76.8 76.8s76.8-33.28 76.8-76.8v-204.8c0-15.36 10.24-25.6 25.6-25.6s25.6 10.24 25.6 25.6v204.8c0 43.52 33.28 76.8 76.8 76.8s76.8-33.28 76.8-76.8v-51.2c0-15.36 10.24-25.6 25.6-25.6h48.64c-12.8 215.04-189.44 384-407.04 384z"  /></svg>`,
+				mobileOnly: false
+			},
+			bubblePop: {
+				title: 'Bubble Pop',
+				path: '/games/bubble-pop/',
+				description: 'Pop the bubbles before they escape! A fast-paced game of precision and reflexes that will keep you on your toes.',
+				icon: `<svg fill="#fff" height="800px" width="800px" version="1.1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 363.188 363.188" xmlns:xlink="http://www.w3.org/1999/xlink" enable-background="new 0 0 363.188 363.188">
   <g>
     <path d="m111.667,132.311c-61.574,0-111.667,50.093-111.667,111.666s50.093,111.667 111.667,111.667 111.667-50.094 111.667-111.667-50.094-111.666-111.667-111.666zm0,208.333c-53.303,0-96.667-43.364-96.667-96.667 0-53.302 43.364-96.666 96.667-96.666s96.667,43.364 96.667,96.666c-0.001,53.303-43.365,96.667-96.667,96.667z"/>
     <path d="m111.667,173.977c-4.142,0-7.5,3.357-7.5,7.5s3.358,7.5 7.5,7.5c30.327,0 55,24.673 55,55 0,4.143 3.358,7.5 7.5,7.5s7.5-3.357 7.5-7.5c0-38.598-31.402-70-70-70z"/>
@@ -1004,13 +1070,13 @@ mobileOnly: true
     <path d="m123.358,96.568c24.544,0 44.512-19.968 44.512-44.512s-19.968-44.512-44.512-44.512-44.512,19.968-44.512,44.512 19.968,44.512 44.512,44.512zm0-74.024c16.273,3.55271e-15 29.512,13.239 29.512,29.512s-13.239,29.512-29.512,29.512-29.512-13.239-29.512-29.512 13.239-29.512 29.512-29.512z"/>
   </g>
 </svg>`,
-                mobileOnly: false
-            },
-            breakout: {
-                title: 'Breakout',
-                path: '/games/breakout/',
-                description: 'Break the bricks, level up, and beat your high score! A fast-paced game of skill and strategy for all ages.',
-                icon: `<svg version="1.0" xmlns="http://www.w3.org/2000/svg"
+				mobileOnly: false
+			},
+			breakout: {
+				title: 'Breakout',
+				path: '/games/breakout/',
+				description: 'Break the bricks, level up, and beat your high score! A fast-paced game of skill and strategy for all ages.',
+				icon: `<svg version="1.0" xmlns="http://www.w3.org/2000/svg"
  width="256.000000pt" height="256.000000pt" viewBox="0 0 256.000000 256.000000"
  preserveAspectRatio="xMidYMid meet">
 
@@ -1060,8 +1126,8 @@ m489 -117 c31 -26 31 -78 -1 -104 -22 -18 -39 -19 -226 -16 -220 3 -226 5
 740 -12z"/>
 </g>
 </svg>`,
-                mobileOnly: false
-            },
+				mobileOnly: false
+			},
 			spaceShooter: {
 				title: 'Space Shooter',
 				path: '/games/space-shooter/',
@@ -1127,20 +1193,20 @@ m489 -117 c31 -26 31 -78 -1 -104 -22 -18 -39 -19 -226 -16 -220 3 -226 5
 				mobileOnly: false
 			},
 
-        };
+		};
 
-        // Function to create game cards
+		// Function to create game cards
 		function createGameCards() {
 			const container = document.getElementById('gamesContainer');
-			
+
 			// Check if device is mobile
-			const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) 
+			const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)
 				|| window.innerWidth <= 768;
-			
+
 			for (const [key, game] of Object.entries(games)) {
 				// Skip if game is mobile only AND we're not on a mobile device
 				if (game.mobileOnly && !isMobile) continue;
-				
+
 				const card = document.createElement('div');
 				card.className = 'game-card';
 				card.innerHTML = `
@@ -1149,66 +1215,67 @@ m489 -117 c31 -26 31 -78 -1 -104 -22 -18 -39 -19 -226 -16 -220 3 -226 5
 				    <p class="game-description">${game.description}</p>
 				    <button class="play-button">Play Now</button>
 				`;
-				
+
 				card.addEventListener('click', () => {
-				    loadGame(game.path);
+					loadGame(game.path);
 				});
-				
+
 				container.appendChild(card);
 			}
 		}
-        // Function to load game in iframe
-        function loadGame(gamePath) {
-            const container = document.getElementById('gameContainer');
-            const iframe = document.getElementById('gameFrame');
-            const backButton = document.getElementById('backButton');
-            const iosInstallPrompt = document.getElementById('iosInstallPrompt');
-            
-            iframe.src = gamePath;
-            container.style.display = 'block';
-            backButton.style.display = 'block';
-            document.body.style.overflow = 'hidden';
-            // Hide install buttons when navigating to an app
-            if (iosInstallPrompt) iosInstallPrompt.style.display = 'none';
-        }
+		// Function to load game in iframe
+		function loadGame(gamePath) {
+			const container = document.getElementById('gameContainer');
+			const iframe = document.getElementById('gameFrame');
+			const backButton = document.getElementById('backButton');
+			const iosInstallPrompt = document.getElementById('iosInstallPrompt');
 
-        // Function to go back to game selection
-        function goBack() {
-            const container = document.getElementById('gameContainer');
-            const iframe = document.getElementById('gameFrame');
-            const backButton = document.getElementById('backButton');
-            const iosInstallPrompt = document.getElementById('iosInstallPrompt');
-            iframe.src = '';
-            container.style.display = 'none';
-            backButton.style.display = 'none';
-            document.body.style.overflow = 'auto';
-            
-            // Show appropriate install button when returning to main page
-            if (isIOS() && !navigator.standalone) {
-                iosInstallPrompt.style.display = 'block';
-            } 
-        }
-        
-        // Initialize the page
-        document.addEventListener('DOMContentLoaded', () => {
-            createGameCards();
-            document.getElementById('backButton').addEventListener('click', goBack);
-            handleGooglePlayButton();
-            
-            // Check if it's iOS and show appropriate prompt
-            if (isIOS()) {
-                showIOSInstall();
-            }
-        });
-        
-    if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => {
-      navigator.serviceWorker.register('service-worker.js')
-        .then(registration => console.log('Service Worker registered with scope:', registration.scope))
-        .catch(error => console.error('Service Worker registration failed:', error));
-    });
-  }
+			iframe.src = gamePath;
+			container.style.display = 'block';
+			backButton.style.display = 'block';
+			document.body.style.overflow = 'hidden';
+			// Hide install buttons when navigating to an app
+			if (iosInstallPrompt) iosInstallPrompt.style.display = 'none';
+		}
 
-    </script>
+		// Function to go back to game selection
+		function goBack() {
+			const container = document.getElementById('gameContainer');
+			const iframe = document.getElementById('gameFrame');
+			const backButton = document.getElementById('backButton');
+			const iosInstallPrompt = document.getElementById('iosInstallPrompt');
+			iframe.src = '';
+			container.style.display = 'none';
+			backButton.style.display = 'none';
+			document.body.style.overflow = 'auto';
+
+			// Show appropriate install button when returning to main page
+			if (isIOS() && !navigator.standalone) {
+				iosInstallPrompt.style.display = 'block';
+			}
+		}
+
+		// Initialize the page
+		document.addEventListener('DOMContentLoaded', () => {
+			createGameCards();
+			document.getElementById('backButton').addEventListener('click', goBack);
+			handleGooglePlayButton();
+
+			// Check if it's iOS and show appropriate prompt
+			if (isIOS()) {
+				showIOSInstall();
+			}
+		});
+
+		if ('serviceWorker' in navigator) {
+			window.addEventListener('load', () => {
+				navigator.serviceWorker.register('service-worker.js')
+					.then(registration => console.log('Service Worker registered with scope:', registration.scope))
+					.catch(error => console.error('Service Worker registration failed:', error));
+			});
+		}
+
+	</script>
 </body>
+
 </html>
