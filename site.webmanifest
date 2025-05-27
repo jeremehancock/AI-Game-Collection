@@ -5,7 +5,6 @@
   "id": "ai-game-collection",
   "description": "This site and all games were built using AI with minimal code changes.",
   "display": "standalone",
-  "orientation": "portrait-primary",
   "icons": [
     {
       "src": "images/icons/web-app-manifest-192x192.png",
