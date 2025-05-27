@@ -4,7 +4,7 @@
   "start_url": "index.html",
   "id": "ai-game-collection",
   "description": "This site and all games were built using AI with minimal code changes.",
-  "display": "fullscreen",
+  "display": "standalone",
   "orientation": "portrait-primary",
   "icons": [
     {
@@ -30,24 +30,20 @@
       "target": "_blank"
     }
   ],
-  "theme_color": "#181d34",	
+  "theme_color": "#181d34",
   "background_color": "#181d34",
-  "display_override": [
-    "fullscreen",
-    "window-controls-overlay",
-    "minimal-ui"
-  ],
+  "display_override": ["fullscreen", "window-controls-overlay", "minimal-ui"],
   "categories": ["games"],
   "edge_side_panel": {
     "preferred_width": 0
   },
   "prefer_related_applications": true,
-   "related_applications": [
-       {
-          "platform": "play",
-          "id": "dev.jereme.games.twa",
-          "url": "https://play.google.com/store/apps/details?id=dev.jereme.games.twa"
-      }
-    ],
+  "related_applications": [
+    {
+      "platform": "play",
+      "id": "dev.jereme.games.twa",
+      "url": "https://play.google.com/store/apps/details?id=dev.jereme.games.twa"
+    }
+  ],
   "shortcuts": []
 }
