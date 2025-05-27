@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Space Shooter</title>
+    <title>Space Game</title>
     <style>
         body {
             margin: 0;
@@ -886,13 +886,11 @@
             ship.x += deltaX * 0.3;
             ship.x = Math.max(ship.size / 2, Math.min(canvas.width - ship.size / 2, ship.x));
 
-            // Check if ship is moving and manage engine sound
+            // Start engine sound when ship first moves, then keep it running
             const isMoving = Math.abs(ship.x - ship.previousX) > 0.1 || keys.left || keys.right;
 
             if (isMoving && !isEngineRunning && gameStarted && !isExploding) {
                 startEngineSound();
-            } else if (!isMoving && isEngineRunning) {
-                stopEngineSound();
             }
         }
 
