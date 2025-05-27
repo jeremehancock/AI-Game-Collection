@@ -52,6 +52,10 @@ Pilot your spaceship and navigate through an asteroid field. Shoot or evade aste
 
 Pilot your upgraded spaceship through dense asteroid fields with enhanced graphics and physics. Dodge or destroy asteroids in this fast-paced arcade sequel, and collect crystals to earn points and boost your score.
 
+### Flapping Bird
+
+Flapping Bird is a simple arcade game where you tap to keep a bird in the air and guide it through gaps between pipes without crashing.
+
 ## 📸 Screenshots
 
 <div align="center">
@@ -68,6 +72,8 @@ Pilot your upgraded spaceship through dense asteroid fields with enhanced graphi
     <img src="https://raw.githubusercontent.com/jeremehancock/AI-Game-Collection/refs/heads/main/images/screenshots/breakout.png" width="300" alt="Breakout"/>
     <img src="https://raw.githubusercontent.com/jeremehancock/AI-Game-Collection/refs/heads/main/images/screenshots/space-shooter-game.png" width="300" alt="Space Shooter"/>
     <img src="https://raw.githubusercontent.com/jeremehancock/AI-Game-Collection/refs/heads/main/images/screenshots/space-shooter-game-2.png" width="300" alt="Space Shooter II"/>
+    <img src="https://raw.githubusercontent.com/jeremehancock/AI-Game-Collection/refs/heads/main/images/screenshots/flapping-bird-game.png" width="300" alt="Flapping Bird"/>
+
 </div>
 
 ## 🚀 Features
