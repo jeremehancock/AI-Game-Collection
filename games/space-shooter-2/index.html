@@ -1,0 +1,1135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Space Shooter II</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-touch-callout: none;
+            -webkit-user-select: none;
+            -khtml-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+        }
+
+        body {
+            background: linear-gradient(135deg, #0c0c1e 0%, #1a1a3e 50%, #0c0c1e 100%);
+            font-family: 'Courier New', monospace;
+            overflow: hidden;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        #gameContainer {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+            max-width: 500px;
+            max-height: 800px;
+            border: 2px solid #333;
+            border-radius: 10px;
+            overflow: hidden;
+            background: radial-gradient(circle at 50% 50%, rgba(30, 30, 80, 0.3) 0%, rgba(0, 0, 20, 0.8) 100%);
+        }
+
+        canvas {
+            display: block;
+            width: 100%;
+            height: 100%;
+            background: transparent;
+        }
+
+        #ui {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            right: 20px;
+            display: flex;
+            justify-content: space-between;
+            color: #fff;
+            font-size: 18px;
+            font-weight: bold;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
+            pointer-events: none;
+            z-index: 10;
+        }
+
+        #gameOver {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0, 0, 30, 0.95);
+            padding: 40px 60px;
+            border-radius: 15px;
+            text-align: center;
+            color: #fff;
+            border: 2px solid #4a90e2;
+            box-shadow: 0 0 30px rgba(74, 144, 226, 0.5);
+            display: none;
+            z-index: 20;
+            min-width: 350px;
+            max-width: 90vw;
+        }
+
+        #gameOver h2 {
+            color: #ff6b6b;
+            margin-bottom: 15px;
+            font-size: 24px;
+        }
+
+        #gameOver p {
+            margin: 10px 0;
+            font-size: 16px;
+        }
+
+        #restartBtn {
+            background: linear-gradient(45deg, #4a90e2, #357abd);
+            border: none;
+            color: white;
+            padding: 12px 25px;
+            font-size: 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            margin-top: 15px;
+            font-family: inherit;
+            transition: all 0.3s ease;
+        }
+
+        #restartBtn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 15px rgba(74, 144, 226, 0.7);
+        }
+
+        .stars {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .star {
+            position: absolute;
+            background: white;
+            border-radius: 50%;
+            animation: twinkle 2s infinite;
+        }
+
+        @keyframes twinkle {
+            0%, 100% { opacity: 0.3; }
+            50% { opacity: 1; }
+        }
+
+        #instructions {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: #ffffff;
+            background: rgba(0, 0, 0, 0.7);
+            padding: 12px 30px;
+            border-radius: 8px;
+            text-align: center;
+            font-size: 16px;
+            font-weight: bold;
+            pointer-events: none;
+            z-index: 10;
+            opacity: 1;
+            transition: opacity 1s ease-out;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+            min-width: 400px;
+            max-width: 95%;
+            line-height: 1.4;
+        }
+
+        #instructions.fade-out {
+            opacity: 0;
+        }
+    </style>
+</head>
+<body>
+    <div id="gameContainer">
+        <div class="stars"></div>
+        <canvas id="gameCanvas"></canvas>
+        
+        <div id="ui">
+            <div>Score: <span id="score">0</span></div>
+            <div>Level: <span id="level">1</span></div>
+            <div>Lives: <span id="lives">3</span></div>
+        </div>
+
+        <div id="instructions">
+            Touch and drag to move your ship • Tap to shoot • Collect blue crystals • Destroy red asteroids
+        </div>
+
+        <div id="gameOver">
+            <h2>Game Over!</h2>
+            <p>Final Score: <span id="finalScore">0</span></p>
+            <p>Level Reached: <span id="finalLevel">1</span></p>
+            <button id="restartBtn">Play Again</button>
+        </div>
+    </div>
+
+    <script>
+        class SpaceCollector {
+            constructor() {
+                this.canvas = document.getElementById('gameCanvas');
+                this.ctx = this.canvas.getContext('2d');
+                this.gameContainer = document.getElementById('gameContainer');
+                
+                // Initialize audio context
+                this.audioContext = null;
+                this.engineSound = null;
+                this.initAudio();
+                
+                this.resizeCanvas();
+                window.addEventListener('resize', () => this.resizeCanvas());
+                
+                this.gameState = 'playing';
+                this.score = 0;
+                this.level = 1;
+                this.lives = 3;
+                this.frameCount = 0;
+                
+                this.player = {
+                    x: this.canvas.width / 2,
+                    y: this.canvas.height - 80,
+                    size: 25, // Increased from 15 to 25
+                    speed: 5,
+                    trail: [],
+                    lastX: this.canvas.width / 2,
+                    lastY: this.canvas.height - 80
+                };
+                
+                this.collectibles = [];
+                this.obstacles = [];
+                this.particles = [];
+                this.bullets = [];
+                this.stars = [];
+                this.bullets = [];
+                
+                this.lastTime = 0;
+                this.spawnTimer = 0;
+                this.levelProgress = 0;
+                
+                this.setupControls();
+                this.createStarfield();
+                this.hideInstructionsAfterDelay();
+                this.gameLoop();
+                
+                document.getElementById('restartBtn').addEventListener('click', () => this.restart());
+            }
+            
+            generateAsteroidShape(size) {
+                const points = [];
+                const numPoints = 8 + Math.floor(Math.random() * 4);
+                for (let i = 0; i < numPoints; i++) {
+                    const angle = (i / numPoints) * Math.PI * 2;
+                    const radius = size * (0.7 + Math.random() * 0.6);
+                    points.push({
+                        x: Math.cos(angle) * radius,
+                        y: Math.sin(angle) * radius
+                    });
+                }
+                return points;
+            }
+            
+            initAudio() {
+                try {
+                    this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                    this.engineReady = false;
+                } catch (e) {
+                    console.log('Web Audio API not supported');
+                }
+            }
+            
+            ensureAudioStarted() {
+                if (!this.audioContext || this.engineReady) return;
+                
+                // Resume audio context and create engine sound on first interaction
+                if (this.audioContext.state === 'suspended') {
+                    this.audioContext.resume();
+                }
+                
+                this.createEngineSound();
+                this.engineReady = true;
+            }
+            
+            createEngineSound() {
+                if (!this.audioContext) return;
+                
+                // Simple low hum using sine wave
+                this.engineOscillator = this.audioContext.createOscillator();
+                this.engineGain = this.audioContext.createGain();
+                
+                // Low frequency hum - louder and more noticeable
+                this.engineOscillator.type = 'sine';
+                this.engineOscillator.frequency.setValueAtTime(60, this.audioContext.currentTime);
+                
+                // Start silent - only play when moving
+                this.engineGain.gain.setValueAtTime(0, this.audioContext.currentTime);
+                
+                // Connect nodes
+                this.engineOscillator.connect(this.engineGain);
+                this.engineGain.connect(this.audioContext.destination);
+                
+                this.engineOscillator.start();
+                this.engineRunning = false; // Not actually running until moving
+                
+                console.log('Engine sound ready'); // Debug log
+            }
+            
+            startEngineSound() {
+                // Start the hum when moving
+                if (!this.audioContext || this.engineRunning) return;
+                
+                if (this.audioContext.state === 'suspended') {
+                    this.audioContext.resume();
+                }
+                
+                const now = this.audioContext.currentTime;
+                this.engineGain.gain.cancelScheduledValues(now);
+                this.engineGain.gain.setValueAtTime(0, now);
+                this.engineGain.gain.linearRampToValueAtTime(0.15, now + 0.1); // Much louder base volume
+                
+                this.engineRunning = true;
+                console.log('Engine hum started'); // Debug log
+            }
+            
+            stopEngineSound() {
+                // Actually stop the hum (used for game over)
+                if (!this.audioContext || !this.engineRunning) return;
+                
+                const now = this.audioContext.currentTime;
+                this.engineGain.gain.cancelScheduledValues(now);
+                this.engineGain.gain.setValueAtTime(this.engineGain.gain.value, now);
+                this.engineGain.gain.linearRampToValueAtTime(0, now + 0.5); // Fade to silence over 0.5s
+                
+                this.engineRunning = false;
+                console.log('Engine hum stopped'); // Debug log
+            }
+            
+            updateEngineSound(intensity) {
+                if (!this.audioContext || !this.engineRunning) return;
+                
+                const now = this.audioContext.currentTime;
+                
+                // More dynamic volume and slight frequency changes
+                const baseVolume = 0.12;
+                const maxVolume = 0.22;
+                const targetVolume = baseVolume + (intensity * (maxVolume - baseVolume));
+                
+                // Add slight frequency variation for more natural sound
+                const baseFreq = 60;
+                const maxFreq = 75;
+                const targetFreq = baseFreq + (intensity * (maxFreq - baseFreq));
+                
+                this.engineGain.gain.cancelScheduledValues(now);
+                this.engineGain.gain.setValueAtTime(this.engineGain.gain.value, now);
+                this.engineGain.gain.linearRampToValueAtTime(targetVolume, now + 0.05); // Faster response
+                
+                this.engineOscillator.frequency.cancelScheduledValues(now);
+                this.engineOscillator.frequency.setValueAtTime(this.engineOscillator.frequency.value, now);
+                this.engineOscillator.frequency.linearRampToValueAtTime(targetFreq, now + 0.05);
+            }
+            
+            playSound(type) {
+                if (!this.audioContext) return;
+                
+                // Resume audio context if suspended (required by browsers)
+                if (this.audioContext.state === 'suspended') {
+                    this.audioContext.resume();
+                }
+                
+                // Make sure engine is started when any sound plays
+                if (!this.engineRunning && this.engineReady) {
+                    this.startEngineSound();
+                }
+                
+                const oscillator = this.audioContext.createOscillator();
+                const gainNode = this.audioContext.createGain();
+                
+                oscillator.connect(gainNode);
+                gainNode.connect(this.audioContext.destination);
+                
+                const now = this.audioContext.currentTime;
+                
+                switch(type) {
+                    case 'shoot':
+                        // Laser sound - quick high-pitched zap
+                        oscillator.frequency.setValueAtTime(800, now);
+                        oscillator.frequency.exponentialRampToValueAtTime(400, now + 0.1);
+                        gainNode.gain.setValueAtTime(0.3, now);
+                        gainNode.gain.exponentialRampToValueAtTime(0.01, now + 0.1);
+                        oscillator.start(now);
+                        oscillator.stop(now + 0.1);
+                        break;
+                        
+                    case 'explosion':
+                        // Explosion sound - noise burst
+                        oscillator.type = 'sawtooth';
+                        oscillator.frequency.setValueAtTime(200, now);
+                        oscillator.frequency.exponentialRampToValueAtTime(50, now + 0.3);
+                        gainNode.gain.setValueAtTime(0.4, now);
+                        gainNode.gain.exponentialRampToValueAtTime(0.01, now + 0.3);
+                        oscillator.start(now);
+                        oscillator.stop(now + 0.3);
+                        break;
+                        
+                    case 'collect':
+                        // Crystal collection - pleasant chime
+                        oscillator.frequency.setValueAtTime(523, now); // C5
+                        oscillator.frequency.setValueAtTime(659, now + 0.1); // E5
+                        oscillator.frequency.setValueAtTime(784, now + 0.2); // G5
+                        gainNode.gain.setValueAtTime(0.2, now);
+                        gainNode.gain.exponentialRampToValueAtTime(0.01, now + 0.4);
+                        oscillator.start(now);
+                        oscillator.stop(now + 0.4);
+                        break;
+                        
+                    case 'hit':
+                        // Player hit - harsh buzz
+                        oscillator.type = 'square';
+                        oscillator.frequency.setValueAtTime(150, now);
+                        oscillator.frequency.exponentialRampToValueAtTime(75, now + 0.2);
+                        gainNode.gain.setValueAtTime(0.3, now);
+                        gainNode.gain.exponentialRampToValueAtTime(0.01, now + 0.2);
+                        oscillator.start(now);
+                        oscillator.stop(now + 0.2);
+                        break;
+                        
+                    case 'engine':
+                        // Thruster sound - low rumble
+                        oscillator.type = 'sawtooth';
+                        oscillator.frequency.setValueAtTime(60, now);
+                        oscillator.frequency.setValueAtTime(80, now + 0.1);
+                        gainNode.gain.setValueAtTime(0.1, now);
+                        gainNode.gain.setValueAtTime(0.01, now + 0.1);
+                        oscillator.start(now);
+                        oscillator.stop(now + 0.1);
+                        break;
+                }
+            }
+            
+            generateTrailParticles() {
+                const particles = [];
+                for (let i = 0; i < 4; i++) { // Fewer particles
+                    particles.push({
+                        offsetX: (Math.random() - 0.5) * 8, // Smaller spread
+                        offsetY: (Math.random() - 0.5) * 8,
+                        size: 0.6 + Math.random() * 0.6, // Smaller, more consistent size
+                        alpha: 0.6 + Math.random() * 0.2, // Less alpha variation
+                        red: 255,
+                        green: 120 + Math.floor(Math.random() * 60), // Less color variation
+                        blue: 20 + Math.floor(Math.random() * 30)
+                    });
+                }
+                return particles;
+            }
+            
+            shoot() {
+                this.bullets.push({
+                    x: this.player.x,
+                    y: this.player.y - this.player.size,
+                    speed: 10,
+                    size: 3
+                });
+                
+                // Play laser sound
+                this.playSound('shoot');
+            }
+            
+            resizeCanvas() {
+                const container = this.gameContainer;
+                this.canvas.width = container.clientWidth;
+                this.canvas.height = container.clientHeight;
+                
+                if (this.player) {
+                    this.player.x = Math.min(this.player.x, this.canvas.width - 20);
+                    this.player.y = Math.min(this.player.y, this.canvas.height - 20);
+                }
+            }
+            
+            hideInstructionsAfterDelay() {
+                setTimeout(() => {
+                    const instructions = document.getElementById('instructions');
+                    instructions.classList.add('fade-out');
+                }, 4000);
+            }
+            
+            setupControls() {
+                let isDragging = false;
+                let lastTouchX, lastTouchY;
+                let dragStartTime = 0;
+                let hasMoved = false;
+                
+                const handleStart = (e) => {
+                    e.preventDefault();
+                    
+                    // Start audio on first touch/click and immediately start engine
+                    if (!this.engineReady) {
+                        this.ensureAudioStarted();
+                        // Give a tiny delay to let audio context initialize, then start engine
+                        setTimeout(() => {
+                            this.startEngineSound();
+                        }, 50);
+                    }
+                    
+                    isDragging = true;
+                    hasMoved = false;
+                    dragStartTime = Date.now();
+                    const touch = e.touches ? e.touches[0] : e;
+                    const rect = this.canvas.getBoundingClientRect();
+                    lastTouchX = touch.clientX - rect.left;
+                    lastTouchY = touch.clientY - rect.top;
+                };
+                
+                const handleMove = (e) => {
+                    if (!isDragging || this.gameState !== 'playing') return;
+                    e.preventDefault();
+                    
+                    const touch = e.touches ? e.touches[0] : e;
+                    const rect = this.canvas.getBoundingClientRect();
+                    const currentX = touch.clientX - rect.left;
+                    const currentY = touch.clientY - rect.top;
+                    
+                    const deltaX = currentX - lastTouchX;
+                    const deltaY = currentY - lastTouchY;
+                    
+                    // If moved more than 10 pixels, consider it a drag
+                    if (Math.abs(deltaX) > 10 || Math.abs(deltaY) > 10) {
+                        hasMoved = true;
+                    }
+                    
+                    this.player.x += deltaX;
+                    this.player.y += deltaY;
+                    
+                    this.player.x = Math.max(this.player.size, Math.min(this.canvas.width - this.player.size, this.player.x));
+                    this.player.y = Math.max(this.player.size, Math.min(this.canvas.height - this.player.size, this.player.y));
+                    
+                    lastTouchX = currentX;
+                    lastTouchY = currentY;
+                };
+                
+                const handleEnd = (e) => {
+                    e.preventDefault();
+                    
+                    // If it was a quick tap without much movement, shoot
+                    const tapDuration = Date.now() - dragStartTime;
+                    if (!hasMoved && tapDuration < 200 && this.gameState === 'playing') {
+                        this.shoot();
+                    }
+                    
+                    isDragging = false;
+                    hasMoved = false;
+                };
+                
+                this.canvas.addEventListener('touchstart', handleStart, { passive: false });
+                this.canvas.addEventListener('touchmove', handleMove, { passive: false });
+                this.canvas.addEventListener('touchend', handleEnd, { passive: false });
+                
+                this.canvas.addEventListener('mousedown', handleStart);
+                this.canvas.addEventListener('mousemove', handleMove);
+                this.canvas.addEventListener('mouseup', handleEnd);
+                this.canvas.addEventListener('mouseleave', handleEnd);
+            }
+            
+            createStarfield() {
+                const starsContainer = document.querySelector('.stars');
+                for (let i = 0; i < 50; i++) {
+                    const star = document.createElement('div');
+                    star.className = 'star';
+                    star.style.left = Math.random() * 100 + '%';
+                    star.style.top = Math.random() * 100 + '%';
+                    star.style.width = star.style.height = (Math.random() * 3 + 1) + 'px';
+                    star.style.animationDelay = Math.random() * 2 + 's';
+                    starsContainer.appendChild(star);
+                }
+            }
+            
+            spawnCollectible() {
+                this.collectibles.push({
+                    x: Math.random() * (this.canvas.width - 20) + 10,
+                    y: -20,
+                    size: 8,
+                    speed: 2 + this.level * 0.5,
+                    rotation: 0,
+                    pulsePhase: Math.random() * Math.PI * 2,
+                    trail: []
+                });
+            }
+            
+            spawnObstacle() {
+                const size = 12 + Math.random() * 8;
+                this.obstacles.push({
+                    x: Math.random() * (this.canvas.width - 30) + 15,
+                    y: -30,
+                    size: size,
+                    speed: 1.5 + this.level * 0.3,
+                    rotation: Math.random() * Math.PI * 2,
+                    rotationSpeed: (Math.random() - 0.5) * 0.1,
+                    trail: [],
+                    points: this.generateAsteroidShape(size)
+                });
+            }
+            
+            createParticles(x, y, color, count = 8) {
+                for (let i = 0; i < count; i++) {
+                    this.particles.push({
+                        x: x,
+                        y: y,
+                        vx: (Math.random() - 0.5) * 6,
+                        vy: (Math.random() - 0.5) * 6,
+                        life: 1.0,
+                        decay: 0.04,
+                        size: Math.random() * 4 + 2,
+                        color: color
+                    });
+                }
+            }
+            
+            update(deltaTime) {
+                if (this.gameState !== 'playing') return;
+                
+                this.frameCount++;
+                this.spawnTimer += deltaTime;
+                this.levelProgress += deltaTime;
+                
+                // Level progression
+                if (this.levelProgress > 15000) {
+                    this.level++;
+                    this.levelProgress = 0;
+                    document.getElementById('level').textContent = this.level;
+                }
+                
+                // Spawn entities
+                if (this.spawnTimer > Math.max(800 - this.level * 50, 300)) {
+                    if (Math.random() < 0.7) {
+                        this.spawnCollectible();
+                    } else {
+                        this.spawnObstacle();
+                    }
+                    this.spawnTimer = 0;
+                }
+                
+                // Update player trail - only add if player moved
+                const playerMoved = Math.abs(this.player.x - this.player.lastX) > 1 || 
+                                  Math.abs(this.player.y - this.player.lastY) > 1;
+                
+                if (playerMoved) {
+                    this.player.trail.push({ 
+                        x: this.player.lastX, 
+                        y: this.player.lastY,
+                        time: Date.now()
+                    });
+                    this.player.lastX = this.player.x;
+                    this.player.lastY = this.player.y;
+                    
+                    // Make sure engine sound is running when moving
+                    if (!this.engineRunning && this.engineReady) {
+                        this.startEngineSound();
+                    }
+                    
+                    // Start engine sound and calculate movement intensity
+                    this.startEngineSound();
+                    const deltaX = Math.abs(this.player.x - this.player.lastX);
+                    const deltaY = Math.abs(this.player.y - this.player.lastY);
+                    const movementSpeed = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
+                    const intensity = Math.min(movementSpeed / 10, 1); // Normalize to 0-1
+                    this.updateEngineSound(intensity);
+                } else {
+                    // When not moving, return to idle but with some fluctuation
+                    if (this.engineRunning) {
+                        // Add slight random fluctuation to make it feel alive
+                        const fluctuation = (Math.random() - 0.5) * 0.02; // Small random variation
+                        this.updateEngineSound(0.1 + fluctuation); // Low but fluctuating idle
+                    }
+                }
+                
+                // Remove old trail points (older than 200ms)
+                const now = Date.now();
+                this.player.trail = this.player.trail.filter(point => now - point.time < 200);
+                
+                // Update bullets
+                this.bullets.forEach((bullet, index) => {
+                    bullet.y -= bullet.speed;
+                    
+                    // Remove bullets that go off screen
+                    if (bullet.y < -10) {
+                        this.bullets.splice(index, 1);
+                        return;
+                    }
+                    
+                    // Check bullet collision with obstacles
+                    this.obstacles.forEach((obstacle, obstacleIndex) => {
+                        const dx = bullet.x - obstacle.x;
+                        const dy = bullet.y - obstacle.y;
+                        const distance = Math.sqrt(dx * dx + dy * dy);
+                        
+                        if (distance < bullet.size + obstacle.size) {
+                            // Hit! Remove bullet and obstacle
+                            this.bullets.splice(index, 1);
+                            this.obstacles.splice(obstacleIndex, 1);
+                            
+                            // Add explosion particles
+                            this.createParticles(obstacle.x, obstacle.y, '#ff6b6b', 15);
+                            
+                            // Award points for destroying asteroid
+                            this.score += 25 * this.level;
+                            document.getElementById('score').textContent = this.score;
+                            
+                            // Play explosion sound
+                            this.playSound('explosion');
+                        }
+                    });
+                });
+                
+                // Update collectibles
+                this.collectibles.forEach((collectible, index) => {
+                    // Add trail point every few frames for natural spacing
+                    if (this.frameCount % 2 === 0) {
+                        collectible.trail.push({ 
+                            x: collectible.x, 
+                            y: collectible.y,
+                            time: Date.now()
+                        });
+                    }
+                    
+                    collectible.y += collectible.speed;
+                    collectible.rotation += 0.1;
+                    collectible.pulsePhase += 0.1;
+                    
+                    // Keep trail length reasonable (about 400ms worth)
+                    collectible.trail = collectible.trail.filter(point => now - point.time < 400);
+                    
+                    if (collectible.y > this.canvas.height + 20) {
+                        this.collectibles.splice(index, 1);
+                        return;
+                    }
+                    
+                    // Collision with player
+                    const dx = collectible.x - this.player.x;
+                    const dy = collectible.y - this.player.y;
+                    const distance = Math.sqrt(dx * dx + dy * dy);
+                    
+                    if (distance < this.player.size + collectible.size) {
+                        this.score += 10 * this.level;
+                        document.getElementById('score').textContent = this.score;
+                        this.createParticles(collectible.x, collectible.y, '#4ecdc4');
+                        this.collectibles.splice(index, 1);
+                        
+                        // Play crystal collection sound
+                        this.playSound('collect');
+                    }
+                });
+                
+                // Update obstacles
+                this.obstacles.forEach((obstacle, index) => {
+                    // Add trail point every frame for smoother, longer trails
+                    obstacle.trail.push({ 
+                        x: obstacle.x, 
+                        y: obstacle.y,
+                        time: Date.now(),
+                        particles: this.generateTrailParticles()
+                    });
+                    
+                    obstacle.y += obstacle.speed;
+                    obstacle.rotation += obstacle.rotationSpeed;
+                    
+                    // Keep trail length longer for asteroids (about 600ms worth)
+                    obstacle.trail = obstacle.trail.filter(point => now - point.time < 600);
+                    
+                    if (obstacle.y > this.canvas.height + 30) {
+                        this.obstacles.splice(index, 1);
+                        return;
+                    }
+                    
+                    // Collision with player
+                    const dx = obstacle.x - this.player.x;
+                    const dy = obstacle.y - this.player.y;
+                    const distance = Math.sqrt(dx * dx + dy * dy);
+                    
+                    if (distance < this.player.size + obstacle.size) {
+                        this.lives--;
+                        document.getElementById('lives').textContent = this.lives;
+                        this.createParticles(this.player.x, this.player.y, '#ff6b6b', 12);
+                        this.obstacles.splice(index, 1);
+                        
+                        // Play hit sound
+                        this.playSound('hit');
+                        
+                        if (this.lives <= 0) {
+                            this.gameOver();
+                        }
+                    }
+                });
+                
+                // Update particles
+                this.particles.forEach((particle, index) => {
+                    particle.x += particle.vx;
+                    particle.y += particle.vy;
+                    particle.life -= particle.decay;
+                    particle.vx *= 0.99;
+                    particle.vy *= 0.99;
+                    
+                    if (particle.life <= 0) {
+                        this.particles.splice(index, 1);
+                    }
+                });
+            }
+            
+            render() {
+                // Clear canvas completely - no overlay marks!
+                this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+                
+                const now = Date.now();
+                
+                // Draw collectible trails with natural variation
+                this.collectibles.forEach(collectible => {
+                    collectible.trail.forEach((point, index) => {
+                        const age = now - point.time;
+                        const alpha = Math.max(0, 1 - (age / 400));
+                        const size = collectible.size * alpha * (0.6 + Math.sin(index * 0.5) * 0.2);
+                        this.ctx.fillStyle = `rgba(78, 205, 196, ${alpha * 0.7})`;
+                        this.ctx.beginPath();
+                        this.ctx.arc(point.x, point.y, size, 0, Math.PI * 2);
+                        this.ctx.fill();
+                    });
+                });
+                
+                // Draw asteroid trails - size-proportional and longer
+                this.obstacles.forEach(obstacle => {
+                    obstacle.trail.forEach((point, index) => {
+                        const age = now - point.time;
+                        const alpha = Math.max(0, 1 - (age / 600)); // Longer fade time
+                        const baseSize = obstacle.size * alpha * 0.5; // Scale with asteroid size
+                        
+                        // Use pre-generated particles for stable animation
+                        point.particles.forEach(particle => {
+                            const size = baseSize * particle.size;
+                            const particleAlpha = alpha * particle.alpha;
+                            
+                            this.ctx.fillStyle = `rgba(${particle.red}, ${particle.green}, ${particle.blue}, ${particleAlpha})`;
+                            this.ctx.beginPath();
+                            this.ctx.arc(point.x + particle.offsetX, point.y + particle.offsetY, size, 0, Math.PI * 2);
+                            this.ctx.fill();
+                        });
+                    });
+                });
+                
+                // Draw player trail (integrated wing engine exhaust)
+                this.player.trail.forEach((point, index) => {
+                    const age = now - point.time;
+                    const alpha = Math.max(0, 1 - (age / 200));
+                    
+                    // Main center engine exhaust
+                    this.ctx.fillStyle = `rgba(0, 150, 255, ${alpha * 0.8})`;
+                    this.ctx.beginPath();
+                    this.ctx.arc(point.x, point.y + this.player.size * 0.9, this.player.size * alpha * 0.35, 0, Math.PI * 2);
+                    this.ctx.fill();
+                    
+                    // Center engine core
+                    this.ctx.fillStyle = `rgba(255, 255, 255, ${alpha * 0.9})`;
+                    this.ctx.beginPath();
+                    this.ctx.arc(point.x, point.y + this.player.size * 0.85, this.player.size * alpha * 0.15, 0, Math.PI * 2);
+                    this.ctx.fill();
+                    
+                    // Left wing integrated engine exhaust
+                    this.ctx.fillStyle = `rgba(0, 200, 255, ${alpha * 0.7})`;
+                    this.ctx.beginPath();
+                    this.ctx.arc(point.x - this.player.size * 0.625, point.y + this.player.size * 0.8, this.player.size * alpha * 0.25, 0, Math.PI * 2);
+                    this.ctx.fill();
+                    
+                    // Left wing engine core
+                    this.ctx.fillStyle = `rgba(255, 255, 255, ${alpha * 0.6})`;
+                    this.ctx.beginPath();
+                    this.ctx.arc(point.x - this.player.size * 0.625, point.y + this.player.size * 0.78, this.player.size * alpha * 0.1, 0, Math.PI * 2);
+                    this.ctx.fill();
+                    
+                    // Right wing integrated engine exhaust
+                    this.ctx.fillStyle = `rgba(0, 200, 255, ${alpha * 0.7})`;
+                    this.ctx.beginPath();
+                    this.ctx.arc(point.x + this.player.size * 0.625, point.y + this.player.size * 0.8, this.player.size * alpha * 0.25, 0, Math.PI * 2);
+                    this.ctx.fill();
+                    
+                    // Right wing engine core
+                    this.ctx.fillStyle = `rgba(255, 255, 255, ${alpha * 0.6})`;
+                    this.ctx.beginPath();
+                    this.ctx.arc(point.x + this.player.size * 0.625, point.y + this.player.size * 0.78, this.player.size * alpha * 0.1, 0, Math.PI * 2);
+                    this.ctx.fill();
+                });
+                
+                // Draw bullets
+                this.bullets.forEach(bullet => {
+                    // Bullet trail effect
+                    this.ctx.fillStyle = '#00ffff';
+                    this.ctx.beginPath();
+                    this.ctx.arc(bullet.x, bullet.y, bullet.size + 1, 0, Math.PI * 2);
+                    this.ctx.fill();
+                    
+                    // Bullet core
+                    this.ctx.fillStyle = '#ffffff';
+                    this.ctx.beginPath();
+                    this.ctx.arc(bullet.x, bullet.y, bullet.size, 0, Math.PI * 2);
+                    this.ctx.fill();
+                });
+                
+                // Draw player (realistic fighter with integrated wing engines)
+                this.ctx.save();
+                this.ctx.translate(this.player.x, this.player.y);
+                
+                // Main fuselage (central body)
+                this.ctx.fillStyle = '#D0D0D0';
+                this.ctx.beginPath();
+                this.ctx.moveTo(0, -this.player.size * 0.9); // Nose
+                this.ctx.lineTo(this.player.size * 0.2, -this.player.size * 0.6);
+                this.ctx.lineTo(this.player.size * 0.2, this.player.size * 0.8);
+                this.ctx.lineTo(-this.player.size * 0.2, this.player.size * 0.8);
+                this.ctx.lineTo(-this.player.size * 0.2, -this.player.size * 0.6);
+                this.ctx.closePath();
+                this.ctx.fill();
+                
+                // Wings with integrated engine pods
+                this.ctx.fillStyle = '#B8B8B8';
+                // Left wing with engine pod
+                this.ctx.beginPath();
+                this.ctx.moveTo(-this.player.size * 0.2, -this.player.size * 0.1);
+                this.ctx.lineTo(-this.player.size * 0.7, this.player.size * 0.1);
+                this.ctx.lineTo(-this.player.size * 0.75, this.player.size * 0.6); // Extended for engine
+                this.ctx.lineTo(-this.player.size * 0.55, this.player.size * 0.8); // Engine pod bottom
+                this.ctx.lineTo(-this.player.size * 0.2, this.player.size * 0.4);
+                this.ctx.closePath();
+                this.ctx.fill();
+                
+                // Right wing with engine pod
+                this.ctx.beginPath();
+                this.ctx.moveTo(this.player.size * 0.2, -this.player.size * 0.1);
+                this.ctx.lineTo(this.player.size * 0.7, this.player.size * 0.1);
+                this.ctx.lineTo(this.player.size * 0.75, this.player.size * 0.6); // Extended for engine
+                this.ctx.lineTo(this.player.size * 0.55, this.player.size * 0.8); // Engine pod bottom
+                this.ctx.lineTo(this.player.size * 0.2, this.player.size * 0.4);
+                this.ctx.closePath();
+                this.ctx.fill();
+                
+                // Wing engine pod details (darker section showing it's an engine)
+                this.ctx.fillStyle = '#909090';
+                // Left engine pod
+                this.ctx.beginPath();
+                this.ctx.moveTo(-this.player.size * 0.7, this.player.size * 0.3);
+                this.ctx.lineTo(-this.player.size * 0.75, this.player.size * 0.6);
+                this.ctx.lineTo(-this.player.size * 0.55, this.player.size * 0.8);
+                this.ctx.lineTo(-this.player.size * 0.5, this.player.size * 0.5);
+                this.ctx.closePath();
+                this.ctx.fill();
+                
+                // Right engine pod
+                this.ctx.beginPath();
+                this.ctx.moveTo(this.player.size * 0.7, this.player.size * 0.3);
+                this.ctx.lineTo(this.player.size * 0.75, this.player.size * 0.6);
+                this.ctx.lineTo(this.player.size * 0.55, this.player.size * 0.8);
+                this.ctx.lineTo(this.player.size * 0.5, this.player.size * 0.5);
+                this.ctx.closePath();
+                this.ctx.fill();
+                
+                // Wing outlines
+                this.ctx.strokeStyle = '#808080';
+                this.ctx.lineWidth = 1;
+                this.ctx.stroke();
+                
+                // Cockpit canopy
+                this.ctx.fillStyle = '#4a90e2';
+                this.ctx.beginPath();
+                this.ctx.moveTo(0, -this.player.size * 0.6);
+                this.ctx.lineTo(this.player.size * 0.15, -this.player.size * 0.3);
+                this.ctx.lineTo(this.player.size * 0.15, this.player.size * 0.1);
+                this.ctx.lineTo(-this.player.size * 0.15, this.player.size * 0.1);
+                this.ctx.lineTo(-this.player.size * 0.15, -this.player.size * 0.3);
+                this.ctx.closePath();
+                this.ctx.fill();
+                
+                // Canopy frame
+                this.ctx.strokeStyle = '#606060';
+                this.ctx.lineWidth = 1;
+                this.ctx.stroke();
+                
+                // Cockpit reflection
+                this.ctx.fillStyle = '#87ceeb';
+                this.ctx.fillRect(-this.player.size * 0.08, -this.player.size * 0.5, this.player.size * 0.06, this.player.size * 0.15);
+                
+                // Wing engine exhausts (integrated into wing pods)
+                this.ctx.fillStyle = '#404040';
+                this.ctx.fillRect(-this.player.size * 0.7, this.player.size * 0.75, this.player.size * 0.15, this.player.size * 0.1);
+                this.ctx.fillRect(this.player.size * 0.55, this.player.size * 0.75, this.player.size * 0.15, this.player.size * 0.1);
+                
+                // Main engine exhaust
+                this.ctx.fillStyle = '#606060';
+                this.ctx.fillRect(-this.player.size * 0.1, this.player.size * 0.8, this.player.size * 0.2, this.player.size * 0.1);
+                
+                // Engine intake details on wing pods
+                this.ctx.fillStyle = '#505050';
+                this.ctx.fillRect(-this.player.size * 0.68, this.player.size * 0.15, this.player.size * 0.08, this.player.size * 0.1);
+                this.ctx.fillRect(this.player.size * 0.6, this.player.size * 0.15, this.player.size * 0.08, this.player.size * 0.1);
+                
+                // Fuselage panel lines
+                this.ctx.strokeStyle = '#A0A0A0';
+                this.ctx.lineWidth = 1;
+                this.ctx.beginPath();
+                this.ctx.moveTo(-this.player.size * 0.2, -this.player.size * 0.6);
+                this.ctx.lineTo(this.player.size * 0.2, -this.player.size * 0.6);
+                this.ctx.stroke();
+                
+                this.ctx.restore();
+                
+                // Draw collectibles (more gem-like)
+                this.collectibles.forEach(collectible => {
+                    const pulse = Math.sin(collectible.pulsePhase) * 0.3 + 1;
+                    const size = collectible.size * pulse;
+                    
+                    this.ctx.save();
+                    this.ctx.translate(collectible.x, collectible.y);
+                    this.ctx.rotate(collectible.rotation);
+                    
+                    // Draw main crystal body
+                    this.ctx.fillStyle = '#4ecdc4';
+                    this.ctx.beginPath();
+                    this.ctx.moveTo(0, -size);
+                    this.ctx.lineTo(size * 0.6, -size * 0.3);
+                    this.ctx.lineTo(size * 0.8, size * 0.3);
+                    this.ctx.lineTo(0, size);
+                    this.ctx.lineTo(-size * 0.8, size * 0.3);
+                    this.ctx.lineTo(-size * 0.6, -size * 0.3);
+                    this.ctx.closePath();
+                    this.ctx.fill();
+                    
+                    // Add inner glow
+                    this.ctx.fillStyle = '#7fffd4';
+                    this.ctx.beginPath();
+                    this.ctx.moveTo(0, -size * 0.6);
+                    this.ctx.lineTo(size * 0.3, -size * 0.2);
+                    this.ctx.lineTo(size * 0.4, size * 0.2);
+                    this.ctx.lineTo(0, size * 0.6);
+                    this.ctx.lineTo(-size * 0.4, size * 0.2);
+                    this.ctx.lineTo(-size * 0.3, -size * 0.2);
+                    this.ctx.closePath();
+                    this.ctx.fill();
+                    
+                    // Add sparkle highlight
+                    this.ctx.fillStyle = '#ffffff';
+                    this.ctx.beginPath();
+                    this.ctx.arc(-size * 0.2, -size * 0.3, size * 0.15, 0, Math.PI * 2);
+                    this.ctx.fill();
+                    
+                    this.ctx.restore();
+                });
+                
+                // Draw obstacles (realistic asteroids)
+                this.obstacles.forEach(obstacle => {
+                    this.ctx.save();
+                    this.ctx.translate(obstacle.x, obstacle.y);
+                    this.ctx.rotate(obstacle.rotation);
+                    
+                    // Draw asteroid with irregular shape
+                    this.ctx.fillStyle = '#8B4513';
+                    this.ctx.beginPath();
+                    obstacle.points.forEach((point, index) => {
+                        if (index === 0) {
+                            this.ctx.moveTo(point.x, point.y);
+                        } else {
+                            this.ctx.lineTo(point.x, point.y);
+                        }
+                    });
+                    this.ctx.closePath();
+                    this.ctx.fill();
+                    
+                    // Add darker outline
+                    this.ctx.strokeStyle = '#654321';
+                    this.ctx.lineWidth = 1;
+                    this.ctx.stroke();
+                    
+                    // Add some surface details
+                    this.ctx.fillStyle = '#A0522D';
+                    obstacle.points.forEach((point, index) => {
+                        if (index % 3 === 0) {
+                            this.ctx.beginPath();
+                            this.ctx.arc(point.x * 0.6, point.y * 0.6, 2, 0, Math.PI * 2);
+                            this.ctx.fill();
+                        }
+                    });
+                    
+                    this.ctx.restore();
+                });
+                
+                // Draw particles
+                this.particles.forEach(particle => {
+                    this.ctx.fillStyle = particle.color + Math.floor(particle.life * 255).toString(16).padStart(2, '0');
+                    this.ctx.beginPath();
+                    this.ctx.arc(particle.x, particle.y, particle.size * particle.life, 0, Math.PI * 2);
+                    this.ctx.fill();
+                });
+            }
+            
+            gameOver() {
+                this.gameState = 'gameOver';
+                
+                // Stop the engine hum when game ends
+                this.stopEngineSound();
+                
+                document.getElementById('finalScore').textContent = this.score;
+                document.getElementById('finalLevel').textContent = this.level;
+                document.getElementById('gameOver').style.display = 'block';
+            }
+            
+            restart() {
+                this.gameState = 'playing';
+                this.score = 0;
+                this.level = 1;
+                this.lives = 3;
+                this.levelProgress = 0;
+                this.spawnTimer = 0;
+                this.frameCount = 0;
+                
+                this.player.x = this.canvas.width / 2;
+                this.player.y = this.canvas.height - 250; // Moved much higher up
+                this.player.size = 25;
+                this.player.trail = [];
+                this.player.lastX = this.canvas.width / 2;
+                this.player.lastY = this.canvas.height - 250;
+                
+                this.collectibles = [];
+                this.obstacles = [];
+                this.particles = [];
+                
+                document.getElementById('score').textContent = this.score;
+                document.getElementById('level').textContent = this.level;
+                document.getElementById('lives').textContent = this.lives;
+                document.getElementById('gameOver').style.display = 'none';
+            }
+            
+            gameLoop(currentTime = 0) {
+                const deltaTime = currentTime - this.lastTime;
+                this.lastTime = currentTime;
+                
+                this.update(deltaTime);
+                this.render();
+                
+                requestAnimationFrame((time) => this.gameLoop(time));
+            }
+        }
+        
+        // Start the game when page loads
+        window.addEventListener('load', () => {
+            new SpaceCollector();
+        });
+    </script>
+</body>
+</html>
