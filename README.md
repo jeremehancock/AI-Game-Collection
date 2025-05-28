@@ -165,7 +165,7 @@ docker pull bozodev/ai-game-collection:latest
 2. Run the container:
 
 ```bash
-docker run -d -p 38008:80 ai-game-collection:latest
+docker run -d -p 38008:80 bozodev/ai-game-collection:latest
 ```
 
 ### Option 2: Build Locally
@@ -193,7 +193,7 @@ docker run -d -p 38008:80 ai-game-collection
 
 Once running with either option:
 
-- Access the games by opening your browser and visiting `http://localhost:38008/games/`
+- Access the games by opening your browser and visiting `http://localhost:38008/`
 - View running containers: `docker ps`
 - Stop the container: `docker stop <container-id>`
 
