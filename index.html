@@ -183,6 +183,69 @@
 			background: rgba(255, 255, 255, 0.2);
 		}
 
+		/* Desktop Modal Styles */
+		.game-modal {
+			position: fixed;
+			top: 0;
+			left: 0;
+			width: 100%;
+			height: 100%;
+			background: rgba(0, 0, 0, 0.8);
+			display: none;
+			align-items: center;
+			justify-content: center;
+			z-index: 1000;
+			backdrop-filter: blur(5px);
+			-webkit-backdrop-filter: blur(5px);
+			padding: 0 80px 0 20px;
+		}
+
+		.game-modal-content {
+			width: 90%;
+			max-width: 500px;
+			height: 98vh;
+			background: #1a1a2e;
+			border-radius: 15px;
+			overflow: hidden;
+			position: relative;
+			border: 1px solid rgba(255, 255, 255, 0.1);
+			box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+		}
+
+		.game-modal-close {
+			position: absolute;
+			top: 4%;
+			left: calc(50% + 230px);
+			transform: translateY(-50%);
+			background: rgba(26, 26, 46, 0.9);
+			border: 1px solid rgba(255, 255, 255, 0.2);
+			color: #fff;
+			font-size: 1.25rem;
+			cursor: pointer;
+			padding: 0.5rem;
+			border-radius: 50%;
+			width: 40px;
+			height: 40px;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			transition: all 0.3s ease;
+			z-index: 1001;
+			box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+		}
+
+		.game-modal-close:hover {
+			background: rgba(255, 255, 255, 0.1);
+			transform: translateY(-22px);
+		}
+
+		.game-modal-iframe {
+			width: 100%;
+			height: 100%;
+			border: none;
+		}
+
+		/* Mobile Full-screen Styles */
 		.game-iframe-container {
 			position: fixed;
 			top: 0;
@@ -334,6 +397,11 @@
 			.github-link:hover,
 			.dockerhub-link:hover {
 				transform: scale(0.9) translateY(-2px);
+			}
+
+			/* Hide modal on mobile, use full-screen instead */
+			.game-modal {
+				display: none !important;
 			}
 		}
 
@@ -608,7 +676,15 @@
 		</div>
 	</div>
 
-	<!-- New elements for iframe and back button -->
+	<!-- Desktop Modal -->
+	<div class="game-modal" id="gameModal">
+		<div class="game-modal-content">
+			<iframe class="game-modal-iframe" id="gameModalFrame"></iframe>
+		</div>
+		<button class="game-modal-close" id="gameModalClose">&times;</button>
+	</div>
+
+	<!-- Mobile Full-screen (existing) -->
 	<div class="game-iframe-container" id="gameContainer">
 		<iframe class="game-iframe" id="gameFrame"></iframe>
 	</div>
@@ -683,6 +759,12 @@
 			return /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
 		}
 
+		// Check if it's mobile
+		function isMobile() {
+			return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)
+				|| window.innerWidth <= 768;
+		}
+
 		// Show iOS install prompt
 		function showIOSInstall() {
 			if (isIOS() && !navigator.standalone) {
@@ -695,24 +777,54 @@
 			iosInstallPrompt.style.display = 'none';
 		}
 
-		// Modify loadGame to handle install button visibility
-		function loadGame(gamePath) {
-			const container = document.getElementById('gameContainer');
-			const iframe = document.getElementById('gameFrame');
-			const backButton = document.getElementById('backButton');
+		// Load game function - updated to handle modal vs fullscreen
+		function loadGame(gamePath, gameTitle) {
+			if (isMobile()) {
+				// Mobile: Use full-screen iframe (existing behavior)
+				const container = document.getElementById('gameContainer');
+				const iframe = document.getElementById('gameFrame');
+				const backButton = document.getElementById('backButton');
 
-			iframe.src = gamePath;
-			container.style.display = 'block';
-			backButton.style.display = 'block';
-			document.body.style.overflow = 'hidden';
-			document.body.classList.add('game-view');
+				iframe.src = gamePath;
+				container.style.display = 'block';
+				backButton.style.display = 'block';
+				document.body.style.overflow = 'hidden';
+				document.body.classList.add('game-view');
+			} else {
+				// Desktop: Use modal
+				const gameModal = document.getElementById('gameModal');
+				const gameModalFrame = document.getElementById('gameModalFrame');
+
+				gameModalFrame.src = gamePath;
+				gameModal.style.display = 'flex';
+				document.body.style.overflow = 'hidden';
+			}
+
+			// Hide install buttons when navigating to a game
+			if (iosInstallPrompt) iosInstallPrompt.style.display = 'none';
 		}
 
-		// Modify goBack to handle install button visibility
+		// Close modal function
+		function closeModal() {
+			const gameModal = document.getElementById('gameModal');
+			const gameModalFrame = document.getElementById('gameModalFrame');
+
+			gameModalFrame.src = '';
+			gameModal.style.display = 'none';
+			document.body.style.overflow = 'auto';
+
+			// Show appropriate install button when returning to main page
+			if (isIOS() && !navigator.standalone) {
+				showIOSInstall();
+			}
+		}
+
+		// Go back function for mobile
 		function goBack() {
 			const container = document.getElementById('gameContainer');
 			const iframe = document.getElementById('gameFrame');
 			const backButton = document.getElementById('backButton');
+			const iosInstallPrompt = document.getElementById('iosInstallPrompt');
 
 			iframe.src = '';
 			container.style.display = 'none';
@@ -722,7 +834,7 @@
 
 			// Show appropriate install button when returning to main page
 			if (isIOS() && !navigator.standalone) {
-				showIOSInstall();
+				iosInstallPrompt.style.display = 'block';
 			}
 		}
 
@@ -766,7 +878,7 @@
 			}
 		}
 
-		// Game collection data with SVG icons
+		// Game collection data with placeholder SVG icons
 		const games = {
 			nerdle: {
 				title: 'Nerdle',
@@ -900,8 +1012,7 @@
 		c4.413,0,8.866,0.141,13.35,0.416l0.744-12.017l-0.737,12.017c55.443,3.488,96.252,25.609,123.914,57.755
 		c27.616,32.17,41.938,74.898,41.938,119.674C452.356,207.812,452.113,213.73,451.611,219.664z"/>
 </g>
-</svg>`,
-				mobileOnly: false
+</svg>`, mobileOnly: false
 			},
 			minesweeper: {
 				title: 'Minesweeper',
@@ -916,8 +1027,7 @@
     <path d="m496,96.586h-32c-8.844,0-16,7.164-16,16 0,8.836 7.156,16 16,16h32c8.844,0 16-7.164 16-16 0-8.836-7.156-16-16-16z"/>
     <path d="m436.98,75.605c3.125,3.125 7.219,4.688 11.313,4.688 4.094,0 8.188-1.563 11.313-4.688l32-32c6.25-6.25 6.25-16.375 0-22.625s-16.375-6.25-22.625,0l-32,32c-6.251,6.25-6.251,16.375-0.001,22.625z"/>
   </g>
-</svg>`,
-				mobileOnly: false
+</svg>`, mobileOnly: false
 			},
 			snake: {
 				title: 'Snake',
@@ -1227,13 +1337,9 @@ m489 -117 c31 -26 31 -78 -1 -104 -22 -18 -39 -19 -226 -16 -220 3 -226 5
 		function createGameCards() {
 			const container = document.getElementById('gamesContainer');
 
-			// Check if device is mobile
-			const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)
-				|| window.innerWidth <= 768;
-
 			for (const [key, game] of Object.entries(games)) {
 				// Skip if game is mobile only AND we're not on a mobile device
-				if (game.mobileOnly && !isMobile) continue;
+				if (game.mobileOnly && !isMobile()) continue;
 
 				const card = document.createElement('div');
 				card.className = 'game-card';
@@ -1245,48 +1351,35 @@ m489 -117 c31 -26 31 -78 -1 -104 -22 -18 -39 -19 -226 -16 -220 3 -226 5
 				`;
 
 				card.addEventListener('click', () => {
-					loadGame(game.path);
+					loadGame(game.path, game.title);
 				});
 
 				container.appendChild(card);
-			}
-		}
-		// Function to load game in iframe
-		function loadGame(gamePath) {
-			const container = document.getElementById('gameContainer');
-			const iframe = document.getElementById('gameFrame');
-			const backButton = document.getElementById('backButton');
-			const iosInstallPrompt = document.getElementById('iosInstallPrompt');
-
-			iframe.src = gamePath;
-			container.style.display = 'block';
-			backButton.style.display = 'block';
-			document.body.style.overflow = 'hidden';
-			// Hide install buttons when navigating to an app
-			if (iosInstallPrompt) iosInstallPrompt.style.display = 'none';
-		}
-
-		// Function to go back to game selection
-		function goBack() {
-			const container = document.getElementById('gameContainer');
-			const iframe = document.getElementById('gameFrame');
-			const backButton = document.getElementById('backButton');
-			const iosInstallPrompt = document.getElementById('iosInstallPrompt');
-			iframe.src = '';
-			container.style.display = 'none';
-			backButton.style.display = 'none';
-			document.body.style.overflow = 'auto';
-
-			// Show appropriate install button when returning to main page
-			if (isIOS() && !navigator.standalone) {
-				iosInstallPrompt.style.display = 'block';
 			}
 		}
 
 		// Initialize the page
 		document.addEventListener('DOMContentLoaded', () => {
 			createGameCards();
+
+			// Event listeners for mobile back button
 			document.getElementById('backButton').addEventListener('click', goBack);
+
+			// Event listeners for desktop modal
+			document.getElementById('gameModalClose').addEventListener('click', closeModal);
+			document.getElementById('gameModal').addEventListener('click', (e) => {
+				if (e.target === document.getElementById('gameModal')) {
+					closeModal();
+				}
+			});
+
+			// ESC key to close modal
+			document.addEventListener('keydown', (e) => {
+				if (e.key === 'Escape') {
+					closeModal();
+				}
+			});
+
 			handleGooglePlayButton();
 
 			// Check if it's iOS and show appropriate prompt
