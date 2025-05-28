@@ -1,542 +1,568 @@
 <!DOCTYPE html>
 <html>
-    <head>
-        <title>Waveform</title>
-        <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no" />
-        <style>
-            * {
-                box-sizing: border-box;
-                touch-action: manipulation;
-                user-select: none;
-                -webkit-user-select: none;
-            }
-            body {
-                margin: 0;
-                overflow: hidden;
-                background: #0a0a2a;
-                font-family: Arial, sans-serif;
-                position: fixed;
-                width: 100%;
-                height: 100%;
-            }
-            #game-container {
-                width: 100%;
-                height: 100%;
-                position: relative;
-            }
-            canvas {
-                position: absolute;
-                top: -10rem;
-                left: 0;
-                touch-action: none;
-            }
-            .warning {
-                color: red;
-                font-size: 1.5rem !important;
-                animation: pulse 1.5s infinite;
-            }
-            @keyframes pulse {
-              0% {
+
+<head>
+    <title>Waveform</title>
+    <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no" />
+    <style>
+        * {
+            box-sizing: border-box;
+            touch-action: manipulation;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+
+        body {
+            margin: 0;
+            overflow: hidden;
+            background: #0a0a2a;
+            font-family: Arial, sans-serif;
+            position: fixed;
+            width: 100%;
+            height: 100%;
+        }
+
+        #game-container {
+            width: 100%;
+            height: 100%;
+            position: relative;
+        }
+
+        canvas {
+            position: absolute;
+            top: -10rem;
+            left: 0;
+            touch-action: none;
+        }
+
+        .warning {
+            color: red;
+            font-size: 1.5rem !important;
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0% {
                 transform: scale(1);
-              }
-              50% {
+            }
+
+            50% {
                 transform: scale(1.1);
-              }
-              100% {
+            }
+
+            100% {
                 transform: scale(1);
-              }
             }
-            .controls {
-                position: absolute;
-                bottom: 120px;
-                left: 50%;
-                transform: translateX(-50%);
-                display: flex;
-                flex-direction: column;
-                background: rgba(0, 0, 0, 0.7);
-                padding: 10px;
-                border-radius: 10px;
-                width: 90%;
-                gap: 10px;
-                max-width: 400px;
-                z-index: 1;
-            }
-            .slider {
-                display: grid;
-                grid-template-columns: 60px 1fr 40px;
-                align-items: center;
-                gap: 10px;
-                color: #fff;
-                font-size: 14px;
-            }
-            .slider input[type="range"] {
-                width: 100%;
-                margin: 0;
-                height: 40px;
-            }
-            #stats {
-                position: absolute;
-                top: 20px;
-                left: 20px;
-                right: 20px;
-                display: flex;
-                justify-content: space-between;
-                align-items: center;
-                color: #fff;
-                font-size: 24px;
-                font-weight: bold;
-                text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
-                z-index: 1;
-            }
-            #restart-btn {
-                background: linear-gradient(to right, #ff4757, #ff6b81);
-                color: #fff;
-                border: none;
-                padding: 10px 20px;
-                font-size: 16px;
-                border-radius: 25px;
-                cursor: pointer;
-                box-shadow: 0 4px 15px rgba(255, 71, 87, 0.3);
-                transition: all 0.3s ease;
-                position: absolute;
-                bottom: 0;
-                right: 0;
-                margin: 10px;
-                display: none;
-            }
-            #restart-btn:hover {
-                transform: translateY(-2px);
-                box-shadow: 0 6px 20px rgba(255, 71, 87, 0.4);
-            }
-            #restart-btn.visible {
-                display: block;
-            }
-            #start-screen {
-                position: fixed;
-                top: 0;
-                left: 0;
-                width: 100%;
-                height: 100%;
-                background: rgba(0, 0, 0, 0.95);
-                background: linear-gradient(135deg, #1a1a2e, #0a0a2a);
-                display: flex;
-                flex-direction: column;
-                align-items: center;
-                justify-content: center;
-                z-index: 1000;
-                padding: 20px;
-                color: #fff;
-                text-align: center;
-            }
-            #start-screen h1 {
-                font-size: 36px;
-                color: #4caf50;
-                margin-bottom: 30px;
-                text-shadow: 0 0 10px rgba(76, 175, 80, 0.5);
-            }
-            #start-screen p {
-                font-size: 18px;
-                margin: 8px 0;
-                max-width: 100%;
-                line-height: 1.6;
-                opacity: 0.9;
-            }
-            #start-screen p strong {
-                color: #4caf50;
-                font-weight: bold;
-            }
-            #play-btn {
-                background: linear-gradient(to right, #4caf50, #45a049);
-                color: #fff;
-                border: none;
-                padding: 20px 50px;
-                font-size: 24px;
-                border-radius: 50px;
-                margin-top: 40px;
-                cursor: pointer;
-                box-shadow: 0 4px 15px rgba(76, 175, 80, 0.3);
-                transition: all 0.3s ease;
-            }
-            #play-btn:hover {
-                transform: translateY(-2px);
-                box-shadow: 0 6px 20px rgba(76, 175, 80, 0.4);
-            }
-            #level-complete {
-                display: none;
-                position: fixed;
-                top: 50%;
-                left: 50%;
-                transform: translate(-50%, -50%);
-                background: rgba(0, 0, 0, 0.9);
-                padding: 20px;
-                border-radius: 10px;
-                text-align: center;
-                color: #fff;
-                z-index: 1000;
-            }
-            #level-message {
-                font-size: 1.2rem;
-            }
-            #next-level {
-                background: #4caf50;
-                color: #fff;
-                border: none;
-                padding: 15px 30px;
-                font-size: 18px;
-                border-radius: 10px;
-                margin-top: 15px;
-                cursor: pointer;
-            }
-        </style>
-    </head>
-    <body>
-        <div id="game-container">
-            <canvas id="gameCanvas"></canvas>
-            <div id="stats">
-                <div id="score">Score: 0</div>
-                <div id="level">Level: 1</div>
+        }
+
+        .controls {
+            position: absolute;
+            bottom: 120px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            flex-direction: column;
+            background: rgba(0, 0, 0, 0.7);
+            padding: 10px;
+            border-radius: 10px;
+            width: 90%;
+            gap: 10px;
+            max-width: 400px;
+            z-index: 1;
+        }
+
+        .slider {
+            display: grid;
+            grid-template-columns: 60px 1fr 40px;
+            align-items: center;
+            gap: 10px;
+            color: #fff;
+            font-size: 14px;
+        }
+
+        .slider input[type="range"] {
+            width: 100%;
+            margin: 0;
+            height: 40px;
+        }
+
+        #stats {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            right: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            color: #fff;
+            font-size: 24px;
+            font-weight: bold;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+            z-index: 1;
+        }
+
+        #restart-btn {
+            background: linear-gradient(to right, #ff4757, #ff6b81);
+            color: #fff;
+            border: none;
+            padding: 10px 20px;
+            font-size: 16px;
+            border-radius: 25px;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(255, 71, 87, 0.3);
+            transition: all 0.3s ease;
+            position: absolute;
+            bottom: 10px;
+            right: 10px;
+            margin: 10px;
+            display: none;
+        }
+
+        #restart-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(255, 71, 87, 0.4);
+        }
+
+        #restart-btn.visible {
+            display: block;
+        }
+
+        #start-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.95);
+            background: linear-gradient(135deg, #1a1a2e, #0a0a2a);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            padding: 20px;
+            color: #fff;
+            text-align: center;
+        }
+
+        #start-screen h1 {
+            font-size: 36px;
+            color: #4caf50;
+            margin-bottom: 30px;
+            text-shadow: 0 0 10px rgba(76, 175, 80, 0.5);
+        }
+
+        #start-screen p {
+            font-size: 18px;
+            margin: 8px 0;
+            max-width: 100%;
+            line-height: 1.6;
+            opacity: 0.9;
+        }
+
+        #start-screen p strong {
+            color: #4caf50;
+            font-weight: bold;
+        }
+
+        #play-btn {
+            background: linear-gradient(to right, #4caf50, #45a049);
+            color: #fff;
+            border: none;
+            padding: 20px 50px;
+            font-size: 24px;
+            border-radius: 50px;
+            margin-top: 40px;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(76, 175, 80, 0.3);
+            transition: all 0.3s ease;
+        }
+
+        #play-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(76, 175, 80, 0.4);
+        }
+
+        #level-complete {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0, 0, 0, 0.9);
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            color: #fff;
+            z-index: 1000;
+        }
+
+        #level-message {
+            font-size: 1.2rem;
+        }
+
+        #next-level {
+            background: #4caf50;
+            color: #fff;
+            border: none;
+            padding: 15px 30px;
+            font-size: 18px;
+            border-radius: 10px;
+            margin-top: 15px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="game-container">
+        <canvas id="gameCanvas"></canvas>
+        <div id="stats">
+            <div id="score">Score: 0</div>
+            <div id="level">Level: 1</div>
+        </div>
+        <button id="restart-btn">Restart</button>
+        <div class="controls">
+            <div class="slider">
+                <label>Frequency</label>
+                <input type="range" id="frequency" min="1" max="10" step="0.1" value="2" />
+                <span class="slider-value" id="frequency-value">2.0</span>
             </div>
-            <button id="restart-btn">Restart</button>
-            <div class="controls">
-                <div class="slider">
-                    <label>Frequency</label>
-                    <input type="range" id="frequency" min="1" max="10" step="0.1" value="2" />
-                    <span class="slider-value" id="frequency-value">2.0</span>
-                </div>
-                <div class="slider">
-                    <label>Amplitude</label>
-                    <input type="range" id="amplitude" min="10" max="150" value="50" />
-                    <span class="slider-value" id="amplitude-value">50</span>
-                </div>
-                <div class="slider">
-                    <label>Phase</label>
-                    <input type="range" id="phase" min="0" max="360" value="0" />
-                    <span class="slider-value" id="phase-value">0</span>
-                </div>
+            <div class="slider">
+                <label>Amplitude</label>
+                <input type="range" id="amplitude" min="10" max="150" value="50" />
+                <span class="slider-value" id="amplitude-value">50</span>
+            </div>
+            <div class="slider">
+                <label>Phase</label>
+                <input type="range" id="phase" min="0" max="360" value="0" />
+                <span class="slider-value" id="phase-value">0</span>
             </div>
         </div>
-        <div id="start-screen">
-            <h1>Waveform</h1>
-            <p>Guide the particles to the green circles.</p>
-            <p><strong>Frequency</strong> - How many peaks and valleys</p>
-            <p><strong>Amplitude</strong> - Makes the wave taller or shorter</p>
-            <p><strong>Phase</strong> - Moves the wave left and right</p>
-            <p class="warning">Avoid the red obstacles!</p>
-            <button id="play-btn">Play Now</button>
-        </div>
-        <div id="level-complete">
-            <div id="level-message">Level Complete!</div>
-            <button id="next-level">Next Level</button>
-        </div>
-        <script>
-            window.onload = function () {
-                const game = {
-                    canvas: null,
-                    ctx: null,
-                    width: 0,
-                    height: 0,
-                    score: 0,
-                    level: 1,
-                    particles: [],
-                    obstacles: [],
-                    goals: [],
-                    waveParams: { frequency: 2, amplitude: 50, phase: 0 },
-                    gameStarted: false,
-                    resetStartX: 50, // Starting X position for particles
+    </div>
+    <div id="start-screen">
+        <h1>Waveform</h1>
+        <p>Guide the particles to the green circles.</p>
+        <p><strong>Frequency</strong> - How many peaks and valleys</p>
+        <p><strong>Amplitude</strong> - Makes the wave taller or shorter</p>
+        <p><strong>Phase</strong> - Moves the wave left and right</p>
+        <p class="warning">Avoid the red obstacles!</p>
+        <button id="play-btn">Play Now</button>
+    </div>
+    <div id="level-complete">
+        <div id="level-message">Level Complete!</div>
+        <button id="next-level">Next Level</button>
+    </div>
+    <script>
+        window.onload = function () {
+            const game = {
+                canvas: null,
+                ctx: null,
+                width: 0,
+                height: 0,
+                score: 0,
+                level: 1,
+                particles: [],
+                obstacles: [],
+                goals: [],
+                waveParams: { frequency: 2, amplitude: 50, phase: 0 },
+                gameStarted: false,
+                resetStartX: 50, // Starting X position for particles
 
-                    init() {
-                        this.canvas = document.getElementById("gameCanvas");
-                        this.ctx = this.canvas.getContext("2d");
-                        this.resize();
-                        this.setupEventListeners();
+                init() {
+                    this.canvas = document.getElementById("gameCanvas");
+                    this.ctx = this.canvas.getContext("2d");
+                    this.resize();
+                    this.setupEventListeners();
 
-                        const playBtn = document.getElementById("play-btn");
-                        playBtn.addEventListener("click", () => {
-                            document.getElementById("start-screen").style.display = "none";
-                            document.getElementById("restart-btn").style.display = "block";
-                            this.startGame();
-                        });
+                    const playBtn = document.getElementById("play-btn");
+                    playBtn.addEventListener("click", () => {
+                        document.getElementById("start-screen").style.display = "none";
+                        document.getElementById("restart-btn").style.display = "block";
+                        this.startGame();
+                    });
 
-                        const restartBtn = document.getElementById("restart-btn");
-                        restartBtn.addEventListener("click", () => {
-                            this.score = 0;
-                            this.level = 1;
-                            document.getElementById("score").textContent = "Score: 0";
-                            document.getElementById("level").textContent = "Level: 1";
-                            document.getElementById("level-complete").style.display = "none";
-                            this.createLevel();
-                        });
-
-                        document.addEventListener(
-                            "touchmove",
-                            (e) => {
-                                if (this.gameStarted) e.preventDefault();
-                            },
-                            { passive: false }
-                        );
-                    },
-
-                    // Calculate Y position on wave for any X coordinate
-                    getWaveY(x) {
-                        return this.height / 2 + Math.sin((x * this.waveParams.frequency) / 100 + this.waveParams.phase / 57.3) * this.waveParams.amplitude;
-                    },
-
-                    // Reset particle position smoothly
-                    resetParticle(particle) {
-                        particle.x = this.resetStartX;
-                        particle.y = this.getWaveY(this.resetStartX);
-                        particle.resetting = false;
-                    },
-
-                    startGame() {
-                        if (!this.gameStarted) {
-                            this.gameStarted = true;
-                            this.createLevel();
-                            this.animate();
-                        }
-                    },
-
-                    resize() {
-                        const dpr = window.devicePixelRatio || 1;
-                        this.width = window.innerWidth;
-                        this.height = window.innerHeight;
-                        this.canvas.width = this.width * dpr;
-                        this.canvas.height = this.height * dpr;
-                        this.canvas.style.width = this.width + "px";
-                        this.canvas.style.height = this.height + "px";
-                        this.ctx.scale(dpr, dpr);
-                    },
-
-                    setupEventListeners() {
-                        window.addEventListener("resize", () => this.resize());
-
-                        ["frequency", "amplitude", "phase"].forEach((param) => {
-                            const slider = document.getElementById(param);
-                            const display = document.getElementById(param + "-value");
-
-                            const updateValue = (e) => {
-                                e.preventDefault();
-                                let value;
-                                if (e.type === "touchstart" || e.type === "touchmove") {
-                                    const rect = slider.getBoundingClientRect();
-                                    const touch = e.touches[0];
-                                    const percentage = (touch.clientX - rect.left) / rect.width;
-                                    const min = parseFloat(slider.min);
-                                    const max = parseFloat(slider.max);
-                                    value = min + (max - min) * Math.max(0, Math.min(1, percentage));
-                                } else {
-                                    value = parseFloat(slider.value);
-                                }
-                                slider.value = value;
-                                this.waveParams[param] = value;
-                                display.textContent = value.toFixed(1);
-                            };
-
-                            slider.addEventListener("touchstart", updateValue, { passive: false });
-                            slider.addEventListener("touchmove", updateValue, { passive: false });
-                            slider.addEventListener("input", updateValue);
-                        });
-
-                        const nextBtn = document.getElementById("next-level");
-                        nextBtn.addEventListener("touchend", () => {
-                            if (this.checkLevelComplete()) this.nextLevel();
-                        });
-                        nextBtn.addEventListener("click", () => {
-                            if (this.checkLevelComplete()) this.nextLevel();
-                        });
-                    },
-
-                    createLevel() {
-                        const baseFreq = 1 + 0.3 * this.level;
-                        const baseAmp = Math.min(30 + 5 * this.level, this.height / 4);
-
-                        this.particles = [];
-                        this.obstacles = [];
-                        this.goals = [];
-
-                        // Create particles
-                        const particleCount = Math.min(this.level, 3);
-                        for (let i = 0; i < particleCount; i++) {
-                            this.particles.push({
-                                x: this.resetStartX,
-                                y: this.height / 2,
-                                velocity: this.width / 200,
-                                resetting: false
-                            });
-                        }
-
-                        // Create goals
-                        for (let i = 0; i < particleCount; i++) {
-                            const yPos = this.height / 2 + (i - (particleCount - 1) / 2) * baseAmp;
-                            this.goals.push({
-                                x: this.width - Math.min(100, 0.15 * this.width),
-                                y: yPos,
-                                reached: false
-                            });
-                        }
-
-                        // Create obstacles
-                        const obstacleCount = Math.min(2 * this.level, 8);
-                        const gap = 0.15 * this.height;
-                        for (let i = 0; i < obstacleCount; i++) {
-                            const obstacle = {
-                                x: this.width * (0.3 + (i / obstacleCount) * 0.4),
-                                y: this.height / 2 - baseAmp - gap / 2 + Math.random() * (2 * baseAmp + gap),
-                                width: 0.03 * this.width,
-                                height: 0.15 * this.height
-                            };
-                            this.obstacles.push(obstacle);
-                        }
-
-                        // Set wave parameters
-                        this.waveParams.frequency = baseFreq;
-                        this.waveParams.amplitude = baseAmp;
-                        this.waveParams.phase = 0;
-
-                        // Update UI sliders
-                        ["frequency", "amplitude", "phase"].forEach((param) => {
-                            const slider = document.getElementById(param);
-                            const display = document.getElementById(param + "-value");
-                            slider.value = this.waveParams[param];
-                            display.textContent = this.waveParams[param].toFixed(1);
-                        });
-
-                        document.getElementById("level-complete").style.display = "none";
-                    },
-
-                    nextLevel() {
-                        this.level++;
-                        this.score += 100 * this.level;
-                        document.getElementById("score").textContent = `Score: ${this.score}`;
-                        document.getElementById("level").textContent = `Level: ${this.level}`;
+                    const restartBtn = document.getElementById("restart-btn");
+                    restartBtn.addEventListener("click", () => {
+                        this.score = 0;
+                        this.level = 1;
+                        document.getElementById("score").textContent = "Score: 0";
+                        document.getElementById("level").textContent = "Level: 1";
                         document.getElementById("level-complete").style.display = "none";
                         this.createLevel();
-                    },
+                    });
 
-                    checkLevelComplete() {
-                        const complete = this.goals.every((goal) => goal.reached);
-                        if (complete) {
-                            document.getElementById("level-complete").style.display = "block";
-                        }
-                        return complete;
-                    },
+                    document.addEventListener(
+                        "touchmove",
+                        (e) => {
+                            if (this.gameStarted) e.preventDefault();
+                        },
+                        { passive: false }
+                    );
+                },
 
-                    updateParticles() {
-                        this.particles.forEach((p) => {
-                            if (p.resetting) {
-                                this.resetParticle(p);
+                // Calculate Y position on wave for any X coordinate
+                getWaveY(x) {
+                    return this.height / 2 + Math.sin((x * this.waveParams.frequency) / 100 + this.waveParams.phase / 57.3) * this.waveParams.amplitude;
+                },
+
+                // Reset particle position smoothly
+                resetParticle(particle) {
+                    particle.x = this.resetStartX;
+                    particle.y = this.getWaveY(this.resetStartX);
+                    particle.resetting = false;
+                },
+
+                startGame() {
+                    if (!this.gameStarted) {
+                        this.gameStarted = true;
+                        this.createLevel();
+                        this.animate();
+                    }
+                },
+
+                resize() {
+                    const dpr = window.devicePixelRatio || 1;
+                    this.width = window.innerWidth;
+                    this.height = window.innerHeight;
+                    this.canvas.width = this.width * dpr;
+                    this.canvas.height = this.height * dpr;
+                    this.canvas.style.width = this.width + "px";
+                    this.canvas.style.height = this.height + "px";
+                    this.ctx.scale(dpr, dpr);
+                },
+
+                setupEventListeners() {
+                    window.addEventListener("resize", () => this.resize());
+
+                    ["frequency", "amplitude", "phase"].forEach((param) => {
+                        const slider = document.getElementById(param);
+                        const display = document.getElementById(param + "-value");
+
+                        const updateValue = (e) => {
+                            e.preventDefault();
+                            let value;
+                            if (e.type === "touchstart" || e.type === "touchmove") {
+                                const rect = slider.getBoundingClientRect();
+                                const touch = e.touches[0];
+                                const percentage = (touch.clientX - rect.left) / rect.width;
+                                const min = parseFloat(slider.min);
+                                const max = parseFloat(slider.max);
+                                value = min + (max - min) * Math.max(0, Math.min(1, percentage));
                             } else {
-                                // Update particle position based on wave function
-                                p.y = this.getWaveY(p.x);
-                                p.x += p.velocity;
-
-                                this.checkCollisions(p);
-
-                                // Reset if particle goes off screen
-                                if (p.x > this.width) {
-                                    this.resetParticle(p);
-                                }
+                                value = parseFloat(slider.value);
                             }
-                        });
-                    },
+                            slider.value = value;
+                            this.waveParams[param] = value;
+                            display.textContent = value.toFixed(1);
+                        };
 
-                    checkCollisions(p) {
-                        // Check obstacle collisions
-                        this.obstacles.forEach((o) => {
-                            if (this.hitObstacle(p, o)) {
-                                p.resetting = true;
+                        slider.addEventListener("touchstart", updateValue, { passive: false });
+                        slider.addEventListener("touchmove", updateValue, { passive: false });
+                        slider.addEventListener("input", updateValue);
+                    });
+
+                    const nextBtn = document.getElementById("next-level");
+                    nextBtn.addEventListener("touchend", () => {
+                        if (this.checkLevelComplete()) this.nextLevel();
+                    });
+                    nextBtn.addEventListener("click", () => {
+                        if (this.checkLevelComplete()) this.nextLevel();
+                    });
+                },
+
+                createLevel() {
+                    const baseFreq = 1 + 0.3 * this.level;
+                    const baseAmp = Math.min(30 + 5 * this.level, this.height / 4);
+
+                    this.particles = [];
+                    this.obstacles = [];
+                    this.goals = [];
+
+                    // Create particles
+                    const particleCount = Math.min(this.level, 3);
+                    for (let i = 0; i < particleCount; i++) {
+                        this.particles.push({
+                            x: this.resetStartX,
+                            y: this.height / 2,
+                            velocity: this.width / 200,
+                            resetting: false
+                        });
+                    }
+
+                    // Create goals
+                    for (let i = 0; i < particleCount; i++) {
+                        const yPos = this.height / 2 + (i - (particleCount - 1) / 2) * baseAmp;
+                        this.goals.push({
+                            x: this.width - Math.min(100, 0.15 * this.width),
+                            y: yPos,
+                            reached: false
+                        });
+                    }
+
+                    // Create obstacles
+                    const obstacleCount = Math.min(2 * this.level, 8);
+                    const gap = 0.15 * this.height;
+                    for (let i = 0; i < obstacleCount; i++) {
+                        const obstacle = {
+                            x: this.width * (0.3 + (i / obstacleCount) * 0.4),
+                            y: this.height / 2 - baseAmp - gap / 2 + Math.random() * (2 * baseAmp + gap),
+                            width: 0.03 * this.width,
+                            height: 0.15 * this.height
+                        };
+                        this.obstacles.push(obstacle);
+                    }
+
+                    // Set wave parameters
+                    this.waveParams.frequency = baseFreq;
+                    this.waveParams.amplitude = baseAmp;
+                    this.waveParams.phase = 0;
+
+                    // Update UI sliders
+                    ["frequency", "amplitude", "phase"].forEach((param) => {
+                        const slider = document.getElementById(param);
+                        const display = document.getElementById(param + "-value");
+                        slider.value = this.waveParams[param];
+                        display.textContent = this.waveParams[param].toFixed(1);
+                    });
+
+                    document.getElementById("level-complete").style.display = "none";
+                },
+
+                nextLevel() {
+                    this.level++;
+                    this.score += 100 * this.level;
+                    document.getElementById("score").textContent = `Score: ${this.score}`;
+                    document.getElementById("level").textContent = `Level: ${this.level}`;
+                    document.getElementById("level-complete").style.display = "none";
+                    this.createLevel();
+                },
+
+                checkLevelComplete() {
+                    const complete = this.goals.every((goal) => goal.reached);
+                    if (complete) {
+                        document.getElementById("level-complete").style.display = "block";
+                    }
+                    return complete;
+                },
+
+                updateParticles() {
+                    this.particles.forEach((p) => {
+                        if (p.resetting) {
+                            this.resetParticle(p);
+                        } else {
+                            // Update particle position based on wave function
+                            p.y = this.getWaveY(p.x);
+                            p.x += p.velocity;
+
+                            this.checkCollisions(p);
+
+                            // Reset if particle goes off screen
+                            if (p.x > this.width) {
+                                this.resetParticle(p);
                             }
-                        });
-
-                        // Check goal collisions
-                        this.goals.forEach((g) => {
-                            if (!g.reached && this.hitGoal(p, g)) {
-                                g.reached = true;
-                                this.checkLevelComplete();
-                            }
-                        });
-                    },
-
-                    hitObstacle(p, o) {
-                        return p.x > o.x && p.x < o.x + o.width && p.y > o.y && p.y < o.y + o.height;
-                    },
-
-                    hitGoal(p, g) {
-                        const dx = p.x - g.x;
-                        const dy = p.y - g.y;
-                        return Math.sqrt(dx * dx + dy * dy) < 15;
-                    },
-
-                    drawRoundedRect(ctx, x, y, width, height, radius, fillColor) {
-                        radius = Math.min(radius || Math.min(width, height) / 4, width / 2, height / 2);
-
-                        ctx.beginPath();
-                        ctx.moveTo(x + radius, y);
-                        ctx.lineTo(x + width - radius, y);
-                        ctx.arcTo(x + width, y, x + width, y + radius, radius);
-                        ctx.lineTo(x + width, y + height - radius);
-                        ctx.arcTo(x + width, y + height, x + width - radius, y + height, radius);
-                        ctx.lineTo(x + radius, y + height);
-                        ctx.arcTo(x, y + height, x, y + height - radius, radius);
-                        ctx.lineTo(x, y + radius);
-                        ctx.arcTo(x, y, x + radius, y, radius);
-                        ctx.closePath();
-
-                        ctx.fillStyle = fillColor;
-                        ctx.fill();
-                    },
-
-                    draw() {
-                        this.ctx.clearRect(0, 0, this.width, this.height);
-
-                        // Draw wave
-                        this.ctx.beginPath();
-                        this.ctx.strokeStyle = "rgba(255, 255, 255, 0.5)";
-                        this.ctx.lineWidth = 2;
-
-                        for (let x = 0; x < this.width; x += 2) {
-                            const y = this.getWaveY(x);
-                            x === 0 ? this.ctx.moveTo(x, y) : this.ctx.lineTo(x, y);
                         }
+                    });
+                },
+
+                checkCollisions(p) {
+                    // Check obstacle collisions
+                    this.obstacles.forEach((o) => {
+                        if (this.hitObstacle(p, o)) {
+                            p.resetting = true;
+                        }
+                    });
+
+                    // Check goal collisions
+                    this.goals.forEach((g) => {
+                        if (!g.reached && this.hitGoal(p, g)) {
+                            g.reached = true;
+                            this.checkLevelComplete();
+                        }
+                    });
+                },
+
+                hitObstacle(p, o) {
+                    return p.x > o.x && p.x < o.x + o.width && p.y > o.y && p.y < o.y + o.height;
+                },
+
+                hitGoal(p, g) {
+                    const dx = p.x - g.x;
+                    const dy = p.y - g.y;
+                    return Math.sqrt(dx * dx + dy * dy) < 15;
+                },
+
+                drawRoundedRect(ctx, x, y, width, height, radius, fillColor) {
+                    radius = Math.min(radius || Math.min(width, height) / 4, width / 2, height / 2);
+
+                    ctx.beginPath();
+                    ctx.moveTo(x + radius, y);
+                    ctx.lineTo(x + width - radius, y);
+                    ctx.arcTo(x + width, y, x + width, y + radius, radius);
+                    ctx.lineTo(x + width, y + height - radius);
+                    ctx.arcTo(x + width, y + height, x + width - radius, y + height, radius);
+                    ctx.lineTo(x + radius, y + height);
+                    ctx.arcTo(x, y + height, x, y + height - radius, radius);
+                    ctx.lineTo(x, y + radius);
+                    ctx.arcTo(x, y, x + radius, y, radius);
+                    ctx.closePath();
+
+                    ctx.fillStyle = fillColor;
+                    ctx.fill();
+                },
+
+                draw() {
+                    this.ctx.clearRect(0, 0, this.width, this.height);
+
+                    // Draw wave
+                    this.ctx.beginPath();
+                    this.ctx.strokeStyle = "rgba(255, 255, 255, 0.5)";
+                    this.ctx.lineWidth = 2;
+
+                    for (let x = 0; x < this.width; x += 2) {
+                        const y = this.getWaveY(x);
+                        x === 0 ? this.ctx.moveTo(x, y) : this.ctx.lineTo(x, y);
+                    }
+                    this.ctx.stroke();
+
+                    // Draw obstacles
+                    this.obstacles.forEach((o) => {
+                        this.drawRoundedRect(this.ctx, o.x, o.y, o.width, o.height, 10, "#ff4444");
+                    });
+
+                    // Draw goals
+                    this.goals.forEach((g) => {
+                        this.ctx.beginPath();
+                        this.ctx.strokeStyle = g.reached ? "#00ff00" : "#4CAF50";
+                        this.ctx.lineWidth = 2;
+                        this.ctx.arc(g.x, g.y, 15, 0, 2 * Math.PI);
                         this.ctx.stroke();
 
-                        // Draw obstacles
-                        this.obstacles.forEach((o) => {
-                            this.drawRoundedRect(this.ctx, o.x, o.y, o.width, o.height, 10, "#ff4444");
-                        });
+                        this.ctx.beginPath();
+                        this.ctx.fillStyle = g.reached ? "#00ff00" : "transparent";
+                        this.ctx.arc(g.x, g.y, 15, 0, 2 * Math.PI);
+                        this.ctx.fill();
+                    });
 
-                        // Draw goals
-                        this.goals.forEach((g) => {
-                            this.ctx.beginPath();
-                            this.ctx.strokeStyle = g.reached ? "#00ff00" : "#4CAF50";
-                            this.ctx.lineWidth = 2;
-                            this.ctx.arc(g.x, g.y, 15, 0, 2 * Math.PI);
-                            this.ctx.stroke();
+                    // Draw particles
+                    this.ctx.fillStyle = "#ffffff";
+                    this.particles.forEach((p) => {
+                        this.ctx.beginPath();
+                        this.ctx.arc(p.x, p.y, 5, 0, 2 * Math.PI);
+                        this.ctx.fill();
+                    });
+                },
 
-                            this.ctx.beginPath();
-                            this.ctx.fillStyle = g.reached ? "#00ff00" : "transparent";
-                            this.ctx.arc(g.x, g.y, 15, 0, 2 * Math.PI);
-                            this.ctx.fill();
-                        });
-
-                        // Draw particles
-                        this.ctx.fillStyle = "#ffffff";
-                        this.particles.forEach((p) => {
-                            this.ctx.beginPath();
-                            this.ctx.arc(p.x, p.y, 5, 0, 2 * Math.PI);
-                            this.ctx.fill();
-                        });
-                    },
-
-                    animate() {
-                        this.updateParticles();
-                        this.draw();
-                        requestAnimationFrame(() => this.animate());
-                    },
-                };
-
-                game.init();
+                animate() {
+                    this.updateParticles();
+                    this.draw();
+                    requestAnimationFrame(() => this.animate());
+                },
             };
-        </script>
-    </body>
+
+            game.init();
+        };
+    </script>
+</body>
+
 </html>
