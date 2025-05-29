@@ -2269,6 +2269,12 @@ m489 -117 c31 -26 31 -78 -1 -104 -22 -18 -39 -19 -226 -16 -220 3 -226 5
 				const viewAllButtons = document.querySelectorAll('.mobile-see-all');
 				viewAllButtons.forEach(btn => btn.classList.remove('show'));
 
+				// Scroll the categories section back to the beginning
+				const categoriesContainer = document.querySelector('.mobile-categories');
+				if (categoriesContainer) {
+					categoriesContainer.scrollLeft = 0;
+				}
+
 				// Show all games
 				createMobileGameCards('all');
 			}
