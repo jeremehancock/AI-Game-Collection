@@ -42,7 +42,8 @@
 
 	<link rel="preconnect" href="https://fonts.googleapis.com">
 	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-	<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+	<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap"
+		rel="stylesheet">
 
 	<style>
 		* {
@@ -65,7 +66,6 @@
 		.container {
 			max-width: 1200px;
 			margin: 0 auto;
-
 		}
 
 		header {
@@ -364,47 +364,6 @@
 			margin-bottom: 50px;
 		}
 
-		@media (max-width: 768px) {
-			body {
-				padding: 1rem;
-			}
-
-			h1 {
-				font-size: 2rem;
-			}
-
-			.games-grid {
-				grid-template-columns: 1fr;
-			}
-
-			.footer-container {
-				padding: 1rem;
-			}
-
-			.footer-text {
-				font-size: 0.9rem;
-			}
-
-			.icon-container {
-				gap: 0.75rem;
-			}
-
-			.github-link,
-			.dockerhub-link {
-				transform: scale(0.9);
-			}
-
-			.github-link:hover,
-			.dockerhub-link:hover {
-				transform: scale(0.9) translateY(-2px);
-			}
-
-			/* Hide modal on mobile, use full-screen instead */
-			.game-modal {
-				display: none !important;
-			}
-		}
-
 		/* iOS install prompt */
 		.ios-install-prompt {
 			position: fixed;
@@ -467,72 +426,647 @@
 			left: 0;
 			right: 0;
 			bottom: 0;
-			background: rgba(0, 0, 0, 0.75);
+			background: rgba(0, 0, 0, 0.8);
 			display: flex;
 			align-items: center;
 			justify-content: center;
 			z-index: 1000;
-			backdrop-filter: blur(5px);
-			-webkit-backdrop-filter: blur(5px);
+			backdrop-filter: blur(20px);
+			-webkit-backdrop-filter: blur(20px);
+			padding: 20px;
 		}
 
 		.app-prompt-content {
 			background: linear-gradient(135deg, rgba(26, 26, 46, 0.95) 0%, rgba(22, 33, 62, 0.95) 100%);
-			padding: 30px;
-			border-radius: 12px;
+			padding: 32px 24px;
+			border-radius: 24px;
 			color: #fff;
 			max-width: 350px;
-			width: 90%;
+			width: 100%;
 			border: 1px solid rgba(255, 255, 255, 0.1);
-			box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+			box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+			backdrop-filter: blur(20px);
+			-webkit-backdrop-filter: blur(20px);
+			position: relative;
+			overflow: hidden;
+		}
+
+		.app-prompt-content::before {
+			content: '';
+			position: absolute;
+			top: -50%;
+			right: -20%;
+			width: 200px;
+			height: 200px;
+			background: rgba(100, 255, 218, 0.1);
+			border-radius: 50%;
+			transform: rotate(45deg);
 		}
 
 		.app-prompt-content h3 {
-			margin: 0 0 10px 0;
-			font-size: 1.2rem;
-			font-weight: 600;
+			margin: 0 0 8px 0;
+			font-size: 1.4rem;
+			font-weight: 700;
 			text-align: center;
+			position: relative;
+			z-index: 2;
 		}
 
 		.app-prompt-content p {
-			margin: 0 0 20px 0;
-			color: #a0a0a0;
-			font-size: 0.9rem;
+			margin: 0 0 24px 0;
+			color: rgba(255, 255, 255, 0.8);
+			font-size: 1rem;
 			text-align: center;
-			line-height: 1.4;
+			line-height: 1.5;
+			position: relative;
+			z-index: 2;
 		}
 
 		.app-prompt-button {
 			display: block;
 			width: 100%;
-			padding: 12px;
-			margin-bottom: 8px;
+			padding: 16px 20px;
+			margin-bottom: 12px;
+			border: none;
+			border-radius: 16px;
+			color: #000;
+			font-weight: 700;
+			font-size: 1rem;
+			cursor: pointer;
+			transition: all 0.3s ease;
+			position: relative;
+			z-index: 2;
+			font-family: 'Inter', sans-serif;
+		}
+
+		.app-prompt-button:first-of-type {
+			background: linear-gradient(135deg, #64ffda 0%, #00bcd4 100%);
+			box-shadow: 0 4px 20px rgba(100, 255, 218, 0.3);
+		}
+
+		.app-prompt-button:first-of-type:hover {
+			transform: translateY(-2px);
+			box-shadow: 0 8px 25px rgba(100, 255, 218, 0.4);
+		}
+
+		.app-prompt-button:first-of-type:active {
+			transform: translateY(0) scale(0.98);
+		}
+
+		.app-prompt-button.secondary {
 			background: rgba(255, 255, 255, 0.1);
 			border: 1px solid rgba(255, 255, 255, 0.2);
-			border-radius: 6px;
 			color: #fff;
 			font-weight: 500;
+			margin-bottom: 0;
+		}
+
+		.app-prompt-button.secondary:hover {
+			background: rgba(255, 255, 255, 0.15);
+			border-color: rgba(255, 255, 255, 0.3);
+			transform: translateY(-1px);
+		}
+
+		.app-prompt-button.secondary:active {
+			transform: translateY(0) scale(0.98);
+			background: rgba(255, 255, 255, 0.08);
+		}
+
+		/* RADICAL MOBILE REDESIGN - Hidden by default, shown only on mobile */
+		.mobile-app-layout {
+			display: none;
+		}
+
+		/* Desktop layout remains exactly the same - this is hidden on mobile */
+		@media (max-width: 768px) {
+
+			/* Hide desktop layout completely on mobile */
+			.container {
+				display: none;
+			}
+
+			/* Show radical mobile layout */
+			.mobile-app-layout {
+				display: block;
+			}
+
+			.game-modal {
+				display: none !important;
+			}
+		}
+
+		/* RADICAL MOBILE LAYOUT STYLES */
+		.mobile-app-layout {
+			position: fixed;
+			top: 0;
+			left: 0;
+			right: 0;
+			bottom: 0;
+			background: #000;
+			overflow: hidden;
+			font-family: 'Inter', sans-serif;
+		}
+
+		.mobile-header {
+			position: fixed;
+			top: 0;
+			left: 0;
+			right: 0;
+			z-index: 100;
+			background: linear-gradient(180deg, #1a1a2e 0%, rgba(26, 26, 46, 0.9) 100%);
+			backdrop-filter: blur(20px);
+			-webkit-backdrop-filter: blur(20px);
+			border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+			padding: env(safe-area-inset-top) 20px 20px 20px;
+		}
+
+		.mobile-header-content {
+			display: flex;
+			align-items: center;
+			justify-content: space-between;
+			padding-top: 20px;
+		}
+
+		.mobile-logo {
+			font-size: 1.5rem;
+			font-weight: 900;
+			background: linear-gradient(135deg, #fff 0%, #64ffda 100%);
+			-webkit-background-clip: text;
+			-webkit-text-fill-color: transparent;
+			background-clip: text;
+		}
+
+		.mobile-main {
+			position: fixed;
+			top: 100px;
+			left: 0;
+			right: 0;
+			bottom: 0;
+			overflow-y: auto;
+			-webkit-overflow-scrolling: touch;
+			padding-top: 0;
+			padding-left: 20px;
+			padding-right: 20px;
+			padding-bottom: calc(40px + env(safe-area-inset-bottom));
+		}
+
+		.mobile-hero {
+			background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+			border-radius: 24px;
+			padding: 32px 24px;
+			margin-bottom: 32px;
+			position: relative;
+			overflow: hidden;
+		}
+
+		.mobile-hero::before {
+			content: '';
+			position: absolute;
+			top: -50%;
+			right: -20%;
+			width: 200px;
+			height: 200px;
+			background: rgba(255, 255, 255, 0.1);
+			border-radius: 50%;
+			transform: rotate(45deg);
+		}
+
+		.mobile-hero-content {
+			position: relative;
+			z-index: 2;
+		}
+
+		.mobile-hero h1 {
+			font-size: 2rem;
+			font-weight: 800;
+			margin-bottom: 8px;
+			color: white;
+		}
+
+		.mobile-hero p {
+			color: rgba(255, 255, 255, 0.9);
+			font-size: 1rem;
+			line-height: 1.5;
+			margin-bottom: 20px;
+		}
+
+		.mobile-hero-stats {
+			display: flex;
+			gap: 20px;
+		}
+
+		.mobile-stat {
+			text-align: center;
+		}
+
+		.mobile-stat-number {
+			font-size: 1.5rem;
+			font-weight: 800;
+			color: white;
+			display: block;
+		}
+
+		.mobile-stat-label {
+			font-size: 0.8rem;
+			color: rgba(255, 255, 255, 0.8);
+			text-transform: uppercase;
+			letter-spacing: 0.5px;
+		}
+
+		.mobile-section-title {
+			font-size: 1.3rem;
+			font-weight: 700;
+			color: white;
+			margin-bottom: 16px;
+			display: flex;
+			align-items: center;
+			justify-content: space-between;
+		}
+
+		.mobile-see-all {
+			font-size: 0.9rem;
+			color: #64ffda;
+			font-weight: 600;
+			cursor: pointer;
+			transition: opacity 0.3s ease;
+			display: none;
+			/* Hidden by default */
+		}
+
+		.mobile-see-all:hover {
+			opacity: 0.8;
+		}
+
+		.mobile-see-all.show {
+			display: block;
+		}
+
+		.mobile-scroll-to-all {
+			font-size: 0.9rem;
+			color: #64ffda;
+			font-weight: 600;
+			cursor: pointer;
+			transition: opacity 0.3s ease;
+		}
+
+		.mobile-scroll-to-all:hover {
+			opacity: 0.8;
+		}
+
+		.mobile-featured-game {
+			background: linear-gradient(135deg, #1a1a2e 0%, #2d1b69 100%);
+			border-radius: 20px;
+			overflow: hidden;
+			margin-bottom: 32px;
+			position: relative;
+			border: 1px solid rgba(255, 255, 255, 0.1);
+			box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+		}
+
+		.mobile-featured-image {
+			height: 200px;
+			background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+			position: relative;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+		}
+
+		.mobile-featured-icon {
+			width: 80px;
+			height: 80px;
+			background: rgba(255, 255, 255, 0.2);
+			border-radius: 50%;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+		}
+
+		.mobile-featured-icon svg {
+			width: 40px;
+			height: 40px;
+			color: white;
+		}
+
+		.mobile-featured-content {
+			padding: 24px;
+		}
+
+		.mobile-featured-title {
+			font-size: 1.4rem;
+			font-weight: 700;
+			color: white;
+			margin-bottom: 8px;
+		}
+
+		.mobile-featured-description {
+			color: #a0a0a0;
+			line-height: 1.5;
+			margin-bottom: 20px;
+			font-size: 0.95rem;
+		}
+
+		.mobile-play-button {
+			background: linear-gradient(135deg, #64ffda 0%, #00bcd4 100%);
+			border: none;
+			border-radius: 16px;
+			padding: 16px 32px;
+			color: #000;
+			font-weight: 700;
+			font-size: 1rem;
+			width: 100%;
 			cursor: pointer;
 			transition: all 0.3s ease;
 		}
 
-		.app-prompt-button:hover {
-			background: rgba(255, 255, 255, 0.2);
+		.mobile-play-button:active {
+			transform: scale(0.98);
+			box-shadow: 0 4px 20px rgba(100, 255, 218, 0.3);
+		}
+
+		.mobile-games-grid {
+			display: grid;
+			grid-template-columns: repeat(2, 1fr);
+			gap: 16px;
+			margin-bottom: 32px;
+			align-items: start;
+		}
+
+		.mobile-game-card {
+			background: rgba(255, 255, 255, 0.05);
+			border-radius: 16px;
+			padding: 20px;
+			border: 1px solid rgba(255, 255, 255, 0.1);
+			backdrop-filter: blur(10px);
+			-webkit-backdrop-filter: blur(10px);
+			transition: all 0.3s ease;
+			cursor: pointer;
+			position: relative;
+			overflow: hidden;
+		}
+
+		.mobile-game-card:active {
+			transform: scale(0.95);
+			background: rgba(255, 255, 255, 0.1);
+		}
+
+		.mobile-game-card::before {
+			content: '';
+			position: absolute;
+			top: 0;
+			left: 0;
+			right: 0;
+			height: 3px;
+			background: linear-gradient(90deg, #64ffda 0%, #667eea 100%);
+		}
+
+		.mobile-game-icon {
+			width: 48px;
+			height: 48px;
+			background: rgba(255, 255, 255, 0.1);
+			border-radius: 12px;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			margin-bottom: 12px;
+		}
+
+		.mobile-game-icon svg {
+			width: 24px;
+			height: 24px;
+		}
+
+		.mobile-game-title {
+			font-size: 1rem;
+			font-weight: 600;
+			color: white;
+			margin-bottom: 4px;
+		}
+
+		.mobile-game-description {
+			font-size: 0.8rem;
+			color: #a0a0a0;
+			line-height: 1.3;
+			display: -webkit-box;
+			-webkit-line-clamp: 2;
+			-webkit-box-orient: vertical;
+			overflow: hidden;
+		}
+
+
+
+		/* Swipe indicators */
+		.mobile-swipe-indicator {
+			position: absolute;
+			bottom: 20px;
+			left: 50%;
+			transform: translateX(-50%);
+			display: flex;
+			gap: 8px;
+		}
+
+		.mobile-dot {
+			width: 8px;
+			height: 8px;
+			border-radius: 50%;
+			background: rgba(255, 255, 255, 0.3);
+			transition: all 0.3s ease;
+		}
+
+		.mobile-dot.active {
+			background: #64ffda;
+			transform: scale(1.2);
+		}
+
+		/* Game categories horizontal scroll */
+		.mobile-categories {
+			display: flex;
+			gap: 12px;
+			overflow-x: auto;
+			padding: 0 0 20px 0;
+			margin-bottom: 24px;
+			-webkit-overflow-scrolling: touch;
+		}
+
+		.mobile-categories::-webkit-scrollbar {
+			display: none;
+		}
+
+		.mobile-category {
+			flex-shrink: 0;
+			padding: 8px 16px;
+			border-radius: 20px;
+			background: rgba(255, 255, 255, 0.1);
+			border: 1px solid rgba(255, 255, 255, 0.1);
+			color: #a0a0a0;
+			font-size: 0.9rem;
+			font-weight: 500;
+			cursor: pointer;
+			transition: all 0.3s ease;
+			user-select: none;
+		}
+
+		.mobile-category.active {
+			background: linear-gradient(135deg, #64ffda 0%, #00bcd4 100%);
+			color: #000;
+			border-color: transparent;
+		}
+
+		.mobile-category:active {
+			transform: scale(0.95);
+		}
+
+		/* Mobile back button for games */
+		.mobile-back-button {
+			position: fixed;
+			bottom: max(env(safe-area-inset-bottom), 20px);
+			left: 20px;
+			z-index: 1001;
+			width: 48px;
+			height: 48px;
+			border-radius: 50%;
+			background: rgba(0, 0, 0, 0.8);
+			backdrop-filter: blur(20px);
+			-webkit-backdrop-filter: blur(20px);
+			border: 1px solid rgba(255, 255, 255, 0.2);
+			color: white;
+			display: none;
+			align-items: center;
+			justify-content: center;
+			cursor: pointer;
+			transition: all 0.3s ease;
+		}
+
+		.mobile-back-button:active {
+			transform: scale(0.9);
+			background: rgba(0, 0, 0, 0.9);
+		}
+
+		.mobile-back-button svg {
+			width: 24px;
+			height: 24px;
+		}
+
+		/* Mobile Footer */
+		.mobile-footer {
+			margin-top: 40px;
+			margin-bottom: 20px;
+		}
+
+		.mobile-footer-content {
+			background: rgba(255, 255, 255, 0.03);
+			border: 1px solid rgba(255, 255, 255, 0.05);
+			border-radius: 16px;
+			padding: 20px;
+			display: flex;
+			align-items: center;
+			justify-content: space-between;
+			backdrop-filter: blur(10px);
+			-webkit-backdrop-filter: blur(10px);
+		}
+
+		.mobile-footer-text {
+			font-size: 0.8rem;
+			color: #666;
+			margin: 0;
+			line-height: 1.3;
+		}
+
+		.mobile-footer-link {
+			color: #a0a0a0;
+			text-decoration: none;
+			transition: color 0.3s ease;
+			font-weight: 500;
+		}
+
+		.mobile-footer-link:hover {
+			color: #64ffda;
+		}
+
+		.mobile-footer-icons {
+			display: flex;
+			gap: 12px;
+		}
+
+		.mobile-footer-icon {
+			width: 32px;
+			height: 32px;
+			border-radius: 8px;
+			background: rgba(255, 255, 255, 0.05);
+			border: 1px solid rgba(255, 255, 255, 0.08);
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			color: #666;
+			transition: all 0.3s ease;
+			text-decoration: none;
+		}
+
+		.mobile-footer-icon:hover {
+			background: rgba(255, 255, 255, 0.1);
+			border-color: rgba(255, 255, 255, 0.15);
+			color: #a0a0a0;
 			transform: translateY(-1px);
 		}
 
-		.app-prompt-button.secondary {
-			background: transparent;
-			border: 1px solid rgba(255, 255, 255, 0.1);
+		.mobile-footer-icon:active {
+			transform: translateY(0) scale(0.95);
 		}
 
-		.app-prompt-button.secondary:hover {
-			background: rgba(255, 255, 255, 0.05);
+		/* Featured game rotation */
+		.mobile-featured-games {
+			position: relative;
+			margin-bottom: 32px;
+		}
+
+		.mobile-featured-slider {
+			display: flex;
+			transition: transform 0.3s ease;
+		}
+
+		.mobile-featured-slide {
+			min-width: 100%;
+			flex-shrink: 0;
+		}
+
+
+
+		/* Smooth scrolling for the entire mobile layout */
+		.mobile-main {
+			scroll-behavior: smooth;
+		}
+
+		/* Loading states */
+		.mobile-loading {
+			display: flex;
+			justify-content: center;
+			align-items: center;
+			height: 100px;
+		}
+
+		.mobile-spinner {
+			width: 32px;
+			height: 32px;
+			border: 3px solid rgba(255, 255, 255, 0.1);
+			border-top: 3px solid #64ffda;
+			border-radius: 50%;
+			animation: spin 1s linear infinite;
+		}
+
+		@keyframes spin {
+			0% {
+				transform: rotate(0deg);
+			}
+
+			100% {
+				transform: rotate(360deg);
+			}
 		}
 	</style>
 </head>
 
 <body>
+	<!-- Desktop Layout - Exactly the same as original -->
 	<div class="container">
 		<header>
 			<h1>AI Game Collection</h1>
@@ -676,6 +1210,110 @@
 		</div>
 	</div>
 
+	<!-- RADICAL MOBILE LAYOUT - Completely different experience -->
+	<div class="mobile-app-layout" id="mobileLayout">
+		<!-- Mobile Header -->
+		<div class="mobile-header">
+			<div class="mobile-header-content">
+				<div class="mobile-logo">AI Game Collection</div>
+			</div>
+		</div>
+
+		<!-- Mobile Main Content -->
+		<div class="mobile-main">
+			<!-- Hero Section -->
+			<div class="mobile-hero">
+				<div class="mobile-hero-content">
+					<h1>Ready to Play?</h1>
+					<p>Discover amazing games built with AI. Instant play, no downloads required.</p>
+					<div class="mobile-hero-stats">
+						<div class="mobile-stat">
+							<span class="mobile-stat-number" id="totalGameCount">0</span>
+							<span class="mobile-stat-label">Games</span>
+						</div>
+						<div class="mobile-stat">
+							<span class="mobile-stat-number">∞</span>
+							<span class="mobile-stat-label">Fun</span>
+						</div>
+						<div class="mobile-stat">
+							<span class="mobile-stat-number">0</span>
+							<span class="mobile-stat-label">Cost</span>
+						</div>
+						<div class="mobile-stat">
+							<span class="mobile-stat-number">0</span>
+							<span class="mobile-stat-label">Ads</span>
+						</div>
+					</div>
+				</div>
+			</div>
+
+			<!-- Featured Game -->
+			<div class="mobile-section-title">
+				Featured Game
+				<span class="mobile-scroll-to-all">See All</span>
+			</div>
+
+			<div class="mobile-featured-games">
+				<div class="mobile-featured-game" id="featuredGame">
+					<!-- Featured game content will be dynamically populated -->
+				</div>
+			</div>
+
+			<!-- Categories -->
+			<div class="mobile-categories">
+				<div class="mobile-category active">All</div>
+				<div class="mobile-category">Puzzle</div>
+				<div class="mobile-category">Action</div>
+				<div class="mobile-category">Classic</div>
+				<div class="mobile-category">Arcade</div>
+			</div>
+
+			<!-- Games Grid -->
+			<div class="mobile-section-title" id="allGamesSection">
+				All Games
+				<span class="mobile-see-all">View All</span>
+			</div>
+
+			<div class="mobile-games-grid" id="mobileGamesGrid">
+				<!-- Games will be populated here -->
+			</div>
+
+			<!-- Mobile Footer -->
+			<div class="mobile-footer">
+				<div class="mobile-footer-content">
+					<p class="mobile-footer-text">
+						AI project by <a href="https://jeremehancock.com" target="_blank"
+							class="mobile-footer-link">Jereme Hancock</a>
+					</p>
+					<div class="mobile-footer-icons">
+						<a href="https://hub.docker.com/repository/docker/bozodev/ai-game-collection/general"
+							target="_blank" class="mobile-footer-icon" title="Docker Hub">
+							<svg xmlns="http://www.w3.org/2000/svg" height="20" width="20" viewBox="49 140 442 235">
+								<path stroke="currentColor" stroke-width="38"
+									d="M296 226h42m-92 0h42m-91 0h42m-91 0h41m-91 0h42m8-46h41m8 0h42m7 0h42m-42-46h42" />
+								<path fill="currentColor"
+									d="m472 228s-18-17-55-11c-4-29-35-46-35-46s-29 35-8 74c-6 3-16 7-31 7H68c-5 19-5 145 133 145 99 0 173-46 208-130 52 4 63-39 63-39" />
+							</svg>
+						</a>
+						<a href="https://github.com/jeremehancock/AI-Game-Collection?tab=readme-ov-file#ai-game-collection"
+							target="_blank" class="mobile-footer-icon" title="GitHub">
+							<svg height="20" width="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+								stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+								<path
+									d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22">
+								</path>
+							</svg>
+						</a>
+					</div>
+				</div>
+			</div>
+
+
+		</div>
+
+
+	</div>
+
 	<!-- Desktop Modal -->
 	<div class="game-modal" id="gameModal">
 		<div class="game-modal-content">
@@ -684,10 +1322,20 @@
 		<button class="game-modal-close" id="gameModalClose">&times;</button>
 	</div>
 
-	<!-- Mobile Full-screen (existing) -->
+	<!-- Mobile Full-screen -->
 	<div class="game-iframe-container" id="gameContainer">
 		<iframe class="game-iframe" id="gameFrame"></iframe>
 	</div>
+
+	<!-- Mobile Back Button -->
+	<button class="mobile-back-button" id="mobileBackButton" aria-label="Return to game selection">
+		<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+			<path d="M15 18L9 12L15 6" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+				stroke-linejoin="round" />
+		</svg>
+	</button>
+
+	<!-- Desktop back button -->
 	<button class="back-button" id="backButton" aria-label="Return to game selection">
 		<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
 			<path d="M15 18L9 12L15 6" stroke="currentColor" stroke-width="2" stroke-linecap="round"
@@ -708,15 +1356,14 @@
 
 	<div id="appPrompt" class="app-prompt" style="display: none;">
 		<div class="app-prompt-content">
-			<h3>Open AI Game Collection App</h3>
-			<p>Would you like to open the installed app?</p>
+			<h3>Open in App?</h3>
+			<p>Get the best gaming experience with our native Android app, or continue playing in your browser.</p>
 			<button id="openInApp" class="app-prompt-button">Open App</button>
 			<button id="stayInBrowser" class="app-prompt-button secondary">Continue in Browser</button>
 		</div>
 	</div>
-	</div>
-	<script>
 
+	<script>
 		document.addEventListener('DOMContentLoaded', () => {
 			const appPrompt = document.getElementById('appPrompt');
 			const openInAppBtn = document.getElementById('openInApp');
@@ -729,7 +1376,7 @@
 
 			// Show prompt if we're on Android and not in the app
 			if (isAndroid && !isStandalone) {
-				appPrompt.style.display = 'flex';  // Changed to flex for centering
+				appPrompt.style.display = 'flex';
 			}
 
 			// Handle opening in Android app
@@ -777,17 +1424,17 @@
 			iosInstallPrompt.style.display = 'none';
 		}
 
-		// Load game function - updated to handle modal vs fullscreen
+		// Load game function - updated to handle mobile/desktop and different layouts
 		function loadGame(gamePath, gameTitle) {
 			if (isMobile()) {
-				// Mobile: Use full-screen iframe (existing behavior)
+				// Mobile: Use full-screen iframe
 				const container = document.getElementById('gameContainer');
 				const iframe = document.getElementById('gameFrame');
-				const backButton = document.getElementById('backButton');
+				const mobileBackButton = document.getElementById('mobileBackButton');
 
 				iframe.src = gamePath;
 				container.style.display = 'block';
-				backButton.style.display = 'block';
+				mobileBackButton.style.display = 'flex';
 				document.body.style.overflow = 'hidden';
 				document.body.classList.add('game-view');
 			} else {
@@ -823,11 +1470,13 @@
 		function goBack() {
 			const container = document.getElementById('gameContainer');
 			const iframe = document.getElementById('gameFrame');
+			const mobileBackButton = document.getElementById('mobileBackButton');
 			const backButton = document.getElementById('backButton');
 			const iosInstallPrompt = document.getElementById('iosInstallPrompt');
 
 			iframe.src = '';
 			container.style.display = 'none';
+			mobileBackButton.style.display = 'none';
 			backButton.style.display = 'none';
 			document.body.style.overflow = 'auto';
 			document.body.classList.remove('game-view');
@@ -854,36 +1503,38 @@
 		// Function to handle Google Play button visibility
 		function handleGooglePlayButton() {
 			const isAndroid = /Android/i.test(navigator.userAgent);
-			const modeParam = getUrlParameter('mode'); // Assumes this function extracts the "mode" URL parameter
-			const isFullscreen = window.matchMedia('(display-mode: fullscreen)').matches; // Detect PWA mode
+			const modeParam = getUrlParameter('mode');
+			const isFullscreen = window.matchMedia('(display-mode: fullscreen)').matches;
 			const googlePlayButton = document.getElementById('googlePlayButton');
 			const mobileOptimizedText = document.getElementById('mobileOptimizedText');
 			const isStandalone = window.matchMedia('(display-mode: standalone)').matches ||
 				document.referrer.includes('android-app://');
 
 			if ((isAndroid && isFullscreen) || modeParam === 'app' || isIOS()) {
-				googlePlayButton.style.display = 'none'; // Hide in Android PWA or app mode
-				mobileOptimizedText.style.display = 'none'; // Hide in Android PWA or app mode
+				googlePlayButton.style.display = 'none';
+				mobileOptimizedText.style.display = 'none';
 			}
 			else if ((isAndroid && !isStandalone) || isIOS()) {
-				googlePlayButton.style.display = 'none'; // Hide in Android PWA or app mode
-				mobileOptimizedText.style.display = 'none'; // Hide in Android PWA or app mode
+				googlePlayButton.style.display = 'none';
+				mobileOptimizedText.style.display = 'none';
 			}
 			else if ((isAndroid && !isFullscreen)) {
-				mobileOptimizedText.style.display = 'none'; // Hide in Android PWA or app mode
-				googlePlayButton.style.display = 'block'; // Show otherwise
+				mobileOptimizedText.style.display = 'none';
+				googlePlayButton.style.display = 'block';
 			}
 			else {
-				googlePlayButton.style.display = 'block'; // Show otherwise
+				googlePlayButton.style.display = 'block';
 			}
 		}
 
-		// Game collection data with placeholder SVG icons
+		// Game collection data with placeholder SVG icons and categories
 		const games = {
 			nerdle: {
 				title: 'Nerdle',
 				path: '/games/nerdle/',
 				description: 'A nerdy twist on the famous word game. Guess the hidden "nerdy" word in 6 tries.',
+				short_description: 'Nerdy word game. Guess the hidden word.',
+				category: 'puzzle',
 				icon: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
 			  <path fill="white" d="M32 2C15.432 2 2 15.432 2 32s13.432 30 30 30 30-13.432 30-30S48.568 2 32 2m18.103 9.324c-2.818-1.123-5.925-1.463-8.979-.915-.703.135-.192 2.27.388 2.156 4.168-.748 8.456.4 11.69 3.133.163.142.469.015.765-.222 1.734 2.3 3.11 4.881 4.06 7.66C55.73 19.456 51.657 17 47 17c-4.533 0-8.521 2.323-10.848 5.842-2.688-1.168-5.805-1.061-8.301.007C25.525 19.326 21.537 17 17 17c-4.657 0-8.73 2.457-11.026 6.137.962-2.818 2.367-5.433 4.136-7.758.27.197.538.299.686.169 3.237-2.732 7.524-3.881 11.692-3.133.58.113 1.092-2.021.389-2.156-2.944-.528-5.936-.228-8.672.8C19.006 6.973 25.218 4.5 32 4.5c6.928 0 13.262 2.581 18.103 6.824M57 30c0 5.521-4.479 10-10 10s-10-4.479-10-10c0-5.524 4.479-10 10-10s10 4.476 10 10m-29.999 0c0 5.523-4.479 10-10.001 10-5.522 0-10-4.477-10-10 0-5.524 4.477-10 10-10s10.001 4.476 10.001 10M32 59.5c-14.563 0-26.511-11.379-27.436-25.712C6.187 39.119 11.139 43 17 43c7.18 0 13-5.82 13-13 0-1.276-.191-2.506-.534-3.671 1.53-.436 3.54-.434 5.068.001C34.191 27.494 34 28.725 34 30c0 7.18 5.82 13 13 13 5.861 0 10.813-3.881 12.436-9.212C58.511 48.121 46.563 59.5 32 59.5"/>
 			  <ellipse fill="white" cx="20" cy="30.5" rx="4" ry="5"/>
@@ -896,6 +1547,8 @@
 				title: 'Pipes',
 				path: '/games/pipes/',
 				description: 'Connect the pipes to create a continuous flow. A challenging puzzle game that will test your logical thinking.',
+				short_description: 'Connect pipes for continuous flow.',
+				category: 'puzzle',
 				icon: `<svg viewBox="0 0 32 32" version="1.1" xmlns="http://www.w3.org/2000/svg" fill="white">
                     <g>
                         <path d="M18.8,25c-0.5,0.5-0.8,1.2-0.8,2v2c0,0.6,0.4,1,1,1h10c0.6,0,1-0.4,1-1v-2c0-0.8-0.3-1.5-0.8-2H18.8z"/>
@@ -1012,12 +1665,126 @@
 		c4.413,0,8.866,0.141,13.35,0.416l0.744-12.017l-0.737,12.017c55.443,3.488,96.252,25.609,123.914,57.755
 		c27.616,32.17,41.938,74.898,41.938,119.674C452.356,207.812,452.113,213.73,451.611,219.664z"/>
 </g>
-</svg>`, mobileOnly: false
+</svg>`,
+				mobileOnly: false
+			},
+			memory: {
+				title: 'Memory',
+				path: '/games/memory/',
+				description: 'Test your memory by matching pairs of cards. A classic game that improves concentration and recall.',
+				short_description: 'Match card pairs. Test your memory.',
+				category: 'puzzle',
+				icon: `<svg height="800px" width="800px" version="1.1" id="_x32_" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" 
+	 viewBox="0 0 512 512"  xml:space="preserve">
+<style type="text/css">
+	.st0{fill:#fff;}
+</style>
+<g>
+	<path class="st0" d="M410.34,153.043c-1.278-1.293-2.712-2.477-4.288-3.527l-1.615-0.337c-0.846-0.368-1.52-0.972-1.96-1.702
+		c-2.524-1.191-5.166-1.959-7.854-2.343c-2.321-0.322-3.951-2.477-3.614-4.814c0.313-2.336,2.484-3.966,4.805-3.645
+		c2.658,0.392,5.322,1.067,7.878,2.07c0.415-1.866,0.65-3.771,0.65-5.691c-0.008-4.202-0.995-8.443-3.096-12.433
+		c-2.399-4.562-5.918-8.121-10.034-10.55c-3.606-2.132-7.682-3.402-11.868-3.7c-0.305,3.817-1.214,7.619-2.798,11.303
+		c-0.941,2.163-3.441,3.159-5.612,2.226c-2.164-0.925-3.167-3.433-2.234-5.597c1.52-3.55,2.234-7.203,2.25-10.825l-0.055-1.544
+		c-0.29-5.017-1.952-9.861-4.782-13.992c-2.83-4.124-6.796-7.502-11.734-9.642c-3.543-1.513-7.212-2.226-10.826-2.226
+		c-6.922,0-13.624,2.666-18.687,7.368c0.948,3.222,1.489,6.616,1.489,10.144c0,2.352-1.928,4.264-4.28,4.264
+		s-4.272-1.912-4.272-4.264c0-3.457-0.635-6.734-1.795-9.783h0.008c-1.968-5.134-5.448-9.555-9.908-12.675
+		c-4.445-3.119-9.83-4.946-15.693-4.946c-5.087,0-9.83,1.388-13.906,3.786c-3.261,1.928-6.075,4.531-8.285,7.588
+		c4.319,5.918,6.874,13.232,6.874,21.118c0,2.351-1.92,4.256-4.28,4.256c-2.352,0-4.272-1.905-4.272-4.256
+		c0-6.929-2.548-13.232-6.788-18.053c-5.032-5.746-12.377-9.343-20.608-9.343c-5.714,0-10.974,1.732-15.372,4.711
+		c-4.382,2.979-7.87,7.196-9.932,12.15c-1.332,3.237-2.093,6.804-2.093,10.535c0,2.351-1.905,4.256-4.264,4.256
+		c-2.36,0-4.264-1.905-4.264-4.256c0-3.465,0.502-6.804,1.411-9.987c-3.214-1.301-6.694-2.022-10.268-2.022
+		c-2.03,0-4.068,0.235-6.138,0.698c-6.083,1.403-11.17,4.68-14.894,9.116c-2.681,3.199-4.594,7-5.589,11.084
+		c8.819,0.156,17.629,3.566,24.434,10.229c1.678,1.654,1.709,4.351,0.063,6.028c-1.654,1.693-4.351,1.709-6.036,0.07
+		c-5.346-5.212-12.236-7.823-19.166-7.831c-1.238,0-2.477,0.086-3.716,0.243h-0.015h-0.008c-5.808,0.807-11.405,3.456-15.85,7.988
+		c-5.221,5.33-7.808,12.213-7.815,19.158c0,3.959,0.862,7.948,2.586,11.617c1.34,2.892,3.222,5.589,5.652,7.956v0.007
+		c2.744,2.697,5.911,4.688,9.29,5.989c2.186,0.855,3.292,3.324,2.43,5.518c-0.854,2.211-3.316,3.309-5.518,2.446
+		c-4.413-1.709-8.583-4.326-12.19-7.862c-1.575-1.552-2.979-3.206-4.224-4.961c-3.222,4.617-4.97,10.142-4.97,15.771
+		c0,4.359,1.043,8.756,3.245,12.887c2.477,4.625,6.06,8.231,10.277,10.692c3.331,1.952,7.055,3.183,10.896,3.614l-0.008-0.259
+		c0-2.258,0.212-4.468,0.596-6.616c0.439-2.32,2.673-3.834,4.978-3.418c2.32,0.431,3.849,2.657,3.433,4.977
+		c-0.306,1.638-0.47,3.339-0.47,5.056l0.07,1.984l0.227,1.999v0.023l0.008,0.039c1.96,13.389,13.53,23.398,27.075,23.398
+		l1.968-0.078h0.008c6.004-0.431,11.397-2.752,15.677-6.365c3.002-2.532,5.463-5.706,7.149-9.282
+		c0.995-2.14,3.558-3.048,5.683-2.038c2.132,1.004,3.042,3.543,2.038,5.676c-1.826,3.849-4.319,7.321-7.313,10.276
+		c1.677,5.158,4.828,9.587,8.944,12.879c4.704,3.771,10.637,5.997,17.049,5.997l1.976-0.078h0.008
+		c4.06-0.29,7.815-1.458,11.147-3.277c-0.518-2.453-0.815-4.961-0.815-7.501c0-5.237,1.168-10.575,3.582-15.592
+		c1.027-2.124,3.574-3.01,5.691-1.983c2.124,1.011,3.026,3.567,1.999,5.691c-1.858,3.849-2.728,7.894-2.728,11.884
+		c0,2.79,0.431,5.573,1.262,8.214h0.008c2.187,6.969,7.126,13.06,14.235,16.477c3.841,1.858,7.886,2.728,11.868,2.728
+		c6.326,0,12.511-2.211,17.418-6.216l0.016-0.008c2.979-2.454,5.472-5.558,7.266-9.266l0.008-0.016
+		c1.67-3.464,2.548-7.093,2.696-10.715c0.11-2.352,2.093-4.186,4.46-4.076c2.352,0.102,4.17,2.092,4.068,4.444
+		c-0.204,4.75-1.356,9.547-3.543,14.07v-0.008c-1.756,3.661-4.068,6.883-6.78,9.634c5.032,7.227,13.404,11.782,22.458,11.774
+		c1.677,0,3.386-0.156,5.103-0.486c6.592-1.238,12.15-4.727,16.101-9.524c3.943-4.806,6.24-10.912,6.24-17.356l-0.008-0.579v-0.032
+		c-0.031-1.45-0.18-2.97-0.462-4.5c-0.682-3.629-2.07-6.922-3.974-9.83c-2.759-2.43-5.824-5.604-8.716-9.132
+		c-3.081-3.762-5.918-7.878-7.823-12.024c-1.254-2.775-2.148-5.581-2.164-8.536c0-1.309,0.18-2.665,0.674-3.966
+		c0.478-1.325,1.262-2.579,2.312-3.614c1.662-1.654,4.358-1.654,6.028,0c1.662,1.677,1.662,4.389,0,6.044l-0.322,0.51l-0.164,1.027
+		c-0.016,1.074,0.431,2.893,1.395,4.985c0.956,2.086,2.375,4.429,4.045,6.741c3.308,4.633,7.596,9.18,10.825,11.954l0.439,0.377
+		l0.322,0.478c2.642,3.935,4.578,8.466,5.51,13.412v0.008l0.306,2.116l1.278,0.055c5.409-0.008,10.856-1.607,15.646-4.97
+		c3.81-2.681,6.71-6.122,8.67-9.987c1.967-3.872,2.994-8.152,2.994-12.463c0-4.037-0.91-8.09-2.728-11.86
+		c-1.686,0.541-3.395,0.972-5.127,1.27c-2.32,0.415-4.523-1.161-4.938-3.48c-0.393-2.328,1.176-4.523,3.496-4.931
+		c7.556-1.301,14.478-5.706,18.758-12.777c2.712-4.444,3.99-9.336,3.99-14.172c0-7.126-2.752-14.094-7.878-19.26L410.34,153.043z
+		 M214.788,120.481c4.076-4.821,9.485-8.247,15.301-10.489c5.84-2.242,12.095-3.316,18.1-3.316
+		c5.84,0.008,11.452,0.996,16.218,3.207c2.132,0.971,3.065,3.519,2.077,5.659c-0.98,2.133-3.512,3.073-5.667,2.086
+		c-3.292-1.544-7.8-2.43-12.628-2.43c-4.97,0-10.268,0.916-15.027,2.767c-4.758,1.826-8.936,4.554-11.876,8.019
+		c-1.505,1.803-4.209,2.038-6.012,0.502C213.479,124.965,213.252,122.276,214.788,120.481z M311.925,221.396
+		c-4.962,0-9.462-0.564-13.569-1.512c0.11,1.175,0.188,2.484,0.188,3.872c0,2.783-0.306,5.964-1.176,9.304
+		c-0.878,3.331-2.359,6.835-4.695,10.198c-1.34,1.944-3.998,2.422-5.934,1.081c-1.944-1.341-2.414-3.99-1.09-5.942
+		c1.724-2.485,2.798-5.025,3.457-7.525c0.659-2.5,0.902-4.931,0.902-7.117c0.008-3.018-0.455-5.503-0.784-6.922
+		c-2.085-0.941-4.006-1.999-5.8-3.183c-7.149-4.625-11.93-10.731-14.933-16.54c-2.014-3.896-3.238-7.658-3.896-10.927
+		c-0.376-1.866-0.564-3.558-0.564-5.096c0-2.367,1.913-4.28,4.272-4.28c2.359,0,4.272,1.913,4.272,4.28
+		c-0.008,1.238,0.259,3.316,0.933,5.676c0.674,2.367,1.748,5.056,3.3,7.76c3.112,5.44,8.058,10.888,15.693,14.424
+		c5.103,2.367,11.452,3.903,19.424,3.903c2.359,0,4.272,1.913,4.272,4.272C316.197,219.484,314.285,221.396,311.925,221.396z
+		 M341.979,190.229c-0.878,2.18-3.363,3.246-5.558,2.375c-2.187-0.878-3.237-3.347-2.375-5.534v-0.008l0.024-0.063l0.126-0.376
+		l0.439-1.536c0.322-1.348,0.651-3.253,0.651-5.346l-0.008-0.298c-5.863,1.991-11.303,2.884-16.312,2.884
+		c-7.572,0.016-14.125-2.061-19.456-5.212c-5.338-3.15-9.492-7.321-12.597-11.562c-3.527-4.805-8.152-9.116-13.451-12.165
+		c-5.314-3.058-11.256-4.876-17.566-4.892c-5.526,0.016-11.405,1.395-17.543,4.766c-5.824,3.198-9.571,7.454-11.993,12.126
+		c-2.406,4.68-3.425,9.79-3.418,14.447c-0.016,4.311,0.894,8.214,2.077,10.676c1.011,2.132,0.094,4.672-2.03,5.683
+		c-2.124,1.012-4.672,0.094-5.683-2.03c-1.858-3.936-2.892-8.89-2.908-14.329c0.008-5.409,1.082-11.32,3.724-16.971
+		c-5.298,1.2-10.221,1.733-14.705,1.733c-2.422,0-4.704-0.157-6.875-0.439l-0.792,1.599l-0.008,0.015l-0.063,0.064l-0.227,0.29
+		l-0.91,1.238c-0.776,1.114-1.85,2.736-3.018,4.805c-2.328,4.1-4.993,9.885-6.287,16.382c-0.462,2.313-2.704,3.826-5.017,3.355
+		c-2.312-0.462-3.818-2.704-3.339-5.032c1.536-7.706,4.571-14.259,7.212-18.923c1.379-2.414,2.642-4.326,3.566-5.628
+		c-3.48-1.042-6.49-2.32-8.951-3.622c-5.62-2.987-8.545-5.981-8.795-6.224c-1.631-1.701-1.584-4.398,0.109-6.036
+		c1.701-1.63,4.39-1.583,6.028,0.094l0.048,0.047l0.25,0.243l1.223,1.026c1.112,0.878,2.83,2.086,5.126,3.308
+		c4.609,2.43,11.492,4.892,20.718,4.908c6.482,0,14.125-1.238,23.006-4.656c2.25-2.093,4.844-4.005,7.823-5.636
+		c7.306-4.005,14.666-5.808,21.65-5.808c7.98,0,15.403,2.321,21.831,6.02c6.428,3.716,11.876,8.803,16.069,14.525
+		c2.548,3.456,5.895,6.804,10.042,9.241c4.17,2.446,9.1,4.038,15.128,4.045c4.131,0,8.787-0.768,14.055-2.618
+		c-1.285-2.062-3.198-4.053-6.349-5.856c-2.054-1.168-2.783-3.77-1.623-5.816c1.168-2.062,3.763-2.768,5.816-1.623
+		c5.048,2.846,8.427,6.616,10.386,10.559c1.983,3.927,2.571,7.909,2.571,11.296C343.797,185.652,342.096,189.924,341.979,190.229z
+		 M340.38,137.938c-9.971,0-18.695-2.689-25.75-6.757c-0.995,1.38-2.328,3.112-4.045,4.993c-3.864,4.241-9.54,9.219-17.135,11.946
+		c-2.234,0.784-4.664-0.36-5.456-2.586c-0.792-2.227,0.376-4.664,2.579-5.448c5.605-1.999,10.292-5.926,13.538-9.477
+		c1.505-1.623,2.673-3.159,3.52-4.335c-4.21-3.558-7.533-7.611-9.814-11.781c-2.163-3.998-3.418-8.121-3.433-12.127
+		c0-2.351,1.913-4.264,4.272-4.264c2.352,0,4.264,1.913,4.264,4.264c-0.016,2.156,0.737,5.033,2.398,8.051
+		c1.638,3.025,4.131,6.176,7.392,8.999c6.522,5.652,15.936,9.978,27.671,9.978c2.359,0,4.264,1.921,4.264,4.28
+		C344.644,136.025,342.739,137.938,340.38,137.938z M374.023,198.037c-1.497,1.803-4.194,2.069-6.012,0.556
+		c-1.818-1.497-2.069-4.193-0.58-6.004c4.656-5.652,6.373-11.343,6.388-16.79c0.016-4.962-1.505-9.752-3.888-13.788
+		c-2.352-4.03-5.604-7.259-8.732-9.054c-2.101-1.207-4.076-1.748-5.644-1.748c-2.36,0-4.264-1.904-4.264-4.264
+		c0-2.359,1.905-4.272,4.264-4.272c2.594,0,5.134,0.635,7.549,1.701c2.406,1.051,4.68,2.548,6.796,4.375
+		c4.225,3.652,7.815,8.622,10.073,14.447c1.489,3.887,2.398,8.152,2.398,12.604C382.379,183.12,379.879,190.958,374.023,198.037z"/>
+	<path class="st0" d="M172.459,411.86l0.291,0.259c-0.008-0.008-0.008-0.008-0.016-0.016L172.459,411.86z"/>
+	<path class="st0" d="M428.699,66.574C396.943,29.442,349.183,4.155,287.986,0.462C283.008,0.156,278.054,0,273.147,0
+		c-51.469,0-98.815,16.712-133.524,47.393c-34.733,30.602-56.36,75.408-56.282,129.072c0,1.215,0.008,2.43,0.031,3.653l-0.054,6.474
+		l-44.179,78.018c-2.375,4.209-3.575,8.905-3.575,13.601c0,3.918,0.832,7.854,2.516,11.522c3.567,7.784,10.582,13.381,18.891,15.309
+		l-0.016,0.07l20.318,5.597l8.027,77.423l0.063-0.008c0.565,11.28,5.597,21.87,14.142,29.301
+		c7.596,6.616,17.292,10.206,27.263,10.206c1.01,0,2.006-0.094,3.01-0.164l23.022,1.826l1.153-0.125l0.368-0.016
+		c0.885,0,1.709,0.314,2.344,0.886l0.038,0.04c0.73,0.658,1.161,1.622,1.161,2.61V512h214.96v-12.04c0,0,0-32.616,0-45.628
+		c-0.024-5.237,1.019-15.591,3.073-25.578c1.019-5.008,2.28-10.002,3.708-14.32c1.411-4.311,3.042-7.98,4.405-10.12
+		c14.298-23.046,34.514-41.952,53.028-68.69c18.492-26.714,34.255-61.369,38.574-113.951c0.549-6.592,0.824-13.185,0.824-19.745
+		C476.436,152.079,460.508,103.674,428.699,66.574z M451.611,219.664c-4.178,48.875-17.849,78.12-34.405,102.303
+		c-16.531,24.159-36.974,43.152-53.616,69.577c-2.9,4.672-5.025,9.846-6.851,15.348c-2.712,8.239-4.648,17.222-5.973,25.586
+		c-1.317,8.387-2.014,15.991-2.022,21.854c0,8.356,0,20.992,0,33.588H181.944v-55.231c0-7.847-3.339-15.317-9.188-20.56
+		c-5.103-4.586-11.687-7.063-18.436-7.063c-0.494,0-0.972,0.054-1.458,0.086l-22.998-1.834l-1.129,0.125l-1.967,0.11
+		c-4.186,0-8.262-1.513-11.453-4.288c-3.684-3.206-5.864-7.815-6.005-12.714l-0.007-0.454l-9.767-94.221l-36.607-10.096
+		l-0.439-0.086c-1.113-0.22-2.045-0.957-2.524-1.992l-0.322-1.489l0.455-1.74l47.251-83.443l0.102-13.036v-0.173
+		c-0.023-1.128-0.031-2.242-0.031-3.354c0.079-47.251,18.444-84.658,48.153-111.035c29.74-26.315,71.27-41.35,117.573-41.35
+		c4.413,0,8.866,0.141,13.35,0.416l0.744-12.017l-0.737,12.017c55.443,3.488,96.252,25.609,123.914,57.755
+		c27.616,32.17,41.938,74.898,41.938,119.674C452.356,207.812,452.113,213.73,451.611,219.664z"/>
+</g>
+</svg>`,
+				mobileOnly: false
 			},
 			minesweeper: {
 				title: 'Minesweeper',
 				path: '/games/minesweeper/',
 				description: 'Classic Minesweeper game with a modern touch. Clear the board without hitting any mines in this strategic puzzle game.',
+				short_description: 'Clear board without hitting mines.',
+				category: 'classic',
 				icon: `<svg fill="#fff" height="800px" width="800px" version="1.1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" xmlns:xlink="http://www.w3.org/1999/xlink" enable-background="new 0 0 512 512">
   <g>
     <path d="m411.313,123.313c6.25-6.25 6.25-16.375 0-22.625s-16.375-6.25-22.625,0l-32,32-9.375,9.375-20.688-20.688c-12.484-12.5-32.766-12.5-45.25,0l-16,16c-1.261,1.261-2.304,2.648-3.31,4.051-21.739-8.561-45.324-13.426-70.065-13.426-105.867,0-192,86.133-192,192s86.133,192 192,192 192-86.133 192-192c0-24.741-4.864-48.327-13.426-70.065 1.402-1.007 2.79-2.049 4.051-3.31l16-16c12.5-12.492 12.5-32.758 0-45.25l-20.688-20.688 9.375-9.375 32.001-31.999zm-219.313,100.687c-52.938,0-96,43.063-96,96 0,8.836-7.164,16-16,16s-16-7.164-16-16c0-70.578 57.422-128 128-128 8.836,0 16,7.164 16,16s-7.164,16-16,16z"/>
@@ -1027,12 +1794,15 @@
     <path d="m496,96.586h-32c-8.844,0-16,7.164-16,16 0,8.836 7.156,16 16,16h32c8.844,0 16-7.164 16-16 0-8.836-7.156-16-16-16z"/>
     <path d="m436.98,75.605c3.125,3.125 7.219,4.688 11.313,4.688 4.094,0 8.188-1.563 11.313-4.688l32-32c6.25-6.25 6.25-16.375 0-22.625s-16.375-6.25-22.625,0l-32,32c-6.251,6.25-6.251,16.375-0.001,22.625z"/>
   </g>
-</svg>`, mobileOnly: false
+</svg>`,
+				mobileOnly: false
 			},
 			snake: {
 				title: 'Snake',
 				path: '/games/snake/',
 				description: 'Classic snake game with a modern twist. Eat the food, grow longer, and try not to hit the walls or yourself!',
+				short_description: 'Eat food, grow longer, avoid walls.',
+				category: 'classic',
 				icon: `
 <svg height="800px" width="800px" version="1.1" id="_x32_" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" 
 	 viewBox="0 0 512 512"  xml:space="preserve">
@@ -1085,6 +1855,8 @@
 				title: 'Soccer Juggle',
 				path: '/games/soccer-juggle/',
 				description: 'Keep the soccer ball in the air as long as you can. How many juggles can you achieve?',
+				short_description: 'Keep ball airborne. Count juggles.',
+				category: 'arcade',
 				icon: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="-2500 -2500 5000 5000">
                     <title>soccer ball</title>
                     <g stroke="#000" stroke-width="24">
@@ -1098,7 +1870,9 @@
 			waterRingToss: {
 				title: 'Water Ring Toss',
 				path: '/games/water-ring-toss/',
-				description: 'Test your skill and patience in this classic water game! Use precision to land all the rings onto the pegs. How many can you score?',
+				description: 'Test your skill and patience in this classic water game! Use precision to land all the rings onto the pegs.',
+				short_description: 'Land rings on pegs with precision.',
+				category: 'arcade',
 				icon: `<svg version="1.0" xmlns="http://www.w3.org/2000/svg"
  width="512.000000pt" height="512.000000pt" viewBox="0 0 512.000000 512.000000"
  preserveAspectRatio="xMidYMid meet">
@@ -1163,14 +1937,18 @@ c-84 -42 -203 -88 -209 -82 -2 2 -6 48 -10 101 l-6 98 32 -6 c18 -3 69 -14
 			waveform: {
 				title: 'Waveform',
 				path: '/games/waveform/',
-				description: 'Guide particles to their targets by shaping a wave using frequency, amplitude, and phase controls while avoiding obstacles in this unique physics puzzle.',
+				description: 'Guide particles to their targets by shaping a wave using frequency, amplitude, and phase controls.',
+				short_description: 'Guide particles with wave controls.',
+				category: 'puzzle',
 				icon: `<svg class="svg-icon" style="vertical-align: middle;fill: #fff;overflow: hidden;" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg"><path d="M512 51.2c-253.44 0-460.8 207.36-460.8 460.8s207.36 460.8 460.8 460.8 460.8-207.36 460.8-460.8-207.36-460.8-460.8-460.8z m0 51.2c217.6 0 394.24 168.96 407.04 384h-48.64c-43.52 0-76.8 33.28-76.8 76.8v51.2c0 15.36-10.24 25.6-25.6 25.6s-25.6-10.24-25.6-25.6v-204.8c0-43.52-33.28-76.8-76.8-76.8s-76.8 33.28-76.8 76.8v204.8c0 15.36-10.24 25.6-25.6 25.6s-25.6-10.24-25.6-25.6v-204.8c0-43.52-33.28-76.8-76.8-76.8s-76.8 33.28-76.8 76.8v204.8c0 15.36-10.24 25.6-25.6 25.6s-25.6-10.24-25.6-25.6v-179.2c0-43.52-33.28-76.8-76.8-76.8s-76.8 33.28-76.8 76.8v25.6c0 15.36-10.24 25.6-25.6 25.6h-48.64c12.8-215.04 189.44-384 407.04-384z m0 819.2c-217.6 0-394.24-168.96-407.04-384h48.64c43.52 0 76.8-33.28 76.8-76.8v-25.6c0-15.36 10.24-25.6 25.6-25.6s25.6 10.24 25.6 25.6v179.2c0 43.52 33.28 76.8 76.8 76.8s76.8-33.28 76.8-76.8v-204.8c0-15.36 10.24-25.6 25.6-25.6s25.6 10.24 25.6 25.6v204.8c0 43.52 33.28 76.8 76.8 76.8s76.8-33.28 76.8-76.8v-204.8c0-15.36 10.24-25.6 25.6-25.6s25.6 10.24 25.6 25.6v204.8c0 43.52 33.28 76.8 76.8 76.8s76.8-33.28 76.8-76.8v-51.2c0-15.36 10.24-25.6 25.6-25.6h48.64c-12.8 215.04-189.44 384-407.04 384z"  /></svg>`,
 				mobileOnly: false
 			},
 			bubblePop: {
 				title: 'Bubble Pop',
 				path: '/games/bubble-pop/',
-				description: 'Pop the bubbles before they escape! A fast-paced game of precision and reflexes that will keep you on your toes.',
+				description: 'Pop the bubbles before they escape! A fast-paced game of precision and reflexes.',
+				short_description: 'Pop bubbles before they escape.',
+				category: 'arcade',
 				icon: `<svg fill="#fff" height="800px" width="800px" version="1.1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 363.188 363.188" xmlns:xlink="http://www.w3.org/1999/xlink" enable-background="new 0 0 363.188 363.188">
   <g>
     <path d="m111.667,132.311c-61.574,0-111.667,50.093-111.667,111.666s50.093,111.667 111.667,111.667 111.667-50.094 111.667-111.667-50.094-111.666-111.667-111.666zm0,208.333c-53.303,0-96.667-43.364-96.667-96.667 0-53.302 43.364-96.666 96.667-96.666s96.667,43.364 96.667,96.666c-0.001,53.303-43.365,96.667-96.667,96.667z"/>
@@ -1185,7 +1963,9 @@ c-84 -42 -203 -88 -209 -82 -2 2 -6 48 -10 101 l-6 98 32 -6 c18 -3 69 -14
 			breakout: {
 				title: 'Breakout',
 				path: '/games/breakout/',
-				description: 'Break the bricks, level up, and beat your high score! A fast-paced game of skill and strategy for all ages.',
+				description: 'Break the bricks, level up, and beat your high score! A fast-paced game of skill and strategy.',
+				short_description: 'Break bricks and beat high scores.',
+				category: 'arcade',
 				icon: `<svg version="1.0" xmlns="http://www.w3.org/2000/svg"
  width="256.000000pt" height="256.000000pt" viewBox="0 0 256.000000 256.000000"
  preserveAspectRatio="xMidYMid meet">
@@ -1241,7 +2021,9 @@ m489 -117 c31 -26 31 -78 -1 -104 -22 -18 -39 -19 -226 -16 -220 3 -226 5
 			spaceShooter: {
 				title: 'Space Shooter',
 				path: '/games/space-shooter/',
-				description: 'Pilot your spaceship and navigate through an asteroid field. Shoot or evade asteroids in this fast-paced arcade challenge.',
+				description: 'Pilot your spaceship and navigate through an asteroid field. Shoot or evade asteroids.',
+				short_description: 'Pilot spaceship through asteroids.',
+				category: 'action',
 				icon: `<svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" fill="#fff" viewBox="12.368 -0.374 76.099 100" enable-background="new 12.368 -0.374 76.099 100" xml:space="preserve"><g><g><path d="M84.868,64.865c-2.589-2.306-5.567-4.338-8.929-6.021c-1.694-0.85-2.195-1.688-2.01-3.161
 			c1.118-8.796,1.176-17.582-1.221-26.303c-2.966-10.8-9.554-20.312-20.385-29.145c-1.02-0.805-2.88-0.917-4.388,0.305
 			c-4.874,3.951-9.039,8.254-12.42,12.946c-6.002,8.335-8.925,17.25-9.672,26.572c-0.481,5.974-0.067,11.931,0.677,17.882
@@ -1273,7 +2055,9 @@ m489 -117 c31 -26 31 -78 -1 -104 -22 -18 -39 -19 -226 -16 -220 3 -226 5
 			spaceShooter2: {
 				title: 'Space Shooter II',
 				path: '/games/space-shooter-2/',
-				description: 'Pilot your upgraded spaceship through dense asteroid fields with enhanced graphics and physics. Dodge or destroy asteroids in this fast-paced arcade sequel, and collect crystals to earn points and boost your score.',
+				description: 'Pilot your upgraded spaceship through dense asteroid fields with enhanced graphics.',
+				short_description: 'Enhanced spaceship asteroid action.',
+				category: 'action',
 				icon: `<svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" fill="#fff" viewBox="12.368 -0.374 76.099 100" enable-background="new 12.368 -0.374 76.099 100" xml:space="preserve"><g><g><path d="M84.868,64.865c-2.589-2.306-5.567-4.338-8.929-6.021c-1.694-0.85-2.195-1.688-2.01-3.161
 			c1.118-8.796,1.176-17.582-1.221-26.303c-2.966-10.8-9.554-20.312-20.385-29.145c-1.02-0.805-2.88-0.917-4.388,0.305
 			c-4.874,3.951-9.039,8.254-12.42,12.946c-6.002,8.335-8.925,17.25-9.672,26.572c-0.481,5.974-0.067,11.931,0.677,17.882
@@ -1305,7 +2089,9 @@ m489 -117 c31 -26 31 -78 -1 -104 -22 -18 -39 -19 -226 -16 -220 3 -226 5
 			flappingBird: {
 				title: 'Flapping Bird',
 				path: '/games/flapping-bird/',
-				description: 'Flapping Bird is a simple arcade game where you tap to keep a bird in the air and guide it through gaps between pipes without crashing.',
+				description: 'Flapping Bird is a simple arcade game where you tap to keep a bird in the air.',
+				short_description: 'Tap to keep bird flying.',
+				category: 'arcade',
 				icon: `<svg width='24' height='24' viewBox='0 0 24 24' xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink'>
   <rect width='24' height='24' stroke='none' fill='#000000' opacity='0'/>
   <g transform="matrix(0.83 0 0 0.83 12 12)">
@@ -1327,17 +2113,83 @@ m489 -117 c31 -26 31 -78 -1 -104 -22 -18 -39 -19 -226 -16 -220 3 -226 5
       </g>
     </g>
   </g>
-</svg>
-`,
+</svg>`,
 				mobileOnly: false
 			},
 		};
 
-		// Function to create game cards
+		// Function to sort games alphabetically by title
+		function getSortedGames() {
+			return Object.entries(games).sort(([, a], [, b]) =>
+				a.title.localeCompare(b.title)
+			);
+		}
+
+		// Function to get featured game that changes daily
+		function getFeaturedGame() {
+			const sortedGames = getSortedGames();
+			const availableGames = sortedGames.filter(([key, game]) => {
+				// Skip if game is mobile only AND we're not on a mobile device
+				return !(game.mobileOnly && !isMobile());
+			});
+
+			// Get today's date and convert to days since epoch
+			const today = new Date();
+			const daysSinceEpoch = Math.floor(today.getTime() / (1000 * 60 * 60 * 24));
+
+			// Use modulo to cycle through games
+			const gameIndex = daysSinceEpoch % availableGames.length;
+
+			return availableGames[gameIndex][1]; // Return the game object
+		}
+
+		// Function to update the featured game section
+		function updateFeaturedGame() {
+			const featuredGame = getFeaturedGame();
+			const featuredGameElement = document.getElementById('featuredGame');
+
+			if (featuredGameElement && featuredGame) {
+				featuredGameElement.innerHTML = `
+					<div class="mobile-featured-image">
+						<div class="mobile-featured-icon">
+							${featuredGame.icon}
+						</div>
+					</div>
+					<div class="mobile-featured-content">
+						<h3 class="mobile-featured-title">${featuredGame.title}</h3>
+						<p class="mobile-featured-description">${featuredGame.description}</p>
+						<button class="mobile-play-button" onclick="loadGame('${featuredGame.path}', '${featuredGame.title}')">Play Now</button>
+					</div>
+				`;
+			}
+		}
+
+		// Function to get total count of available games (excluding mobile-only on desktop)
+		function getTotalGameCount() {
+			let count = 0;
+			for (const [key, game] of Object.entries(games)) {
+				// Skip if game is mobile only AND we're not on a mobile device
+				if (game.mobileOnly && !isMobile()) continue;
+				count++;
+			}
+			return count;
+		}
+
+		// Function to update the game count display
+		function updateGameCount() {
+			const totalCount = getTotalGameCount();
+			const gameCountElement = document.getElementById('totalGameCount');
+			if (gameCountElement) {
+				gameCountElement.textContent = totalCount;
+			}
+		}
+
+		// Function to create desktop game cards
 		function createGameCards() {
 			const container = document.getElementById('gamesContainer');
+			const sortedGames = getSortedGames();
 
-			for (const [key, game] of Object.entries(games)) {
+			for (const [key, game] of sortedGames) {
 				// Skip if game is mobile only AND we're not on a mobile device
 				if (game.mobileOnly && !isMobile()) continue;
 
@@ -1358,11 +2210,130 @@ m489 -117 c31 -26 31 -78 -1 -104 -22 -18 -39 -19 -226 -16 -220 3 -226 5
 			}
 		}
 
+		// Function to create mobile game cards
+		function createMobileGameCards(filterCategory = 'all') {
+			const container = document.getElementById('mobileGamesGrid');
+			container.innerHTML = ''; // Clear existing cards
+
+			const sortedGames = getSortedGames();
+
+			for (const [key, game] of sortedGames) {
+				// Skip if game is mobile only AND we're not on a mobile device
+				if (game.mobileOnly && !isMobile()) continue;
+
+				// Filter by category (if not 'all')
+				if (filterCategory !== 'all' && game.category !== filterCategory) continue;
+
+				const card = document.createElement('div');
+				card.className = 'mobile-game-card';
+				card.innerHTML = `
+				    <div class="mobile-game-icon">${game.icon}</div>
+				    <h3 class="mobile-game-title">${game.title}</h3>
+				    <p class="mobile-game-description">${game.short_description}</p>
+				`;
+
+				card.addEventListener('click', () => {
+					loadGame(game.path, game.title);
+				});
+
+				container.appendChild(card);
+			}
+		}
+
+		// Function to handle category filtering
+		function filterGames(category, buttonElement) {
+			// Update active category button
+			document.querySelectorAll('.mobile-category').forEach(btn => {
+				btn.classList.remove('active');
+			});
+			buttonElement.classList.add('active');
+
+			// Show/hide View All buttons based on category
+			const viewAllButtons = document.querySelectorAll('.mobile-see-all');
+			if (category === 'all') {
+				// Hide View All buttons when showing all games
+				viewAllButtons.forEach(btn => btn.classList.remove('show'));
+			} else {
+				// Show View All buttons when filtering by category
+				viewAllButtons.forEach(btn => btn.classList.add('show'));
+			}
+
+			// Re-create mobile game cards with filter
+			createMobileGameCards(category);
+		}
+
+		// Function to clear category filter and show all games
+		function clearCategoryFilter() {
+			// Find the "All" category button and make it active
+			const allCategoryButton = Array.from(document.querySelectorAll('.mobile-category'))
+				.find(btn => btn.textContent.toLowerCase() === 'all');
+
+			if (allCategoryButton) {
+				// Clear active state from all buttons
+				document.querySelectorAll('.mobile-category').forEach(btn => {
+					btn.classList.remove('active');
+				});
+
+				// Set "All" as active
+				allCategoryButton.classList.add('active');
+
+				// Hide View All buttons since we're showing all games
+				const viewAllButtons = document.querySelectorAll('.mobile-see-all');
+				viewAllButtons.forEach(btn => btn.classList.remove('show'));
+
+				// Show all games
+				createMobileGameCards('all');
+			}
+		}
+
+		// Function to smooth scroll to All Games section
+		function scrollToAllGames() {
+			const allGamesSection = document.getElementById('allGamesSection');
+			if (allGamesSection) {
+				allGamesSection.scrollIntoView({
+					behavior: 'smooth',
+					block: 'start'
+				});
+			}
+		}
+
+		// Function to setup category buttons
+		function setupCategoryButtons() {
+			const categoryButtons = document.querySelectorAll('.mobile-category');
+			categoryButtons.forEach(button => {
+				button.addEventListener('click', (e) => {
+					const category = e.target.textContent.toLowerCase();
+					filterGames(category, e.target);
+				});
+			});
+		}
+
+		// Function to setup "See All" / "View All" buttons
+		function setupViewAllButtons() {
+			// Setup "View All" buttons (for clearing category filters)
+			const viewAllButtons = document.querySelectorAll('.mobile-see-all');
+			viewAllButtons.forEach(button => {
+				button.addEventListener('click', clearCategoryFilter);
+			});
+
+			// Setup "See All" buttons (for scrolling to All Games section)
+			const scrollToAllButtons = document.querySelectorAll('.mobile-scroll-to-all');
+			scrollToAllButtons.forEach(button => {
+				button.addEventListener('click', scrollToAllGames);
+			});
+		}
+
 		// Initialize the page
 		document.addEventListener('DOMContentLoaded', () => {
-			createGameCards();
+			updateGameCount(); // Update the dynamic game count
+			updateFeaturedGame(); // Set today's featured game
+			createGameCards(); // Desktop cards
+			createMobileGameCards(); // Mobile cards
+			setupCategoryButtons(); // Setup mobile category filtering
+			setupViewAllButtons(); // Setup "View All" functionality
 
 			// Event listeners for mobile back button
+			document.getElementById('mobileBackButton').addEventListener('click', goBack);
 			document.getElementById('backButton').addEventListener('click', goBack);
 
 			// Event listeners for desktop modal
@@ -1395,7 +2366,6 @@ m489 -117 c31 -26 31 -78 -1 -104 -22 -18 -39 -19 -226 -16 -220 3 -226 5
 					.catch(error => console.error('Service Worker registration failed:', error));
 			});
 		}
-
 	</script>
 </body>
 
