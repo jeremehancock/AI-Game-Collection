@@ -1,0 +1,1262 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Flappy Fish</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(180deg, #4a90e2 0%, #1e3c72 100%);
+            overflow: hidden;
+            touch-action: none;
+            user-select: none;
+        }
+
+        #gameContainer {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        #gameCanvas {
+            display: block;
+            background: linear-gradient(180deg, #87ceeb 0%, #4682b4 50%, #191970 100%);
+        }
+
+        #ui {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 10;
+        }
+
+        #topUI {
+            position: absolute;
+            top: 10px;
+            left: 0;
+            right: 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            padding: 0 15px;
+        }
+
+        #lives,
+        #score,
+        #level {
+            color: white;
+            font-weight: bold;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
+        }
+
+        #lives {
+            font-size: 18px !important;
+            text-align: left;
+        }
+
+        #score {
+            font-size: 18px !important;
+            text-align: center;
+        }
+
+        #level {
+            font-size: 18px !important;
+            text-align: right;
+        }
+
+        #scoreDisplay {
+            font-size: 18px;
+            margin-top: 5px;
+        }
+
+        .heart {
+            color: #ff6b6b;
+            margin: 0 2px;
+        }
+
+        #gameOver {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            color: white;
+            background: rgba(0, 0, 0, 0.9);
+            padding: 30px 40px;
+            border-radius: 15px;
+            display: none;
+            min-width: 300px;
+            max-width: 80vw;
+            border: 2px solid #4682b4;
+        }
+
+        #startScreen {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            color: white;
+            background: linear-gradient(135deg, rgba(0, 50, 100, 0.95), rgba(0, 100, 150, 0.95));
+            padding: 40px 80px;
+            border-radius: 20px;
+            min-width: 800px;
+            max-width: 98vw;
+            border: 3px solid rgba(135, 206, 235, 0.8);
+            box-shadow: 0 0 30px rgba(135, 206, 235, 0.3), inset 0 0 20px rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+        }
+
+        #startScreen h1 {
+            font-size: 48px;
+            margin-bottom: 15px;
+            color: #87ceeb;
+            text-shadow: 0 0 10px rgba(135, 206, 235, 0.8);
+            font-family: 'Arial', sans-serif;
+        }
+
+        #startScreen .subtitle {
+            font-size: 18px;
+            margin-bottom: 25px;
+            color: #add8e6;
+            font-style: italic;
+        }
+
+        #startScreen .controls {
+            font-size: 20px;
+            margin: 20px 0;
+            color: #ffffff;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 15px 30px;
+            border-radius: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            white-space: nowrap;
+            display: inline-block;
+            min-width: 300px;
+        }
+
+        #startScreen .goal {
+            font-size: 16px;
+            margin: 15px auto;
+            color: #e0f6ff;
+            line-height: 1.6;
+            max-width: 600px;
+            white-space: nowrap;
+        }
+
+        #startBtn {
+            background: linear-gradient(45deg, #1e90ff, #00bfff);
+            color: white;
+            border: none;
+            padding: 18px 45px;
+            font-size: 22px;
+            border-radius: 15px;
+            cursor: pointer;
+            pointer-events: all;
+            margin-top: 25px;
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.3), 0 0 20px rgba(0, 191, 255, 0.4);
+            transition: all 0.3s ease;
+            font-weight: bold;
+        }
+
+        #startBtn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4), 0 0 30px rgba(0, 191, 255, 0.6);
+        }
+
+        #gameOver h2 {
+            font-size: 36px;
+            margin-bottom: 20px;
+        }
+
+        #gameOver p {
+            font-size: 18px;
+            margin-bottom: 20px;
+        }
+
+        #restartBtn {
+            background: #ff6b6b;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            font-size: 20px;
+            border-radius: 10px;
+            cursor: pointer;
+            pointer-events: all;
+        }
+
+        #instructions {
+            position: absolute;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: white;
+            text-align: center;
+            font-size: 18px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
+        }
+
+        @media (max-width: 600px) {
+            #score {
+                font-size: 28px;
+            }
+
+            #lives {
+                font-size: 16px;
+            }
+
+            #level {
+                font-size: 16px;
+            }
+
+            #topUI {
+                top: 8px;
+                padding: 0 12px;
+            }
+
+            #gameOver h2 {
+                font-size: 32px;
+            }
+
+            #gameOver p {
+                font-size: 18px;
+            }
+
+            #gameOver {
+                padding: 30px 25px;
+                min-width: 350px;
+            }
+
+            #restartBtn {
+                font-size: 20px;
+                padding: 15px 35px;
+            }
+
+            #startScreen {
+                padding: 30px 20px;
+                min-width: 280px;
+            }
+
+            #startScreen h1 {
+                font-size: 36px;
+                margin-bottom: 12px;
+            }
+
+            #startScreen .subtitle {
+                font-size: 16px;
+                margin-bottom: 20px;
+            }
+
+            #startScreen .controls {
+                font-size: 18px;
+                padding: 12px;
+            }
+
+            #startScreen .goal {
+                font-size: 14px;
+                margin: 12px 0;
+            }
+
+            #startBtn {
+                font-size: 18px;
+                padding: 15px 35px;
+                margin-top: 20px;
+            }
+
+            #instructions {
+                font-size: 16px;
+                bottom: 20px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div id="gameContainer">
+        <canvas id="gameCanvas"></canvas>
+        <div id="ui">
+            <div id="startScreen">
+                <h1>🐠 Deep Sea Escape</h1>
+                <div class="subtitle">Navigate the coral maze of the ocean depths</div>
+
+                <div class="controls">
+                    🌊 TAP TO SWIM UP 🌊
+                </div>
+
+                <div class="goal">
+                    Glide through coral gaps • Survive the reef<br>
+                    Eat fish food and small fish for bonus points!<br>
+                    3 Lives • Level up every 5 points • Earn lives back for each level completed
+                </div>
+
+                <button id="startBtn">🌊 DIVE IN 🌊</button>
+            </div>
+
+            <div id="topUI">
+                <div id="lives">
+                    <div>Lives:</div>
+                    <div id="livesDisplay">❤️❤️❤️</div>
+                </div>
+                <div id="score">
+                    <div>Score:</div>
+                    <div id="scoreDisplay">0</div>
+                </div>
+                <div id="level">
+                    <div>Level:</div>
+                    <div id="levelDisplay">1</div>
+                </div>
+            </div>
+            <div id="gameOver">
+                <h2 id="gameOverTitle">Game Over!</h2>
+                <p>Your Score: <span id="finalScore">0</span></p>
+                <p>Level Reached: <span id="finalLevel">1</span></p>
+                <button id="restartBtn">🐠 Play Again 🐠</button>
+            </div>
+            <div id="instructions">Tap to swim up!</div>
+        </div>
+    </div>
+
+    <script>
+        class FlappyFishGame {
+            constructor() {
+                this.canvas = document.getElementById('gameCanvas');
+                this.ctx = this.canvas.getContext('2d');
+                this.scoreElement = document.getElementById('scoreDisplay');
+                this.livesElement = document.getElementById('livesDisplay');
+                this.levelElement = document.getElementById('levelDisplay');
+                this.startScreen = document.getElementById('startScreen');
+                this.gameOverElement = document.getElementById('gameOver');
+                this.gameOverTitle = document.getElementById('gameOverTitle');
+                this.finalScoreElement = document.getElementById('finalScore');
+                this.finalLevelElement = document.getElementById('finalLevel');
+                this.startBtn = document.getElementById('startBtn');
+                this.restartBtn = document.getElementById('restartBtn');
+                this.instructionsElement = document.getElementById('instructions');
+
+                this.animationId = null; // Track animation frame
+
+                this.setupCanvas();
+                this.setupEventListeners();
+                this.showStartScreen();
+            }
+
+            destroy() {
+                // Cancel any running animation frames
+                if (this.animationId) {
+                    cancelAnimationFrame(this.animationId);
+                    this.animationId = null;
+                }
+
+                // Clear the canvas
+                this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+
+                // Reset all arrays
+                this.seaweed = [];
+                this.bubbles = [];
+                this.corals = [];
+
+                // Stop any lingering timers or intervals
+                this.gameState = 'destroyed';
+            }
+
+            completeReset() {
+                // Destroy current game state
+                this.destroy();
+
+                // Wait a frame to ensure everything is cleaned up
+                setTimeout(() => {
+                    // Hide game over screen
+                    this.gameOverElement.style.display = 'none';
+                    this.instructionsElement.style.display = 'block';
+
+                    // Start completely fresh
+                    this.init();
+                }, 16); // One frame delay
+            }
+
+            setupCanvas() {
+                this.canvas.width = window.innerWidth;
+                this.canvas.height = window.innerHeight;
+
+                window.addEventListener('resize', () => {
+                    this.canvas.width = window.innerWidth;
+                    this.canvas.height = window.innerHeight;
+                });
+            }
+
+            setupEventListeners() {
+                // Touch events for mobile
+                this.canvas.addEventListener('touchstart', (e) => {
+                    e.preventDefault();
+                    this.jump();
+                });
+
+                // Mouse events for desktop
+                this.canvas.addEventListener('click', () => {
+                    this.jump();
+                });
+
+                // Keyboard events
+                document.addEventListener('keydown', (e) => {
+                    if (e.code === 'Space') {
+                        e.preventDefault();
+                        this.jump();
+                    }
+                });
+
+                this.startBtn.addEventListener('click', () => {
+                    this.startGame();
+                });
+
+                this.restartBtn.addEventListener('click', () => {
+                    // Use global restart function for complete reset
+                    restartGame();
+                });
+            }
+
+            showStartScreen() {
+                // Cancel any existing animation loops
+                if (this.animationId) {
+                    cancelAnimationFrame(this.animationId);
+                    this.animationId = null;
+                }
+
+                this.gameState = 'start';
+                this.startScreen.style.display = 'block';
+                this.gameOverElement.style.display = 'none';
+                this.instructionsElement.style.display = 'none';
+
+                // Initialize arrays for background animation
+                this.seaweed = [];
+                this.bubbles = [];
+                this.corals = [];
+                this.collectibles = [];
+                this.lastCoralSpawn = 0; // Initialize spawn timing
+
+                // Initialize background animation even on start screen
+                this.initBackground();
+                this.backgroundLoop();
+            }
+
+            startGame() {
+                // Cancel any existing animation loops
+                if (this.animationId) {
+                    cancelAnimationFrame(this.animationId);
+                    this.animationId = null;
+                }
+
+                this.startScreen.style.display = 'none';
+                this.instructionsElement.style.display = 'block';
+                this.init();
+            }
+
+            init() {
+                // Ensure any existing loops are stopped
+                if (this.animationId) {
+                    cancelAnimationFrame(this.animationId);
+                    this.animationId = null;
+                }
+
+                // Clear canvas completely
+                this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+
+                // Reset ALL game state variables
+                this.gameState = 'playing';
+                this.score = 0;
+                this.lives = 3;
+                this.level = 1;
+                this.previousLevel = 1;
+                this.frameCount = 0; // Critical: reset frame counter
+                this.respawnTimer = 0;
+                this.isRespawning = false;
+
+                // Reset fish to initial state
+                this.fish = {
+                    x: this.canvas.width * 0.2,
+                    y: this.canvas.height / 2,
+                    width: 40,
+                    height: 30,
+                    velocity: 0,
+                    gravity: 0.15,
+                    jumpPower: -4.5,
+                    maxVelocity: 4,
+                    buoyancy: 0.98,
+                    rotation: 0
+                };
+
+                // Clear and reset all game objects
+                this.corals = [];
+                this.seaweed = [];
+                this.bubbles = [];
+                this.coralSpacing = 300;
+                this.coralGap = 200;
+
+                // Initialize fresh background
+                this.initBackground();
+                this.updateUI();
+
+                // Start the game loop fresh
+                this.gameLoop();
+            }
+
+            backgroundLoop() {
+                // This runs when on start screen to show animated background
+                if (this.gameState === 'start') {
+                    this.updateBackground();
+                    this.renderBackground();
+                    requestAnimationFrame(() => this.backgroundLoop());
+                }
+            }
+
+            renderBackground() {
+                // Clear canvas
+                this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+
+                // Draw background elements only
+                this.drawBackground();
+            }
+
+            initBackground() {
+                // Create seaweed
+                for (let i = 0; i < 8; i++) {
+                    this.seaweed.push({
+                        x: Math.random() * this.canvas.width,
+                        height: 100 + Math.random() * 100,
+                        sway: Math.random() * Math.PI * 2,
+                        swaySpeed: 0.02 + Math.random() * 0.02
+                    });
+                }
+
+                // Create bubbles
+                for (let i = 0; i < 15; i++) {
+                    this.bubbles.push({
+                        x: Math.random() * this.canvas.width,
+                        y: Math.random() * this.canvas.height,
+                        radius: 3 + Math.random() * 8,
+                        speed: 0.5 + Math.random() * 1.5,
+                        opacity: 0.3 + Math.random() * 0.4
+                    });
+                }
+            }
+
+            jump() {
+                if (this.gameState === 'playing' && !this.isRespawning) {
+                    this.fish.velocity = this.fish.jumpPower;
+                    this.instructionsElement.style.display = 'none';
+                }
+            }
+
+            updateUI() {
+                this.scoreElement.textContent = this.score;
+                this.levelElement.textContent = this.level;
+
+                // Update lives display with hearts
+                let heartsDisplay = '';
+                for (let i = 0; i < this.lives; i++) {
+                    heartsDisplay += '❤️';
+                }
+                for (let i = this.lives; i < 3; i++) {
+                    heartsDisplay += '🖤';
+                }
+                this.livesElement.innerHTML = heartsDisplay;
+            }
+
+            updateFish() {
+                if (this.gameState !== 'playing') return;
+
+                // Handle respawn timer
+                if (this.isRespawning) {
+                    this.respawnTimer--;
+                    if (this.respawnTimer <= 0) {
+                        this.isRespawning = false;
+                    }
+                    return;
+                }
+
+                this.fish.velocity += this.fish.gravity;
+
+                // Apply buoyancy (water resistance that slows down movement)
+                this.fish.velocity *= this.fish.buoyancy;
+
+                // Limit maximum speeds
+                if (this.fish.velocity > this.fish.maxVelocity) {
+                    this.fish.velocity = this.fish.maxVelocity;
+                }
+                if (this.fish.velocity < -this.fish.maxVelocity) {
+                    this.fish.velocity = -this.fish.maxVelocity;
+                }
+
+                this.fish.y += this.fish.velocity;
+
+                // Rotation based on velocity (more gradual)
+                this.fish.rotation = Math.min(Math.max(this.fish.velocity * 0.15, -0.25), 0.25);
+
+                // Check boundaries
+                if (this.fish.y < 0 || this.fish.y + this.fish.height > this.canvas.height) {
+                    this.loseLife();
+                }
+            }
+
+            levelComplete(newLevel) {
+                this.previousLevel = this.level;
+                this.level = newLevel;
+
+                // Award extra life if player has less than 3 lives
+                if (this.lives < 3) {
+                    this.lives++;
+                    this.showLevelMessage(`Level ${newLevel}!`, '+1 Life!');
+                } else {
+                    this.showLevelMessage(`Level ${newLevel}!`);
+                }
+
+                this.updateUI();
+            }
+
+            showLevelMessage(mainMessage, bonusMessage = null) {
+                // Clear any existing level messages first
+                this.clearLevelMessages();
+
+                // Create temporary level up message
+                const messageEl = document.createElement('div');
+                messageEl.className = 'level-message'; // Add class for easy identification
+                messageEl.style.cssText = `
+                    position: absolute;
+                    top: 40%;
+                    left: 50%;
+                    transform: translate(-50%, -50%);
+                    color: #ffff00;
+                    font-size: 32px;
+                    font-weight: bold;
+                    text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
+                    z-index: 20;
+                    pointer-events: none;
+                    text-align: center;
+                    line-height: 1.2;
+                    max-width: 80vw;
+                `;
+
+                if (bonusMessage) {
+                    messageEl.innerHTML = `${mainMessage}<br><span style="color: #90EE90; font-size: 20px;">${bonusMessage}</span>`;
+                } else {
+                    messageEl.textContent = mainMessage;
+                }
+
+                document.body.appendChild(messageEl);
+
+                setTimeout(() => {
+                    if (messageEl.parentNode) {
+                        document.body.removeChild(messageEl);
+                    }
+                }, 2500); // Show a bit longer for difficulty messages
+            }
+
+            clearLevelMessages() {
+                // Remove any existing level messages
+                const existingMessages = document.querySelectorAll('.level-message');
+                existingMessages.forEach(msg => {
+                    if (msg.parentNode) {
+                        msg.parentNode.removeChild(msg);
+                    }
+                });
+            }
+
+            loseLife() {
+                this.lives--;
+                this.updateUI();
+
+                if (this.lives <= 0) {
+                    this.gameOver();
+                } else {
+                    this.respawn();
+                }
+            }
+
+            respawn() {
+                // Reset fish position and clear obstacles
+                this.fish.y = this.canvas.height / 2;
+                this.fish.velocity = 0;
+                this.fish.rotation = 0;
+                this.corals = [];
+
+                // Set respawn timer (invincibility frames)
+                this.isRespawning = true;
+                this.respawnTimer = 90; // 1.5 seconds at 60fps
+
+                // Give player time to prepare after respawn
+                this.gameStarted = false;
+                this.gameStartDelay = 120; // 2 seconds for respawn
+
+                this.showLevelMessage('Life Lost! Get Ready...');
+            }
+
+            updateCorals() {
+                if (this.gameState !== 'playing' || this.isRespawning) return;
+
+                // Check if we should use new difficulty settings
+                // Only apply new difficulty when no old coral remains on screen
+                const hasOldCoral = this.corals.some(coral => coral.level && coral.level < this.level);
+                const currentLevelForSpawning = hasOldCoral ? this.previousLevel : this.level;
+
+                // Progressive difficulty based on the level we should use for spawning
+                const spawnRate = Math.max(120, 180 - (currentLevelForSpawning - 1) * 10);
+
+                // ALL coral on screen should move at the same speed
+                const currentGameSpeed = 1.5 + (currentLevelForSpawning - 1) * 0.2;
+
+                // Add new corals with consistent spacing - use time since last spawn instead of modulo
+                const framesSinceLastSpawn = this.frameCount - this.lastCoralSpawn;
+                if (framesSinceLastSpawn >= spawnRate) {
+                    const gapY = 100 + Math.random() * (this.canvas.height - 300);
+                    // Smaller gap size at higher levels (more difficult)
+                    const currentGap = Math.max(150, this.coralGap - (currentLevelForSpawning - 1) * 8);
+
+                    this.corals.push({
+                        x: this.canvas.width,
+                        topHeight: gapY - currentGap / 2,
+                        bottomY: gapY + currentGap / 2,
+                        width: 60,
+                        scored: false,
+                        id: this.frameCount,
+                        level: currentLevelForSpawning // Track which level this coral belongs to
+                    });
+
+                    // Update last spawn time
+                    this.lastCoralSpawn = this.frameCount;
+                }
+
+                // Update coral positions - ALL coral moves at the same current speed
+                this.corals.forEach((coral, index) => {
+                    coral.x -= currentGameSpeed; // All coral moves at same speed
+
+                    // Check for scoring
+                    if (!coral.scored && coral.x + coral.width < this.fish.x) {
+                        coral.scored = true;
+                        this.score++;
+
+                        // Check for level progression (every 5 points)
+                        const newLevel = Math.floor(this.score / 5) + 1;
+                        if (newLevel > this.level) {
+                            this.levelComplete(newLevel);
+                        }
+
+                        this.updateUI();
+                    }
+
+                    // Check collision
+                    if (this.checkCoralCollision(coral)) {
+                        this.loseLife();
+                    }
+
+                    // Remove off-screen corals
+                    if (coral.x + coral.width < 0) {
+                        this.corals.splice(index, 1);
+                    }
+                });
+            }
+
+            checkCoralCollision(coral) {
+                const fishLeft = this.fish.x;
+                const fishRight = this.fish.x + this.fish.width;
+                const fishTop = this.fish.y;
+                const fishBottom = this.fish.y + this.fish.height;
+
+                const coralLeft = coral.x;
+                const coralRight = coral.x + coral.width;
+
+                if (fishRight > coralLeft && fishLeft < coralRight) {
+                    if (fishTop < coral.topHeight || fishBottom > coral.bottomY) {
+                        return true;
+                    }
+                }
+                return false;
+            }
+
+            checkCollectibleCollision(collectible) {
+                if (!collectible || !this.fish) return false;
+
+                const fishCenterX = this.fish.x + this.fish.width / 2;
+                const fishCenterY = this.fish.y + this.fish.height / 2;
+                const collectibleCenterX = collectible.x;
+                const collectibleCenterY = collectible.y;
+
+                const distance = Math.sqrt(
+                    Math.pow(fishCenterX - collectibleCenterX, 2) +
+                    Math.pow(fishCenterY - collectibleCenterY, 2)
+                );
+
+                return distance < (this.fish.width / 2 + collectible.size);
+            }
+
+            showCollectibleMessage(message) {
+                // Create temporary points message
+                const messageEl = document.createElement('div');
+                messageEl.style.cssText = `
+                    position: absolute;
+                    top: ${this.fish.y + 50}px;
+                    left: ${this.fish.x + 50}px;
+                    color: #00ff00;
+                    font-size: 24px;
+                    font-weight: bold;
+                    text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
+                    z-index: 20;
+                    pointer-events: none;
+                    animation: fadeUp 1s ease-out forwards;
+                `;
+
+                // Add CSS animation for floating up and fading
+                if (!document.getElementById('collectible-style')) {
+                    const style = document.createElement('style');
+                    style.id = 'collectible-style';
+                    style.textContent = `
+                        @keyframes fadeUp {
+                            0% { opacity: 1; transform: translateY(0); }
+                            100% { opacity: 0; transform: translateY(-30px); }
+                        }
+                    `;
+                    document.head.appendChild(style);
+                }
+
+                messageEl.textContent = message;
+                document.body.appendChild(messageEl);
+
+                setTimeout(() => {
+                    if (messageEl.parentNode) {
+                        document.body.removeChild(messageEl);
+                    }
+                }, 1000);
+            }
+
+            updateBackground() {
+                // Progressive speed based on level
+                const seaweedSpeed = 0.8 + (this.level - 1) * 0.1; // Seaweed moves faster each level
+                const bubbleSpeed = 0.3 + (this.level - 1) * 0.05; // Bubbles move faster each level
+                const collectibleSpeed = 1.2 + (this.level - 1) * 0.1; // Collectibles move faster each level
+
+                // Initialize collectibles array if it doesn't exist
+                if (!this.collectibles) {
+                    this.collectibles = [];
+                }
+
+                // Spawn collectibles occasionally
+                if (this.gameState === 'playing' && Math.random() < 0.003) { // 0.3% chance per frame
+                    const types = [
+                        { type: 'food', points: 2, color: '#ffd700', size: 4 }, // Gold food pellet
+                        { type: 'plankton', points: 1, color: '#90EE90', size: 3 }, // Green plankton
+                        { type: 'smallfish', points: 5, color: '#87ceeb', size: 6 } // Blue small fish
+                    ];
+                    const collectibleType = types[Math.floor(Math.random() * types.length)];
+
+                    this.collectibles.push({
+                        x: this.canvas.width + 50,
+                        y: 50 + Math.random() * (this.canvas.height - 100),
+                        ...collectibleType,
+                        speed: collectibleSpeed,
+                        bobTime: Math.random() * Math.PI * 2 // For floating animation
+                    });
+                }
+
+                // Update collectibles
+                this.collectibles.forEach((collectible, index) => {
+                    collectible.x -= collectible.speed;
+                    collectible.bobTime += 0.05;
+
+                    // Add gentle bobbing motion
+                    collectible.originalY = collectible.originalY || collectible.y;
+                    collectible.y = collectible.originalY + Math.sin(collectible.bobTime) * 2;
+
+                    // Check collision with fish
+                    if (this.checkCollectibleCollision(collectible)) {
+                        this.score += collectible.points;
+                        this.updateUI();
+                        this.showCollectibleMessage(`+${collectible.points}`);
+                        this.collectibles.splice(index, 1);
+                        return;
+                    }
+
+                    // Remove off-screen collectibles
+                    if (collectible.x < -50) {
+                        this.collectibles.splice(index, 1);
+                    }
+                });
+
+                // Update seaweed - make it scroll past the fish
+                this.seaweed.forEach((weed, index) => {
+                    // Natural sway
+                    weed.sway += weed.swaySpeed;
+
+                    // Move seaweed from right to left (parallax effect with level scaling)
+                    weed.x -= seaweedSpeed;
+
+                    // When seaweed goes off screen, respawn it on the right
+                    if (weed.x < -50) {
+                        weed.x = this.canvas.width + Math.random() * 200; // Stagger respawn
+                        weed.height = 100 + Math.random() * 100; // Vary height
+                        weed.sway = Math.random() * Math.PI * 2;
+                    }
+                });
+
+                // Update bubbles - also make them scroll for parallax
+                this.bubbles.forEach(bubble => {
+                    bubble.y -= bubble.speed;
+                    bubble.x -= bubbleSpeed; // Level-scaled horizontal movement
+                    bubble.x += Math.sin(bubble.y * 0.01) * 0.5;
+
+                    // Respawn bubbles that go off screen
+                    if (bubble.y < -bubble.radius) {
+                        bubble.y = this.canvas.height + bubble.radius;
+                        bubble.x = this.canvas.width + Math.random() * 100;
+                    }
+                    if (bubble.x < -bubble.radius) {
+                        bubble.x = this.canvas.width + bubble.radius;
+                        bubble.y = Math.random() * this.canvas.height;
+                    }
+                });
+            }
+
+            drawFish() {
+                // Flash effect during respawn
+                if (this.isRespawning && Math.floor(this.frameCount / 10) % 2 === 0) {
+                    return; // Skip drawing to create flashing effect
+                }
+
+                this.ctx.save();
+                this.ctx.translate(this.fish.x + this.fish.width / 2, this.fish.y + this.fish.height / 2);
+                this.ctx.rotate(this.fish.rotation);
+
+                // Fish body
+                this.ctx.fillStyle = '#ff6b35';
+                this.ctx.beginPath();
+                this.ctx.ellipse(0, 0, this.fish.width / 2, this.fish.height / 2, 0, 0, Math.PI * 2);
+                this.ctx.fill();
+
+                // Fish stripes
+                this.ctx.fillStyle = '#ff8c42';
+                this.ctx.beginPath();
+                this.ctx.ellipse(-5, 0, 3, this.fish.height / 3, 0, 0, Math.PI * 2);
+                this.ctx.fill();
+                this.ctx.beginPath();
+                this.ctx.ellipse(5, 0, 3, this.fish.height / 3, 0, 0, Math.PI * 2);
+                this.ctx.fill();
+
+                // Fish tail
+                this.ctx.fillStyle = '#ff6b35';
+                this.ctx.beginPath();
+                this.ctx.moveTo(-this.fish.width / 2, 0);
+                this.ctx.lineTo(-this.fish.width / 2 - 15, -10);
+                this.ctx.lineTo(-this.fish.width / 2 - 15, 10);
+                this.ctx.closePath();
+                this.ctx.fill();
+
+                // Fish eye
+                this.ctx.fillStyle = 'white';
+                this.ctx.beginPath();
+                this.ctx.ellipse(8, -3, 4, 4, 0, 0, Math.PI * 2);
+                this.ctx.fill();
+                this.ctx.fillStyle = 'black';
+                this.ctx.beginPath();
+                this.ctx.ellipse(9, -3, 2, 2, 0, 0, Math.PI * 2);
+                this.ctx.fill();
+
+                this.ctx.restore();
+            }
+
+            drawCorals() {
+                this.corals.forEach(coral => {
+                    // Draw top coral formation
+                    this.drawCoralFormation(coral.x, 0, coral.width, coral.topHeight);
+
+                    // Draw bottom coral formation  
+                    this.drawCoralFormation(coral.x, coral.bottomY, coral.width, this.canvas.height - coral.bottomY);
+                });
+            }
+
+            drawCorals() {
+                this.corals.forEach(coral => {
+                    // Draw top coral formation
+                    this.drawCoralFormation(coral.x, 0, coral.width, coral.topHeight, coral.id);
+
+                    // Draw bottom coral formation  
+                    this.drawCoralFormation(coral.x, coral.bottomY, coral.width, this.canvas.height - coral.bottomY, coral.id);
+                });
+            }
+
+            drawCoralFormation(x, y, width, height, coralId) {
+                this.ctx.save();
+
+                // Create irregular coral outline using static coral ID
+                this.ctx.beginPath();
+
+                // Use coral ID for consistent shape (never changes)
+                const seed = coralId || 0;
+
+                // Left edge with bumps and indentations
+                let currentY = y;
+                this.ctx.moveTo(x, currentY);
+
+                const segments = Math.floor(height / 20);
+                for (let i = 0; i <= segments; i++) {
+                    currentY = y + (i / segments) * height;
+
+                    // Create consistent bumps based on static seed
+                    const bumpSize1 = (seed + i * 13) % 7 - 3; // -3 to +3
+                    const bumpSize2 = (seed + i * 17) % 5 - 2; // -2 to +2
+                    const leftX = x + bumpSize1 + bumpSize2;
+
+                    this.ctx.lineTo(leftX, currentY);
+                }
+
+                // Right edge with different bumps
+                for (let i = segments; i >= 0; i--) {
+                    currentY = y + (i / segments) * height;
+
+                    const bumpSize1 = (seed + i * 19) % 6 - 3; // -3 to +2
+                    const bumpSize2 = (seed + i * 23) % 4 - 2; // -2 to +1
+                    const rightX = x + width + bumpSize1 + bumpSize2;
+
+                    this.ctx.lineTo(rightX, currentY);
+                }
+
+                this.ctx.closePath();
+
+                // Fill with pinkish-white coral gradient
+                const gradient = this.ctx.createLinearGradient(x, y, x + width, y);
+                gradient.addColorStop(0, '#f5deb3');     // Wheat (light edges)
+                gradient.addColorStop(0.3, '#ffc0cb');   // Pink
+                gradient.addColorStop(0.7, '#ffb6c1');   // Light pink
+                gradient.addColorStop(1, '#f5deb3');     // Wheat (light edges)
+
+                this.ctx.fillStyle = gradient;
+                this.ctx.fill();
+
+                // Add only coral holes (no bumps or wireframes)
+                this.addCoralHoles(x, y, width, height, seed);
+
+                this.ctx.restore();
+            }
+
+            addCoralHoles(x, y, width, height, seed) {
+                // Add coral holes only within the coral boundaries
+                const holeCount = Math.floor((width * height) / 800);
+                for (let i = 0; i < holeCount; i++) {
+                    // Static hole positions based on coral ID (never changes)
+                    // Keep holes away from edges to ensure they stay within coral shape
+                    const margin = 8; // Safety margin from edges
+                    const holeX = x + margin + ((seed + i * 37) % (width - margin * 2));
+                    const holeY = y + margin + ((seed + i * 41) % (height - margin * 2));
+                    const holeSize = 2 + ((seed + i * 29) % 4); // Smaller holes
+
+                    this.ctx.fillStyle = 'rgba(0, 0, 0, 0.3)'; // Lighter, more subtle holes
+                    this.ctx.beginPath();
+                    this.ctx.ellipse(holeX, holeY, holeSize, holeSize, 0, 0, Math.PI * 2);
+                    this.ctx.fill();
+                }
+            }
+
+            drawBackground() {
+                // Draw seaweed with natural sway
+                this.seaweed.forEach(weed => {
+                    this.ctx.strokeStyle = '#228b22';
+                    this.ctx.lineWidth = 8;
+                    this.ctx.beginPath();
+                    this.ctx.moveTo(weed.x, this.canvas.height);
+
+                    const segments = 10;
+                    for (let i = 1; i <= segments; i++) {
+                        const y = this.canvas.height - (weed.height * i / segments);
+                        const sway = Math.sin(weed.sway + i * 0.5) * (i * 2);
+                        this.ctx.lineTo(weed.x + sway, y);
+                    }
+                    this.ctx.stroke();
+                });
+
+                // Draw collectibles (with safety check)
+                if (this.collectibles && this.collectibles.length > 0) {
+                    this.collectibles.forEach(collectible => {
+                        this.ctx.save();
+
+                        if (collectible.type === 'food') {
+                            // Gold food pellet
+                            this.ctx.fillStyle = collectible.color;
+                            this.ctx.beginPath();
+                            this.ctx.ellipse(collectible.x, collectible.y, collectible.size, collectible.size, 0, 0, Math.PI * 2);
+                            this.ctx.fill();
+
+                            // Add sparkle effect
+                            this.ctx.fillStyle = '#ffffff';
+                            this.ctx.beginPath();
+                            this.ctx.ellipse(collectible.x - 1, collectible.y - 1, collectible.size / 3, collectible.size / 3, 0, 0, Math.PI * 2);
+                            this.ctx.fill();
+
+                        } else if (collectible.type === 'plankton') {
+                            // Green plankton
+                            this.ctx.fillStyle = collectible.color;
+                            this.ctx.beginPath();
+                            this.ctx.ellipse(collectible.x, collectible.y, collectible.size, collectible.size * 0.7, 0, 0, Math.PI * 2);
+                            this.ctx.fill();
+
+                        } else if (collectible.type === 'smallfish') {
+                            // Small blue fish
+                            this.ctx.fillStyle = collectible.color;
+                            this.ctx.beginPath();
+                            this.ctx.ellipse(collectible.x, collectible.y, collectible.size, collectible.size * 0.6, 0, 0, Math.PI * 2);
+                            this.ctx.fill();
+
+                            // Small tail
+                            this.ctx.beginPath();
+                            this.ctx.moveTo(collectible.x + collectible.size, collectible.y);
+                            this.ctx.lineTo(collectible.x + collectible.size + 4, collectible.y - 2);
+                            this.ctx.lineTo(collectible.x + collectible.size + 4, collectible.y + 2);
+                            this.ctx.closePath();
+                            this.ctx.fill();
+
+                            // Small eye
+                            this.ctx.fillStyle = 'white';
+                            this.ctx.beginPath();
+                            this.ctx.ellipse(collectible.x - 2, collectible.y - 1, 1, 1, 0, 0, Math.PI * 2);
+                            this.ctx.fill();
+                        }
+
+                        this.ctx.restore();
+                    });
+                }
+
+                // Draw bubbles
+                this.bubbles.forEach(bubble => {
+                    this.ctx.save();
+                    this.ctx.globalAlpha = bubble.opacity;
+                    this.ctx.fillStyle = '#87ceeb';
+                    this.ctx.beginPath();
+                    this.ctx.ellipse(bubble.x, bubble.y, bubble.radius, bubble.radius, 0, 0, Math.PI * 2);
+                    this.ctx.fill();
+
+                    // Bubble highlight
+                    this.ctx.fillStyle = 'white';
+                    this.ctx.beginPath();
+                    this.ctx.ellipse(bubble.x - bubble.radius / 3, bubble.y - bubble.radius / 3, bubble.radius / 4, bubble.radius / 4, 0, 0, Math.PI * 2);
+                    this.ctx.fill();
+                    this.ctx.restore();
+                });
+            }
+
+            gameOver() {
+                this.gameState = 'gameOver';
+
+                // Stop the game loop
+                if (this.animationId) {
+                    cancelAnimationFrame(this.animationId);
+                    this.animationId = null;
+                }
+
+                this.finalScoreElement.textContent = this.score;
+                this.finalLevelElement.textContent = this.level;
+
+                this.gameOverTitle.textContent = 'Game Over!';
+
+                this.gameOverElement.style.display = 'block';
+            }
+
+            restart() {
+                this.completeReset();
+            }
+
+            render() {
+                // Clear canvas
+                this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+
+                // Draw background elements
+                this.drawBackground();
+
+                // Draw corals
+                this.drawCorals();
+
+                // Draw fish
+                this.drawFish();
+            }
+
+            drawCountdown() {
+                const secondsLeft = Math.ceil(this.gameStartDelay / 60);
+
+                this.ctx.save();
+                this.ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
+                this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+
+                this.ctx.textAlign = 'center';
+                this.ctx.fillStyle = '#87ceeb';
+                this.ctx.font = 'bold 48px Arial';
+                this.ctx.shadowColor = 'rgba(135, 206, 235, 0.8)';
+                this.ctx.shadowBlur = 20;
+
+                if (secondsLeft > 0) {
+                    this.ctx.fillText(`Get Ready: ${secondsLeft}`, this.canvas.width / 2, this.canvas.height / 2 - 20);
+                } else {
+                    this.ctx.fillText('GO!', this.canvas.width / 2, this.canvas.height / 2 - 20);
+                }
+
+                this.ctx.font = 'bold 24px Arial';
+                this.ctx.fillStyle = '#add8e6';
+                this.ctx.fillText('Tap to start immediately!', this.canvas.width / 2, this.canvas.height / 2 + 40);
+
+                this.ctx.restore();
+            }
+
+            update() {
+                // Only update if we're actually playing
+                if (this.gameState !== 'playing') return;
+
+                this.frameCount++;
+                this.updateFish();
+                this.updateCorals();
+                this.updateBackground();
+            }
+
+            gameLoop() {
+                this.update();
+                this.render();
+                requestAnimationFrame(() => this.gameLoop());
+            }
+        }
+
+        // Global game instance
+        let gameInstance = null;
+
+        // Start the game when page loads
+        window.addEventListener('load', () => {
+            gameInstance = new FlappyFishGame();
+        });
+
+        // Function to completely restart the game
+        function restartGame() {
+            if (gameInstance) {
+                gameInstance.destroy();
+            }
+            // Create completely new game instance
+            gameInstance = new FlappyFishGame();
+            // Start game immediately (skip start screen)
+            gameInstance.startGame();
+        }
+
+        // Prevent zoom on double tap
+        let lastTouchEnd = 0;
+        document.addEventListener('touchend', function (event) {
+            const now = (new Date()).getTime();
+            if (now - lastTouchEnd <= 300) {
+                event.preventDefault();
+            }
+            lastTouchEnd = now;
+        }, false);
+    </script>
+</body>
+
+</html>
