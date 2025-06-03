@@ -63,7 +63,7 @@ Guide your fish through underwater coral reefs in this aquatic adventure.
 ## 📸 Screenshots
 
 <div align="center">
-    <img src="https://raw.githubusercontent.com/jeremehancock/AI-Game-Collection/refs/heads/main/images/screenshots/home-updated-again.png" width="300" alt="Game Menu"/>
+    <img src="https://raw.githubusercontent.com/jeremehancock/AI-Game-Collection/refs/heads/main/images/screenshots/home-updated-2.png" width="300" alt="Game Menu"/>
     <img src="https://raw.githubusercontent.com/jeremehancock/AI-Game-Collection/refs/heads/main/images/screenshots/nerdle.png" width="300" alt="Nerdle"/>
     <img src="https://raw.githubusercontent.com/jeremehancock/AI-Game-Collection/refs/heads/main/images/screenshots/pipes.png" width="300" alt="Pipes Puzzle"/>
     <img src="https://raw.githubusercontent.com/jeremehancock/AI-Game-Collection/refs/heads/main/images/screenshots/memory.png" width="300" alt="Memory Game"/>
