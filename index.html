@@ -2137,6 +2137,13 @@ m489 -117 c31 -26 31 -78 -1 -104 -22 -18 -39 -19 -226 -16 -220 3 -226 5
 			});
 			buttonElement.classList.add('active');
 
+			// Scroll the clicked button into view if it's off-screen
+			buttonElement.scrollIntoView({
+				behavior: 'smooth',
+				block: 'nearest',
+				inline: 'center'
+			});
+
 			// Show/hide View All buttons based on category
 			const viewAllButtons = document.querySelectorAll('.mobile-see-all');
 			if (category === 'all') {
