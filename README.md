@@ -56,10 +56,14 @@ Pilot your upgraded spaceship through dense asteroid fields with enhanced graphi
 
 Flapping Bird is a simple arcade game where you tap to keep a bird in the air and guide it through gaps between pipes without crashing.
 
+### Deep Sea Escape
+
+Guide your fish through underwater coral reefs in this aquatic adventure.
+
 ## 📸 Screenshots
 
 <div align="center">
-    <img src="https://raw.githubusercontent.com/jeremehancock/AI-Game-Collection/refs/heads/main/images/screenshots/home.png" width="300" alt="Game Menu"/>
+    <img src="https://raw.githubusercontent.com/jeremehancock/AI-Game-Collection/refs/heads/main/images/screenshots/home-updated.png" width="300" alt="Game Menu"/>
     <img src="https://raw.githubusercontent.com/jeremehancock/AI-Game-Collection/refs/heads/main/images/screenshots/nerdle.png" width="300" alt="Nerdle"/>
     <img src="https://raw.githubusercontent.com/jeremehancock/AI-Game-Collection/refs/heads/main/images/screenshots/pipes.png" width="300" alt="Pipes Puzzle"/>
     <img src="https://raw.githubusercontent.com/jeremehancock/AI-Game-Collection/refs/heads/main/images/screenshots/memory.png" width="300" alt="Memory Game"/>
@@ -72,7 +76,8 @@ Flapping Bird is a simple arcade game where you tap to keep a bird in the air an
     <img src="https://raw.githubusercontent.com/jeremehancock/AI-Game-Collection/refs/heads/main/images/screenshots/breakout.png" width="300" alt="Breakout"/>
     <img src="https://raw.githubusercontent.com/jeremehancock/AI-Game-Collection/refs/heads/main/images/screenshots/space-shooter-game.png" width="300" alt="Space Shooter"/>
     <img src="https://raw.githubusercontent.com/jeremehancock/AI-Game-Collection/refs/heads/main/images/screenshots/space-shooter-game-2.png" width="300" alt="Space Shooter II"/>
-    <img src="https://raw.githubusercontent.com/jeremehancock/AI-Game-Collection/refs/heads/main/images/screenshots/flapping-bird-game.png" width="300" alt="Flapping Bird"/>
+    <img src="https://raw.githubusercontent.com/jeremehancock/AI-Game-Collection/refs/heads/main/images/screenshots/flapping-bird-game-updated.png" width="300" alt="Flapping Bird"/>
+    <img src="https://raw.githubusercontent.com/jeremehancock/AI-Game-Collection/refs/heads/main/images/screenshots/deep-sea-escape-game-updated.png" width="300" alt="Deep Sea Escape"/>
 
 </div>
 
