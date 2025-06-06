@@ -24,7 +24,7 @@ Pilot your upgraded spaceship through dense asteroid fields with enhanced graphi
 
 Guide your fish through underwater coral reefs in this aquatic adventure.
 
-## 📸 Screenshots
+## 📸 Featured Screenshots
 
 <div align="center">
     <img src="https://raw.githubusercontent.com/jeremehancock/AI-Game-Collection/refs/heads/main/images/screenshots/home-updated-3.png" width="300" alt="Game Menu"/>
