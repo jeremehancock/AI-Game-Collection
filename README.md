@@ -60,6 +60,10 @@ Flapping Bird is a simple arcade game where you tap to keep a bird in the air an
 
 Guide your fish through underwater coral reefs in this aquatic adventure.
 
+### Circles & Squares
+
+Fast-paced physics action game where you tap bouncing circles for points while avoiding penalty squares.
+
 ## 📸 Screenshots
 
 <div align="center">
@@ -78,7 +82,7 @@ Guide your fish through underwater coral reefs in this aquatic adventure.
     <img src="https://raw.githubusercontent.com/jeremehancock/AI-Game-Collection/refs/heads/main/images/screenshots/space-shooter-game-2.png" width="300" alt="Space Shooter II"/>
     <img src="https://raw.githubusercontent.com/jeremehancock/AI-Game-Collection/refs/heads/main/images/screenshots/flapping-bird-game-updated.png" width="300" alt="Flapping Bird"/>
     <img src="https://raw.githubusercontent.com/jeremehancock/AI-Game-Collection/refs/heads/main/images/screenshots/deep-sea-escape-game-updated.png" width="300" alt="Deep Sea Escape"/>
-
+    <img src="https://raw.githubusercontent.com/jeremehancock/AI-Game-Collection/refs/heads/main/images/screenshots/circles-and-squares-game.png" width="300" alt="Circle & Squares"/>
 </div>
 
 ## 🚀 Features
