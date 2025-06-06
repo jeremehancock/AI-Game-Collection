@@ -113,8 +113,13 @@
             text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
         }
 
+
         .instructions-list {
-            margin-bottom: 30px;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            margin: 0 auto 30px auto;
+            width: fit-content;
         }
 
         .instructions-list p {
@@ -122,6 +127,7 @@
             margin: 15px 0;
             text-align: left;
             color: #ffffff;
+            white-space: nowrap;
         }
 
         .instructions-list strong {
