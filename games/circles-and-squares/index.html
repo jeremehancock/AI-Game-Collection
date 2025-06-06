@@ -1,0 +1,1017 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Circles & Squares</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+            user-select: none;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            overflow: hidden;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .game-container {
+            position: relative;
+            flex: 1;
+            overflow: hidden;
+        }
+
+        .ui-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 100;
+            padding: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+        }
+
+        .ui-left, .ui-right {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        .ui-right {
+            align-items: flex-end;
+        }
+
+        .score, .timer, .lives, .level {
+            color: white;
+            font-size: 1.1em;
+            font-weight: bold;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+            margin: 2px 0;
+        }
+
+        .level {
+            color: #4ecdc4;
+        }
+
+        .circle {
+            position: absolute;
+            border-radius: 50%;
+            cursor: pointer;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3), 0 0 20px rgba(255, 255, 255, 0.1);
+            transform: scale(0);
+            animation: circleAppear 0.3s ease-out forwards;
+            transition: transform 0.1s ease;
+            z-index: 10;
+        }
+
+        .square {
+            position: absolute;
+            border-radius: 8px;
+            cursor: pointer;
+            border: 3px solid rgba(255, 255, 255, 0.4);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3), 0 0 15px rgba(255, 255, 255, 0.1);
+            transform: scale(0) rotate(0deg);
+            animation: squareAppear 0.3s ease-out forwards;
+            transition: transform 0.1s ease;
+            z-index: 10;
+        }
+
+        .circle:active, .square:active {
+            transform: scale(0.9);
+        }
+
+        @keyframes circleAppear {
+            to { transform: scale(1); }
+        }
+
+        @keyframes squareAppear {
+            to { transform: scale(1) rotate(0deg); }
+        }
+
+        @keyframes circleDisappear {
+            to { 
+                transform: scale(0);
+                opacity: 0;
+            }
+        }
+
+        @keyframes circlePop {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.3); }
+            100% { transform: scale(0); opacity: 0; }
+        }
+
+        @keyframes squarePop {
+            0% { transform: scale(1) rotate(0deg); }
+            50% { transform: scale(1.2) rotate(15deg); }
+            100% { transform: scale(0) rotate(45deg); opacity: 0; }
+        }
+
+        .menu-screen, .game-over-screen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.9);
+            backdrop-filter: blur(20px);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 200;
+            color: white;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .game-title {
+            font-size: clamp(2.2em, 8vw, 3.5em);
+            margin-bottom: 10px;
+            background: linear-gradient(45deg, #ff6b6b, #4ecdc4, #45b7d1, #f9ca24);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: titleGlow 2s ease-in-out infinite alternate;
+            font-weight: bold;
+            letter-spacing: 2px;
+        }
+
+        @keyframes titleGlow {
+            to { filter: brightness(1.2); }
+        }
+
+        .subtitle {
+            font-size: clamp(1em, 4vw, 1.3em);
+            margin-bottom: 15px;
+            opacity: 0.9;
+            line-height: 1.4;
+            max-width: 90%;
+        }
+
+        .subtitle.large {
+            font-size: clamp(1.1em, 4.5vw, 1.4em);
+            margin-bottom: 25px;
+            opacity: 1;
+            font-weight: 500;
+        }
+
+        .instructions-list {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            margin: 0 auto 20px auto;
+            width: fit-content;
+        }
+
+        .instructions-list .subtitle {
+            margin-bottom: 12px;
+            white-space: nowrap;
+        }
+
+        .play-button, .restart-button {
+            background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
+            border: none;
+            color: white;
+            font-size: clamp(1.2em, 5vw, 1.6em);
+            padding: clamp(12px, 4vw, 18px) clamp(30px, 8vw, 50px);
+            border-radius: 50px;
+            cursor: pointer;
+            margin: 20px 10px 10px 10px;
+            transition: all 0.3s ease;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            font-weight: bold;
+            letter-spacing: 1px;
+            min-height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .play-button:hover, .restart-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4);
+        }
+
+        .final-score {
+            font-size: 2em;
+            margin: 20px 0;
+            color: #4ecdc4;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .particle {
+            position: absolute;
+            pointer-events: none;
+            border-radius: 50%;
+            animation: particleFloat 1s ease-out forwards;
+        }
+
+        .square-particle {
+            position: absolute;
+            pointer-events: none;
+            border-radius: 2px;
+            animation: squareParticleFloat 0.8s ease-out forwards;
+        }
+
+        @keyframes particleFloat {
+            to {
+                transform: translateY(-100px) scale(0);
+                opacity: 0;
+            }
+        }
+
+        @keyframes squareParticleFloat {
+            to {
+                transform: translateY(-80px) rotate(180deg) scale(0);
+                opacity: 0;
+            }
+        }
+
+        @keyframes collisionFlash {
+            0% { 
+                filter: brightness(1);
+                transform: scale(1);
+            }
+            50% { 
+                filter: brightness(1.8);
+                transform: scale(1.05);
+            }
+            100% { 
+                filter: brightness(1);
+                transform: scale(1);
+            }
+        }
+
+        .collision-flash {
+            animation: collisionFlash 0.3s ease-out !important;
+        }
+
+        @media (max-width: 768px) {
+            .menu-screen, .game-over-screen {
+                padding: 15px;
+                justify-content: center;
+            }
+            
+            .game-title {
+                margin-bottom: 15px;
+            }
+            
+            .subtitle {
+                margin-bottom: 12px;
+                font-size: clamp(0.9em, 3.8vw, 1.1em);
+            }
+            
+            .subtitle.large {
+                margin-bottom: 20px;
+                font-size: clamp(1em, 4.2vw, 1.2em);
+            }
+            
+            .instructions-list {
+                margin-bottom: 15px;
+            }
+            
+            .instructions-list .subtitle {
+                margin-bottom: 10px;
+            }
+            
+            .play-button, .restart-button {
+                margin: 15px 5px 5px 5px;
+                min-height: 55px;
+                width: 80%;
+                max-width: 300px;
+            }
+            
+            .ui-overlay {
+                padding: 12px;
+            }
+            
+            .score, .timer, .lives, .level {
+                font-size: clamp(0.8em, 3.5vw, 1em);
+            }
+            
+            .final-score {
+                font-size: clamp(1.5em, 6vw, 2em);
+            }
+        }
+
+        @media (max-width: 480px) {
+            .menu-screen, .game-over-screen {
+                padding: 10px;
+            }
+            
+            .subtitle {
+                font-size: clamp(0.85em, 3.5vw, 1em);
+                margin-bottom: 10px;
+            }
+            
+            .instructions-list .subtitle {
+                font-size: clamp(0.9em, 3.8vw, 1.1em);
+            }
+            
+            .play-button, .restart-button {
+                width: 85%;
+                margin: 12px auto;
+                min-height: 50px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <div class="ui-overlay">
+            <div class="ui-left">
+                <div class="score">Score: <span id="score">0</span></div>
+                <div class="level">Level: <span id="level">1</span></div>
+            </div>
+            <div class="ui-right">
+                <div class="timer">Time: <span id="timer">20</span>s</div>
+                <div class="lives">Lives: <span id="lives">3</span></div>
+            </div>
+        </div>
+        
+        <div class="menu-screen" id="menuScreen">
+            <h1 class="game-title">Circles & Squares</h1>
+            <p class="subtitle large">Fast-paced physics action game!</p>
+            <div class="instructions-list">
+                <p class="subtitle">🎯 Tap circles for points</p>
+                <p class="subtitle">🔲 Avoid squares (-5 pts)</p>
+                <p class="subtitle">⚡ Try to complete all levels</p>
+                <p class="subtitle">❤️ Earn life bonuses</p>
+            </div>
+            <button class="play-button" onclick="startGame()">Start Game</button>
+        </div>
+        
+        <div class="game-over-screen hidden" id="levelCompleteScreen">
+            <h2>Level Complete!</h2>
+            <div class="final-score" id="levelScore">Score: 0</div>
+            <div class="subtitle" id="levelBonus">Life bonus awarded!</div>
+            <button class="restart-button" onclick="nextLevel()">Next Level</button>
+        </div>
+        
+        <div class="game-over-screen hidden" id="gameOverScreen">
+            <h2>Game Over!</h2>
+            <div class="final-score" id="finalScore">Score: 0</div>
+            <div class="subtitle" id="finalLevel">Reached Level: 1</div>
+            <button class="restart-button" onclick="restartGame()">Play Again</button>
+        </div>
+    </div>
+
+    <script>
+        let game;
+
+        class TapCirclesGame {
+            constructor() {
+                this.gameContainer = document.querySelector('.game-container');
+                this.scoreElement = document.getElementById('score');
+                this.timerElement = document.getElementById('timer');
+                this.livesElement = document.getElementById('lives');
+                this.levelElement = document.getElementById('level');
+                this.menuScreen = document.getElementById('menuScreen');
+                this.levelCompleteScreen = document.getElementById('levelCompleteScreen');
+                this.gameOverScreen = document.getElementById('gameOverScreen');
+                this.finalScoreElement = document.getElementById('finalScore');
+                this.finalLevelElement = document.getElementById('finalLevel');
+                this.levelScoreElement = document.getElementById('levelScore');
+                this.levelBonusElement = document.getElementById('levelBonus');
+                
+                this.resetGame();
+                this.initAudio();
+            }
+            
+            resetGame() {
+                this.score = 0;
+                this.lives = 3;
+                this.level = 1;
+                this.timeLeft = 20;
+                this.levelTimeLimit = 20;
+                this.isGameActive = false;
+                this.circles = [];
+                this.squares = [];
+                this.squaresTappedThisRound = 0;
+                this.gameInterval = null;
+                this.spawnInterval = null;
+                this.maxCircles = 3;
+                this.maxSquares = 1;
+                this.spawnRate = 800;
+                this.circleLifetime = 2000;
+                this.squareLifetime = 3000;
+                
+                this.colors = [
+                    '#ff6b6b', '#4ecdc4', '#45b7d1', '#f9ca24',
+                    '#5f27cd', '#00d2d3', '#ff9ff3', '#54a0ff'
+                ];
+            }
+            
+            initAudio() {
+                try {
+                    this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                    this.audioInitialized = true;
+                } catch (e) {
+                    console.warn('Web Audio API not supported');
+                    this.audioInitialized = false;
+                }
+            }
+            
+            playPopSound() {
+                if (!this.audioInitialized || !this.audioContext) return;
+                
+                if (this.audioContext.state === 'suspended') {
+                    this.audioContext.resume();
+                }
+                
+                const oscillator = this.audioContext.createOscillator();
+                const gainNode = this.audioContext.createGain();
+                const filterNode = this.audioContext.createBiquadFilter();
+                
+                oscillator.type = 'sine';
+                oscillator.frequency.setValueAtTime(800, this.audioContext.currentTime);
+                oscillator.frequency.exponentialRampToValueAtTime(400, this.audioContext.currentTime + 0.1);
+                
+                filterNode.type = 'lowpass';
+                filterNode.frequency.setValueAtTime(2000, this.audioContext.currentTime);
+                
+                gainNode.gain.setValueAtTime(0, this.audioContext.currentTime);
+                gainNode.gain.linearRampToValueAtTime(0.3, this.audioContext.currentTime + 0.01);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, this.audioContext.currentTime + 0.15);
+                
+                oscillator.connect(filterNode);
+                filterNode.connect(gainNode);
+                gainNode.connect(this.audioContext.destination);
+                
+                oscillator.start(this.audioContext.currentTime);
+                oscillator.stop(this.audioContext.currentTime + 0.15);
+            }
+            
+            playBonkSound() {
+                if (!this.audioInitialized || !this.audioContext) return;
+                
+                if (this.audioContext.state === 'suspended') {
+                    this.audioContext.resume();
+                }
+                
+                const oscillator = this.audioContext.createOscillator();
+                const gainNode = this.audioContext.createGain();
+                const filterNode = this.audioContext.createBiquadFilter();
+                
+                // Lower, more harsh sound for penalty
+                oscillator.type = 'sawtooth';
+                oscillator.frequency.setValueAtTime(200, this.audioContext.currentTime);
+                oscillator.frequency.exponentialRampToValueAtTime(100, this.audioContext.currentTime + 0.2);
+                
+                filterNode.type = 'lowpass';
+                filterNode.frequency.setValueAtTime(800, this.audioContext.currentTime);
+                
+                gainNode.gain.setValueAtTime(0, this.audioContext.currentTime);
+                gainNode.gain.linearRampToValueAtTime(0.4, this.audioContext.currentTime + 0.02);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, this.audioContext.currentTime + 0.25);
+                
+                oscillator.connect(filterNode);
+                filterNode.connect(gainNode);
+                gainNode.connect(this.audioContext.destination);
+                
+                oscillator.start(this.audioContext.currentTime);
+                oscillator.stop(this.audioContext.currentTime + 0.25);
+            }
+            
+            updateDifficulty() {
+                this.maxCircles = Math.min(6, 2 + Math.floor(this.level / 2));
+                this.maxSquares = Math.min(3, Math.floor(this.level / 2) + 1);
+                this.spawnRate = Math.max(500, 800 - (this.level - 1) * 30);
+                this.circleLifetime = Math.max(1800, 2000 - (this.level - 1) * 50);
+                this.squareLifetime = Math.max(2500, 3000 - (this.level - 1) * 60);
+                this.levelTimeLimit = 20 + Math.floor(this.level / 3) * 5;
+            }
+            
+            completeLevel() {
+                this.isGameActive = false;
+                clearInterval(this.gameInterval);
+                clearInterval(this.spawnInterval);
+                
+                const gotLifeBonus = this.lives < 3;
+                if (gotLifeBonus) {
+                    this.lives = Math.min(3, this.lives + 1);
+                    this.livesElement.textContent = this.lives;
+                }
+                
+                // Wait a moment before clearing shapes to let any pending animations finish
+                setTimeout(() => {
+                    this.clearAllShapes();
+                    
+                    this.levelScoreElement.textContent = 'Score: ' + this.score;
+                    this.levelBonusElement.textContent = gotLifeBonus ? 
+                        'Life bonus awarded! +1 Life' : 
+                        'All lives intact! Well done!';
+                    this.levelCompleteScreen.classList.remove('hidden');
+                }, 100);
+            }
+            
+            nextLevel() {
+                this.level++;
+                this.levelElement.textContent = this.level;
+                this.updateDifficulty();
+                this.levelCompleteScreen.classList.add('hidden');
+                this.startLevel();
+            }
+            
+            startLevel() {
+                this.timeLeft = this.levelTimeLimit;
+                this.isGameActive = true;
+                this.squaresTappedThisRound = 0; // Reset square counter for new level
+                this.timerElement.textContent = this.timeLeft;
+                
+                this.updateShapePositions();
+                
+                this.gameInterval = setInterval(() => {
+                    this.timeLeft--;
+                    this.timerElement.textContent = this.timeLeft;
+                    
+                    if (this.timeLeft <= 0) {
+                        this.completeLevel();
+                    }
+                }, 1000);
+                
+                this.spawnInterval = setInterval(() => {
+                    if (this.isGameActive) {
+                        // Randomly spawn circle or square
+                        if (Math.random() < 0.75) { // 75% chance for circle
+                            this.createCircle();
+                        } else {
+                            this.createSquare();
+                        }
+                    }
+                }, this.spawnRate);
+            }
+            
+            updateShapePositions() {
+                const allShapes = [...this.circles, ...this.squares];
+                
+                // Update positions
+                allShapes.forEach(shape => {
+                    if (!shape.parentNode) return;
+                    
+                    shape.x += shape.vx;
+                    shape.y += shape.vy;
+                    
+                    // Bounce off walls
+                    if (shape.x <= 0 || shape.x >= window.innerWidth - shape.size) {
+                        shape.vx = -shape.vx;
+                        shape.x = Math.max(0, Math.min(window.innerWidth - shape.size, shape.x));
+                    }
+                    
+                    if (shape.y <= 80 || shape.y >= window.innerHeight - shape.size) {
+                        shape.vy = -shape.vy;
+                        shape.y = Math.max(80, Math.min(window.innerHeight - shape.size, shape.y));
+                    }
+                });
+                
+                // Check for shape-to-shape collisions
+                for (let i = 0; i < allShapes.length; i++) {
+                    for (let j = i + 1; j < allShapes.length; j++) {
+                        const shape1 = allShapes[i];
+                        const shape2 = allShapes[j];
+                        
+                        if (!shape1.parentNode || !shape2.parentNode) continue;
+                        
+                        // Skip collision if either shape is too newly spawned (immunity period)
+                        const now = Date.now();
+                        const immunityPeriod = 500; // 500ms immunity
+                        if ((now - shape1.spawnTime < immunityPeriod) || (now - shape2.spawnTime < immunityPeriod)) {
+                            continue;
+                        }
+                        
+                        const dx = (shape1.x + shape1.size/2) - (shape2.x + shape2.size/2);
+                        const dy = (shape1.y + shape1.size/2) - (shape2.y + shape2.size/2);
+                        const distance = Math.sqrt(dx * dx + dy * dy);
+                        const minDistance = (shape1.size + shape2.size) / 2;
+                        
+                        if (distance < minDistance) {
+                            // Collision detected - bounce off each other
+                            const angle = Math.atan2(dy, dx);
+                            const sin = Math.sin(angle);
+                            const cos = Math.cos(angle);
+                            
+                            // Rotate velocities
+                            const vx1 = shape1.vx * cos + shape1.vy * sin;
+                            const vy1 = shape1.vy * cos - shape1.vx * sin;
+                            const vx2 = shape2.vx * cos + shape2.vy * sin;
+                            const vy2 = shape2.vy * cos - shape2.vx * sin;
+                            
+                            // Swap velocities (elastic collision) with slight randomness for more dynamic bouncing
+                            const finalVx1 = vx2 * (0.9 + Math.random() * 0.2);
+                            const finalVx2 = vx1 * (0.9 + Math.random() * 0.2);
+                            
+                            // Rotate back
+                            shape1.vx = finalVx1 * cos - vy1 * sin;
+                            shape1.vy = vy1 * cos + finalVx1 * sin;
+                            shape2.vx = finalVx2 * cos - vy2 * sin;
+                            shape2.vy = vy2 * cos + finalVx2 * sin;
+                            
+                            // More aggressive separation to prevent overlap
+                            const overlap = minDistance - distance + 2; // Add small buffer
+                            const separationX = (overlap / 2) * cos;
+                            const separationY = (overlap / 2) * sin;
+                            
+                            shape1.x += separationX;
+                            shape1.y += separationY;
+                            shape2.x -= separationX;
+                            shape2.y -= separationY;
+                            
+                            // Keep shapes within bounds after separation
+                            shape1.x = Math.max(0, Math.min(window.innerWidth - shape1.size, shape1.x));
+                            shape1.y = Math.max(80, Math.min(window.innerHeight - shape1.size, shape1.y));
+                            shape2.x = Math.max(0, Math.min(window.innerWidth - shape2.size, shape2.x));
+                            shape2.y = Math.max(80, Math.min(window.innerHeight - shape2.size, shape2.y));
+                            
+                            // Add visual collision effect with longer duration
+                            shape1.classList.add('collision-flash');
+                            shape2.classList.add('collision-flash');
+                            setTimeout(() => {
+                                if (shape1.classList) shape1.classList.remove('collision-flash');
+                                if (shape2.classList) shape2.classList.remove('collision-flash');
+                            }, 300);
+                        }
+                    }
+                }
+                
+                // Apply positions to DOM
+                allShapes.forEach(shape => {
+                    if (shape.parentNode) {
+                        shape.style.left = shape.x + 'px';
+                        shape.style.top = shape.y + 'px';
+                    }
+                });
+                
+                if (this.isGameActive) {
+                    requestAnimationFrame(() => this.updateShapePositions());
+                }
+            }
+            
+            isPositionValid(x, y, size) {
+                const allShapes = [...this.circles, ...this.squares];
+                
+                for (let shape of allShapes) {
+                    if (!shape.parentNode) continue;
+                    
+                    const dx = (x + size/2) - (shape.x + shape.size/2);
+                    const dy = (y + size/2) - (shape.y + shape.size/2);
+                    const distance = Math.sqrt(dx * dx + dy * dy);
+                    const minDistance = (size + shape.size) / 2 + 20; // Add 20px buffer
+                    
+                    if (distance < minDistance) {
+                        return false; // Too close to existing shape
+                    }
+                }
+                
+                return true; // Position is valid
+            }
+            
+            createCircle() {
+                if (this.circles.length >= this.maxCircles) return;
+                
+                const circle = document.createElement('div');
+                circle.className = 'circle';
+                
+                const size = 60 + Math.random() * 40;
+                const color = this.colors[Math.floor(Math.random() * this.colors.length)];
+                
+                // Find a position that doesn't immediately collide
+                let x, y, attempts = 0;
+                let validPosition = false;
+                
+                do {
+                    x = Math.random() * (window.innerWidth - size);
+                    y = 80 + Math.random() * (window.innerHeight - 160 - size);
+                    validPosition = this.isPositionValid(x, y, size);
+                    attempts++;
+                } while (!validPosition && attempts < 10);
+                
+                circle.style.width = size + 'px';
+                circle.style.height = size + 'px';
+                circle.style.left = x + 'px';
+                circle.style.top = y + 'px';
+                circle.style.background = 'linear-gradient(135deg, ' + color + ', ' + this.adjustBrightness(color, -30) + ')';
+                circle.style.zIndex = 10 + Math.floor(Math.random() * 5);
+                
+                circle.vx = (Math.random() - 0.5) * 5;
+                circle.vy = (Math.random() - 0.5) * 5;
+                circle.x = x;
+                circle.y = y;
+                circle.size = size;
+                circle.spawnTime = Date.now(); // Track when shape was created
+                
+                circle.addEventListener('click', () => this.hitCircle(circle));
+                circle.addEventListener('touchstart', (e) => {
+                    e.preventDefault();
+                    this.hitCircle(circle);
+                });
+                
+                this.gameContainer.appendChild(circle);
+                this.circles.push(circle);
+                
+                const currentLifetime = this.circleLifetime;
+                setTimeout(() => {
+                    if (circle.parentNode && this.isGameActive) {
+                        this.missCircle(circle);
+                    }
+                }, currentLifetime);
+            }
+            
+            createSquare() {
+                if (this.squares.length >= this.maxSquares) return;
+                
+                const square = document.createElement('div');
+                square.className = 'square';
+                
+                const size = 50 + Math.random() * 30;
+                const color = this.colors[Math.floor(Math.random() * this.colors.length)];
+                
+                // Find a position that doesn't immediately collide
+                let x, y, attempts = 0;
+                let validPosition = false;
+                
+                do {
+                    x = Math.random() * (window.innerWidth - size);
+                    y = 80 + Math.random() * (window.innerHeight - 160 - size);
+                    validPosition = this.isPositionValid(x, y, size);
+                    attempts++;
+                } while (!validPosition && attempts < 10);
+                
+                square.style.width = size + 'px';
+                square.style.height = size + 'px';
+                square.style.left = x + 'px';
+                square.style.top = y + 'px';
+                square.style.background = 'linear-gradient(135deg, ' + color + ', ' + this.adjustBrightness(color, -40) + ')';
+                square.style.zIndex = 10 + Math.floor(Math.random() * 5);
+                
+                square.vx = (Math.random() - 0.5) * 4;
+                square.vy = (Math.random() - 0.5) * 4;
+                square.x = x;
+                square.y = y;
+                square.size = size;
+                square.spawnTime = Date.now(); // Track when shape was created
+                
+                square.addEventListener('click', () => this.hitSquare(square));
+                square.addEventListener('touchstart', (e) => {
+                    e.preventDefault();
+                    this.hitSquare(square);
+                });
+                
+                this.gameContainer.appendChild(square);
+                this.squares.push(square);
+                
+                const currentLifetime = this.squareLifetime;
+                setTimeout(() => {
+                    if (square.parentNode && this.isGameActive) {
+                        this.removeSquare(square);
+                    }
+                }, currentLifetime);
+            }
+            
+            hitCircle(circle) {
+                if (!this.isGameActive) return;
+                
+                this.playPopSound();
+                
+                const points = 10 + (this.level - 1) * 2;
+                this.score += points;
+                this.scoreElement.textContent = this.score;
+                
+                this.createParticles(circle);
+                
+                circle.style.animation = 'circlePop 0.3s ease-out forwards';
+                
+                setTimeout(() => {
+                    this.removeCircle(circle);
+                }, 300);
+            }
+            
+            hitSquare(square) {
+                if (!this.isGameActive) return;
+                
+                this.playBonkSound();
+                
+                // Lose 5 points for hitting a square
+                this.score = Math.max(0, this.score - 5);
+                this.scoreElement.textContent = this.score;
+                
+                // Track squares tapped this round
+                this.squaresTappedThisRound++;
+                
+                // Lose a life every 3 squares tapped
+                if (this.squaresTappedThisRound % 3 === 0) {
+                    this.lives--;
+                    this.livesElement.textContent = this.lives;
+                    
+                    if (this.lives <= 0) {
+                        this.endGame();
+                        return;
+                    }
+                }
+                
+                this.createSquareParticles(square);
+                
+                square.style.animation = 'squarePop 0.3s ease-out forwards';
+                
+                setTimeout(() => {
+                    this.removeSquare(square);
+                }, 300);
+            }
+            
+            missCircle(circle) {
+                if (!this.isGameActive) return;
+                
+                this.lives--;
+                this.livesElement.textContent = this.lives;
+                
+                circle.style.animation = 'circleDisappear 0.3s ease-out forwards';
+                
+                setTimeout(() => {
+                    this.removeCircle(circle);
+                }, 300);
+                
+                if (this.lives <= 0) {
+                    this.endGame();
+                }
+            }
+            
+            removeCircle(circle) {
+                const index = this.circles.indexOf(circle);
+                if (index > -1) {
+                    this.circles.splice(index, 1);
+                }
+                if (circle.parentNode) {
+                    circle.parentNode.removeChild(circle);
+                }
+            }
+            
+            removeSquare(square) {
+                const index = this.squares.indexOf(square);
+                if (index > -1) {
+                    this.squares.splice(index, 1);
+                }
+                if (square.parentNode) {
+                    square.parentNode.removeChild(square);
+                }
+            }
+            
+            clearAllShapes() {
+                this.circles.forEach(circle => {
+                    if (circle.parentNode) {
+                        circle.parentNode.removeChild(circle);
+                    }
+                });
+                this.circles = [];
+                
+                this.squares.forEach(square => {
+                    if (square.parentNode) {
+                        square.parentNode.removeChild(square);
+                    }
+                });
+                this.squares = [];
+            }
+            
+            createParticles(circle) {
+                const rect = circle.getBoundingClientRect();
+                const centerX = rect.left + rect.width / 2;
+                const centerY = rect.top + rect.height / 2;
+                
+                for (let i = 0; i < 6; i++) {
+                    const particle = document.createElement('div');
+                    particle.className = 'particle';
+                    particle.style.width = '8px';
+                    particle.style.height = '8px';
+                    particle.style.background = circle.style.background;
+                    particle.style.left = centerX + 'px';
+                    particle.style.top = centerY + 'px';
+                    particle.style.transform = 'translate(-50%, -50%) rotate(' + (i * 60) + 'deg) translateX(30px)';
+                    
+                    document.body.appendChild(particle);
+                    
+                    setTimeout(() => {
+                        if (particle.parentNode) {
+                            particle.parentNode.removeChild(particle);
+                        }
+                    }, 1000);
+                }
+            }
+            
+            createSquareParticles(square) {
+                const rect = square.getBoundingClientRect();
+                const centerX = rect.left + rect.width / 2;
+                const centerY = rect.top + rect.height / 2;
+                
+                for (let i = 0; i < 4; i++) {
+                    const particle = document.createElement('div');
+                    particle.className = 'square-particle';
+                    particle.style.width = '6px';
+                    particle.style.height = '6px';
+                    particle.style.background = square.style.background;
+                    particle.style.left = centerX + 'px';
+                    particle.style.top = centerY + 'px';
+                    particle.style.transform = 'translate(-50%, -50%) rotate(' + (i * 90) + 'deg) translateX(25px)';
+                    
+                    document.body.appendChild(particle);
+                    
+                    setTimeout(() => {
+                        if (particle.parentNode) {
+                            particle.parentNode.removeChild(particle);
+                        }
+                    }, 800);
+                }
+            }
+            
+            adjustBrightness(color, amount) {
+                const hex = color.replace('#', '');
+                const r = Math.max(0, Math.min(255, parseInt(hex.substr(0, 2), 16) + amount));
+                const g = Math.max(0, Math.min(255, parseInt(hex.substr(2, 2), 16) + amount));
+                const b = Math.max(0, Math.min(255, parseInt(hex.substr(4, 2), 16) + amount));
+                const rHex = r.toString(16).padStart(2, '0');
+                const gHex = g.toString(16).padStart(2, '0');
+                const bHex = b.toString(16).padStart(2, '0');
+                return '#' + rHex + gHex + bHex;
+            }
+            
+            startGame() {
+                if (this.audioContext && this.audioContext.state === 'suspended') {
+                    this.audioContext.resume();
+                }
+                
+                this.resetGame();
+                this.updateDifficulty(); // Set initial difficulty
+                
+                this.scoreElement.textContent = this.score;
+                this.livesElement.textContent = this.lives;
+                this.levelElement.textContent = this.level;
+                
+                this.menuScreen.classList.add('hidden');
+                this.gameOverScreen.classList.add('hidden');
+                this.levelCompleteScreen.classList.add('hidden');
+                
+                this.startLevel();
+            }
+            
+            endGame() {
+                this.isGameActive = false;
+                clearInterval(this.gameInterval);
+                clearInterval(this.spawnInterval);
+                
+                this.clearAllShapes();
+                this.levelCompleteScreen.classList.add('hidden');
+                
+                this.finalScoreElement.textContent = 'Score: ' + this.score;
+                this.finalLevelElement.textContent = 'Reached Level: ' + this.level;
+                this.gameOverScreen.classList.remove('hidden');
+            }
+            
+            restartGame() {
+                this.startGame();
+            }
+        }
+        
+        // Initialize game when page loads
+        window.addEventListener('load', function() {
+            game = new TapCirclesGame();
+        });
+        
+        // Global functions for button clicks
+        function startGame() {
+            if (game) {
+                game.startGame();
+            }
+        }
+        
+        function nextLevel() {
+            if (game) {
+                game.nextLevel();
+            }
+        }
+        
+        function restartGame() {
+            if (game) {
+                game.restartGame();
+            }
+        }
+        
+        // Prevent scrolling on mobile
+        document.addEventListener('touchmove', function(e) {
+            e.preventDefault();
+        }, { passive: false });
+    </script>
+</body>
+</html>
