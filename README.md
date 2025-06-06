@@ -2,87 +2,37 @@
 
 A collection of browser-based games created using AI assistance, featuring minimal code modifications. Experience engaging gameplay with a modern, responsive interface at [AI Game Collection](https://aigamecollection.com).
 
-## 🎮 Available Games
-
-### Nerdle
-
-A nerdy twist on the famous word game. Guess the hidden "nerdy" word in 6 tries.
+## 🎮 Featured Games
 
 ### Pipes
 
 Connect the pipes to create a continuous flow. Test your logical thinking skills with this challenging puzzle game that requires strategic planning and spatial awareness.
 
-### Memory
-
-A classic card-matching game that helps improve concentration and recall abilities. Test your memory by finding matching pairs of cards in this timeless brain-training exercise.
-
-### Minesweeper
-
-Classic Minesweeper game with a modern touch. Clear the board without hitting any mines in this strategic puzzle game.
-
-### Snake
-
-Classic snake game with a modern twist. Eat the food, grow longer, and try not to hit the walls or yourself!
-
 ### Soccer Juggle
 
 Keep the soccer ball in the air for as long as possible. Challenge yourself to achieve your highest juggling streak in this addictive skill-based game.
-
-### Water Ring Toss
-
-Test your skill and patience in this classic water game! Use precision to land all the rings onto the pegs. How many can you score? (_Mobile Only_)
-
-### Waveform
-
-Guide particles to their targets by shaping a wave using frequency, amplitude, and phase controls while avoiding obstacles in this unique physics puzzle.
-
-### Bubble Pop
-
-Pop the bubbles before they escape! A fast-paced game of precision and reflexes that will keep you on your toes.
 
 ### Breakout
 
 Break the bricks, level up, and beat your high score! A fast-paced game of skill and strategy for all ages.
 
-### Space Shooter
-
-Pilot your spaceship and navigate through an asteroid field. Shoot or evade asteroids in this fast-paced arcade challenge.
-
 ### Space Shooter II
 
 Pilot your upgraded spaceship through dense asteroid fields with enhanced graphics and physics. Dodge or destroy asteroids in this fast-paced arcade sequel, and collect crystals to earn points and boost your score.
-
-### Flapping Bird
-
-Flapping Bird is a simple arcade game where you tap to keep a bird in the air and guide it through gaps between pipes without crashing.
 
 ### Deep Sea Escape
 
 Guide your fish through underwater coral reefs in this aquatic adventure.
 
-### Circles & Squares
-
-Fast-paced physics action game where you tap bouncing circles for points while avoiding penalty squares.
-
 ## 📸 Screenshots
 
 <div align="center">
-    <img src="https://raw.githubusercontent.com/jeremehancock/AI-Game-Collection/refs/heads/main/images/screenshots/home-updated-3.png" width="300" alt="Game Menu"/>
-    <img src="https://raw.githubusercontent.com/jeremehancock/AI-Game-Collection/refs/heads/main/images/screenshots/nerdle.png" width="300" alt="Nerdle"/>
-    <img src="https://raw.githubusercontent.com/jeremehancock/AI-Game-Collection/refs/heads/main/images/screenshots/pipes.png" width="300" alt="Pipes Puzzle"/>
-    <img src="https://raw.githubusercontent.com/jeremehancock/AI-Game-Collection/refs/heads/main/images/screenshots/memory.png" width="300" alt="Memory Game"/>
-    <img src="https://raw.githubusercontent.com/jeremehancock/AI-Game-Collection/refs/heads/main/images/screenshots/minesweeper.png" width="300" alt="Minesweeper"/>
-    <img src="https://raw.githubusercontent.com/jeremehancock/AI-Game-Collection/refs/heads/main/images/screenshots/snake-game.png" width="300" alt="Snake Game"/>
+    <img src="https://raw.githubusercontent.com/jeremehancock/AI-Game-Collection/refs/heads/main/images/screenshots/home.png" width="300" alt="Game Menu"/>
+    <img src="https://raw.githubusercontent.com/jeremehancock/AI-Game-Collection/refs/heads/main/images/screenshots/pipes.png" width="300" alt="Pipes"/>
     <img src="https://raw.githubusercontent.com/jeremehancock/AI-Game-Collection/refs/heads/main/images/screenshots/soccer-juggle.png" width="300" alt="Soccer Juggle Game"/>
-    <img src="https://raw.githubusercontent.com/jeremehancock/AI-Game-Collection/refs/heads/main/images/screenshots/water-ring-toss-game.png" width="300" alt="Water Ring Toss"/>
-    <img src="https://raw.githubusercontent.com/jeremehancock/AI-Game-Collection/refs/heads/main/images/screenshots/waveform-game.png" width="300" alt="Waveform"/>
-     <img src="https://raw.githubusercontent.com/jeremehancock/AI-Game-Collection/refs/heads/main/images/screenshots/bubble-pop-game.png" width="300" alt="Bubble Pop"/>
     <img src="https://raw.githubusercontent.com/jeremehancock/AI-Game-Collection/refs/heads/main/images/screenshots/breakout.png" width="300" alt="Breakout"/>
-    <img src="https://raw.githubusercontent.com/jeremehancock/AI-Game-Collection/refs/heads/main/images/screenshots/space-shooter-game.png" width="300" alt="Space Shooter"/>
     <img src="https://raw.githubusercontent.com/jeremehancock/AI-Game-Collection/refs/heads/main/images/screenshots/space-shooter-game-2.png" width="300" alt="Space Shooter II"/>
-    <img src="https://raw.githubusercontent.com/jeremehancock/AI-Game-Collection/refs/heads/main/images/screenshots/flapping-bird-game-updated.png" width="300" alt="Flapping Bird"/>
     <img src="https://raw.githubusercontent.com/jeremehancock/AI-Game-Collection/refs/heads/main/images/screenshots/deep-sea-escape-game-updated.png" width="300" alt="Deep Sea Escape"/>
-    <img src="https://raw.githubusercontent.com/jeremehancock/AI-Game-Collection/refs/heads/main/images/screenshots/circles-and-squares-game.png" width="300" alt="Circle & Squares"/>
 </div>
 
 ## 🚀 Features
