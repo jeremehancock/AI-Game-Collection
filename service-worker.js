@@ -13,6 +13,9 @@ const urlsToCache = [
   "games/breakout/index.html",
   "games/space-shooter/index.html",
   "games/space-shooter-2/index.html",
+  "games/deep-sea-escape/index.html",
+  "games/circles-and-squares/index.html",
+  "games/fruit-slice/index.html",
   "images/icons/web-app-manifest-192x192.png",
   "images/icons/web-app-manifest-512x512.png",
 ];
