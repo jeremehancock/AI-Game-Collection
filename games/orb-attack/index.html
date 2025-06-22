@@ -1,0 +1,964 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Orb Attack</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+            -webkit-touch-callout: none;
+            -webkit-user-select: none;
+            user-select: none;
+        }
+
+        html,
+        body {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            font-family: 'Arial', sans-serif;
+            background: #000;
+            color: white;
+            touch-action: manipulation;
+        }
+
+        #gameContainer {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+            background: linear-gradient(180deg, #0a0a2e 0%, #16213e 50%, #0f0f23 100%);
+        }
+
+        #gameCanvas {
+            display: block;
+            width: 100%;
+            height: 100%;
+        }
+
+        .overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 10;
+        }
+
+        .game-hud {
+            position: absolute;
+            top: 15px;
+            left: 0;
+            right: 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 20px;
+            pointer-events: none;
+        }
+
+        .score {
+            font-size: 20px;
+            font-weight: bold;
+            color: #00ffff;
+            text-shadow: 0 0 10px rgba(0, 255, 255, 0.8);
+        }
+
+        .lives {
+            font-size: 18px;
+            font-weight: bold;
+            color: #ff4444;
+            text-shadow: 0 0 10px rgba(255, 68, 68, 0.8);
+        }
+
+        .level-info {
+            font-size: 16px;
+            font-weight: bold;
+            color: #ffff00;
+            text-shadow: 0 0 10px rgba(255, 255, 0, 0.8);
+            text-align: center;
+        }
+
+        .level-complete {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0, 255, 0, 0.3);
+            color: white;
+            padding: 20px 40px;
+            border-radius: 15px;
+            font-size: 24px;
+            font-weight: bold;
+            text-align: center;
+            display: none;
+            z-index: 50;
+            border: 3px solid rgba(0, 255, 0, 0.8);
+            box-shadow: 0 0 30px rgba(0, 255, 0, 0.6);
+            backdrop-filter: blur(2px);
+            pointer-events: none;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
+        }
+
+        .screen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.95);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            pointer-events: auto;
+            z-index: 20;
+        }
+
+        .screen h1 {
+            font-size: 32px;
+            margin-bottom: 20px;
+            color: #00ffff;
+            text-shadow: 0 0 20px rgba(0, 255, 255, 0.8);
+        }
+
+        .screen h2 {
+            font-size: 28px;
+            margin-bottom: 20px;
+            color: #ff4444;
+            text-shadow: 0 0 20px rgba(255, 68, 68, 0.8);
+        }
+
+        .instructions {
+            font-size: 16px;
+            line-height: 1.6;
+            margin: 20px;
+            max-width: 300px;
+            color: #cccccc;
+        }
+
+        .high-score {
+            font-size: 20px;
+            margin: 15px 0;
+            color: #ffff00;
+            font-weight: bold;
+        }
+
+        .btn {
+            background: linear-gradient(45deg, #00ffff, #0088ff);
+            border: none;
+            color: white;
+            padding: 15px 30px;
+            font-size: 18px;
+            font-weight: bold;
+            border-radius: 25px;
+            margin: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            min-width: 150px;
+        }
+
+        .btn:active {
+            transform: scale(0.95);
+            background: linear-gradient(45deg, #0088ff, #00ffff);
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        .stars {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            z-index: 1;
+        }
+
+        .star {
+            position: absolute;
+            background: white;
+            border-radius: 50%;
+            animation: twinkle 2s infinite alternate;
+        }
+
+        @keyframes twinkle {
+            0% {
+                opacity: 0.3;
+            }
+
+            100% {
+                opacity: 1;
+            }
+        }
+
+        @keyframes pulse {
+            0% {
+                transform: scale(1);
+            }
+
+            50% {
+                transform: scale(1.05);
+            }
+
+            100% {
+                transform: scale(1);
+            }
+        }
+
+        @media (max-width: 480px) {
+            .screen h1 {
+                font-size: 26px;
+                margin-bottom: 18px;
+            }
+
+            .screen h2 {
+                font-size: 24px;
+                margin-bottom: 18px;
+            }
+
+            .instructions {
+                font-size: 13px;
+                margin: 18px;
+                max-width: 300px;
+                line-height: 1.5;
+            }
+
+            .high-score {
+                font-size: 16px;
+                margin: 12px 0;
+            }
+
+            .btn {
+                padding: 12px 24px;
+                font-size: 15px;
+                min-width: 140px;
+                margin: 8px;
+            }
+
+            .score {
+                font-size: 22px;
+            }
+
+            .lives {
+                font-size: 12px;
+            }
+
+            .level-info {
+                font-size: 14px;
+            }
+
+            .level-complete {
+                font-size: 14px;
+                padding: 10px 16px;
+                margin: 0 10px;
+                max-width: 85vw;
+                min-width: 160px;
+            }
+
+            .game-hud {
+                top: 15px;
+                padding: 0 20px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div id="gameContainer">
+        <div class="stars" id="stars"></div>
+        <canvas id="gameCanvas"></canvas>
+
+        <div class="overlay">
+            <div class="game-hud">
+                <div class="hud-left">
+                    <div class="lives" id="livesDisplay">
+                        <span class="heart alive" id="heart1">❤️</span>
+                        <span class="heart alive" id="heart2">❤️</span>
+                        <span class="heart alive" id="heart3">❤️</span>
+                    </div>
+                </div>
+                <div class="hud-center">
+                    <div class="level-info">
+                        <div id="levelDisplay">LEVEL 1</div>
+                        <div id="progressDisplay">0/150</div>
+                    </div>
+                </div>
+                <div class="hud-right">
+                    <div class="score" id="score">0</div>
+                </div>
+            </div>
+
+            <div class="level-complete" id="levelComplete">
+                <div id="levelCompleteText">LEVEL 1 COMPLETE</div>
+                <div id="bonusLifeText" style="display: none; color: #00ff88; font-size: 14px; margin-top: 4px;">+1 ❤️
+                </div>
+            </div>
+        </div>
+
+        <!-- Start Screen -->
+        <div class="screen" id="startScreen">
+            <h1>🔴 ORB ATTACK 🟠</h1>
+            <div class="instructions">
+                <div
+                    style="font-size: 16px; color: #00ffff; margin-bottom: 12px; font-weight: bold; text-align: center;">
+                    🎮 HOW TO PLAY 🎮</div>
+
+                <div style="margin-bottom: 8px; text-align: left;">
+                    <strong style="color: #ffff00;">CONTROLS:</strong><br>
+                    👈👉 Swipe LEFT/RIGHT to move<br>
+                    👆 Swipe UP for SPEED BOOST<br>
+                    👇 Swipe DOWN to SLOW DOWN
+                </div>
+
+                <div style="margin-bottom: 8px; text-align: left;">
+                    <strong style="color: #ff8800;">OBSTACLES:</strong><br>
+                    🔴 Red orbs (static)<br>
+                    🟠 Orange orbs (moving)
+                </div>
+
+                <div style="text-align: left;">
+                    <strong style="color: #00ff88;">PROGRESSION:</strong><br>
+                    ❤️ Start with 3 lives<br>
+                    🏆 Complete levels for bonus lives<br>
+                    📈 Each level gets harder!
+                </div>
+            </div>
+            <div class="high-score" id="displayHighScore">High Score: 0</div>
+            <button class="btn" onclick="startGame()">🎮 START GAME</button>
+        </div>
+
+        <!-- Game Over Screen -->
+        <div class="screen hidden" id="gameOverScreen">
+            <h2>💥 GAME OVER 💥</h2>
+            <div class="high-score" id="finalScore" style="font-size: 20px; color: #00ffff;">Score: 0</div>
+            <div class="high-score" id="finalLevel" style="font-size: 18px; color: #ffaa00;">Level Reached: 1</div>
+            <div class="high-score" id="newRecord"
+                style="color: #00ff00; display: none; font-size: 19px; animation: pulse 1s infinite;">
+                🎉 NEW HIGH SCORE! 🎉
+            </div>
+            <button class="btn" onclick="startGame()">🚀 PLAY AGAIN</button>
+            <button class="btn" onclick="showMenu()">🏠 MAIN MENU</button>
+        </div>
+    </div>
+
+    <script>
+        // Game state
+        let gameState = 'menu'; // menu, playing, gameOver
+        let score = 0;
+        let highScore = 0;
+        let gameSpeed = 3;
+        let lives = 3;
+        let level = 1;
+        let levelProgress = 0;
+        let levelTarget = 100; // Score needed to complete level
+        let obstacleSpawnRate = 0.015;
+        let maxObstacleSpeed = 1.0;
+
+        // Load high score
+        try {
+            highScore = parseInt(localStorage.getItem('orbAttackHigh')) || 0;
+        } catch (e) {
+            highScore = 0;
+        }
+
+        // Canvas setup
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+
+        // Player
+        const player = {
+            x: 0,
+            y: 0,
+            targetX: 0,
+            size: 18,
+            speed: 0.2,
+            lanes: 5,
+            currentLane: 2,
+            trail: []
+        };
+
+        // Game objects
+        let obstacles = [];
+        let particles = [];
+        let effects = [];
+
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+
+            // Initialize player position
+            player.x = canvas.width / 2;
+            player.y = canvas.height * 0.8;
+            player.targetX = canvas.width / 2;
+        }
+
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+
+        // Touch handling
+        let touchStart = { x: 0, y: 0, time: 0 };
+        let touchActive = false;
+        let speedMultiplier = 1.0; // Global speed multiplier
+        let speedEffect = false;
+        let slowEffect = false;
+
+        document.addEventListener('touchstart', handleTouchStart, { passive: false });
+        document.addEventListener('touchmove', handleTouchMove, { passive: false });
+        document.addEventListener('touchend', handleTouchEnd, { passive: false });
+
+        function handleTouchStart(e) {
+            if (gameState !== 'playing') return;
+            e.preventDefault();
+
+            const touch = e.touches[0];
+            touchStart.x = touch.clientX;
+            touchStart.y = touch.clientY;
+            touchStart.time = Date.now();
+            touchActive = true;
+        }
+
+        function handleTouchMove(e) {
+            if (gameState !== 'playing' || !touchActive) return;
+            e.preventDefault();
+        }
+
+        function handleTouchEnd(e) {
+            if (gameState !== 'playing' || !touchActive) return;
+            e.preventDefault();
+
+            const touch = e.changedTouches[0];
+            const deltaX = touch.clientX - touchStart.x;
+            const deltaY = touch.clientY - touchStart.y;
+            const deltaTime = Date.now() - touchStart.time;
+
+            touchActive = false;
+
+            // Must be a reasonably quick swipe
+            if (deltaTime > 800) return;
+
+            // Must move at least 30 pixels
+            if (Math.abs(deltaX) < 30 && Math.abs(deltaY) < 30) return;
+
+            // Determine direction - prioritize the larger movement
+            if (Math.abs(deltaX) > Math.abs(deltaY)) {
+                // Horizontal movement is dominant
+                if (deltaX > 0) {
+                    movePlayer(1); // Right
+                } else {
+                    movePlayer(-1); // Left
+                }
+            } else {
+                // Vertical movement is dominant
+                if (deltaY < 0) {
+                    activateSpeedBoost();
+                } else {
+                    activateSlowDown();
+                }
+            }
+        }
+
+        function activateSpeedBoost() {
+            if (speedEffect) return; // Prevent spamming
+
+            speedEffect = true;
+
+            // Set global speed multiplier
+            speedMultiplier = 3.0;
+
+            // Update all existing obstacles to use new multiplier
+            obstacles.forEach(obs => {
+                obs.speed = obs.originalSpeed * speedMultiplier;
+            });
+
+            // Create massive particle explosion
+            for (let i = 0; i < 30; i++) {
+                addParticles(
+                    player.x + (Math.random() - 0.5) * 200,
+                    player.y + (Math.random() - 0.5) * 200,
+                    '#ffff00',
+                    1
+                );
+                addParticles(
+                    player.x + (Math.random() - 0.5) * 150,
+                    player.y + (Math.random() - 0.5) * 150,
+                    '#ffffff',
+                    1
+                );
+            }
+
+            // Reset after 800ms
+            setTimeout(() => {
+                speedMultiplier = 1.0;
+                // Update all obstacles to normal speed
+                obstacles.forEach(obs => {
+                    obs.speed = obs.originalSpeed * speedMultiplier;
+                });
+                speedEffect = false;
+            }, 800);
+        }
+
+        function activateSlowDown() {
+            if (slowEffect) return; // Prevent spamming
+
+            slowEffect = true;
+
+            // Set global speed multiplier
+            speedMultiplier = 0.2;
+
+            // Update all existing obstacles to use new multiplier
+            obstacles.forEach(obs => {
+                obs.speed = obs.originalSpeed * speedMultiplier;
+            });
+
+            // Create particle effect
+            for (let i = 0; i < 20; i++) {
+                addParticles(
+                    player.x + (Math.random() - 0.5) * 150,
+                    player.y + (Math.random() - 0.5) * 150,
+                    '#ff4400',
+                    1
+                );
+                addParticles(
+                    player.x + (Math.random() - 0.5) * 100,
+                    player.y + (Math.random() - 0.5) * 100,
+                    '#ff8800',
+                    1
+                );
+            }
+
+            // Reset after 800ms
+            setTimeout(() => {
+                speedMultiplier = 1.0;
+                // Update all obstacles to normal speed
+                obstacles.forEach(obs => {
+                    obs.speed = obs.originalSpeed * speedMultiplier;
+                });
+                slowEffect = false;
+            }, 800);
+        }
+
+        function movePlayer(direction) {
+            const newLane = Math.max(0, Math.min(player.lanes - 1, player.currentLane + direction));
+
+            if (newLane !== player.currentLane) {
+                player.currentLane = newLane;
+                player.targetX = (canvas.width / player.lanes) * (newLane + 0.5);
+
+                // Visual feedback
+                addParticles(player.x, player.y, '#00ffff', 3);
+            }
+        }
+
+        // Game functions
+        function createObstacle() {
+            const lane = Math.floor(Math.random() * player.lanes);
+            const x = (canvas.width / player.lanes) * (lane + 0.5);
+
+            // More gentle speed variation per level
+            const speedVariation = 0.3 + (level * 0.1); // Reduced variation
+            const baseSpeed = gameSpeed + (level * 0.2); // Reduced from 0.5 to 0.2
+            const originalSpeed = baseSpeed + (Math.random() * speedVariation);
+
+            obstacles.push({
+                x: x,
+                y: -40,
+                size: 18 + Math.random() * 8, // Varying sizes
+                originalSpeed: originalSpeed, // Store the base speed
+                speed: originalSpeed * speedMultiplier, // Current speed with multiplier
+                lane: lane,
+                type: Math.random() > 0.8 ? 'moving' : 'static' // Some obstacles move
+            });
+        }
+
+        function updateDifficulty() {
+            // Much more gradual difficulty increase
+            obstacleSpawnRate = 0.015 + (level * 0.003); // Reduced from 0.008 to 0.003
+            maxObstacleSpeed = 1.0 + (level * 0.1); // Reduced from 0.2 to 0.1
+
+            // Keep base game speed more stable
+            gameSpeed = 3 + (level * 0.15); // Reduced from 0.3 to 0.15
+        }
+
+        function checkLevelComplete() {
+            if (score >= levelTarget) {
+                levelProgress = score - levelTarget;
+                level++;
+                levelTarget = score + (75 + level * 35); // Longer levels (was 50 + level * 25)
+
+                // Award bonus life if player has less than 3 lives
+                let bonusLife = false;
+                if (lives < 3) {
+                    lives++;
+                    bonusLife = true;
+
+                    // Animate the heart that was restored
+                    setTimeout(() => {
+                        const restoredHeart = document.getElementById(`heart${lives}`);
+                        restoredHeart.style.transform = 'scale(1.5)';
+                        setTimeout(() => {
+                            restoredHeart.style.transform = 'scale(1)';
+                        }, 400);
+                    }, 300); // Shorter delay to sync with faster modal
+                }
+
+                // Show level complete message
+                showLevelComplete(bonusLife);
+
+                // Update difficulty
+                updateDifficulty();
+
+                // Add celebration particles
+                for (let i = 0; i < 50; i++) {
+                    addParticles(
+                        Math.random() * canvas.width,
+                        Math.random() * canvas.height,
+                        '#00ff00',
+                        1
+                    );
+                }
+            }
+        }
+
+        function showLevelComplete(bonusLife) {
+            const levelCompleteDiv = document.getElementById('levelComplete');
+            const levelCompleteText = document.getElementById('levelCompleteText');
+            const bonusLifeText = document.getElementById('bonusLifeText');
+
+            levelCompleteText.textContent = `LEVEL ${level - 1} COMPLETE`;
+            bonusLifeText.style.display = bonusLife ? 'block' : 'none';
+
+            levelCompleteDiv.style.display = 'block';
+
+            // Hide after 1.2 seconds (even shorter)
+            setTimeout(() => {
+                levelCompleteDiv.style.display = 'none';
+            }, 1200);
+        }
+
+        function addParticles(x, y, color, count) {
+            for (let i = 0; i < count; i++) {
+                particles.push({
+                    x: x + (Math.random() - 0.5) * 20,
+                    y: y + (Math.random() - 0.5) * 20,
+                    vx: (Math.random() - 0.5) * 4,
+                    vy: (Math.random() - 0.5) * 4,
+                    life: 1,
+                    color: color,
+                    size: Math.random() * 3 + 1
+                });
+            }
+        }
+
+        function update() {
+            if (gameState !== 'playing') return;
+
+            // Update player
+            player.x += (player.targetX - player.x) * player.speed;
+
+            // Update player trail
+            player.trail.push({ x: player.x, y: player.y });
+            if (player.trail.length > 8) {
+                player.trail.shift();
+            }
+
+            // Update obstacles
+            for (let i = obstacles.length - 1; i >= 0; i--) {
+                const obs = obstacles[i];
+                obs.y += obs.speed;
+
+                // Moving obstacles sway side to side
+                if (obs.type === 'moving') {
+                    obs.x += Math.sin(obs.y * 0.02) * 1.5;
+                }
+
+                // Add particles around obstacles occasionally
+                if (Math.random() < 0.15) {
+                    if (obs.type === 'moving') {
+                        addParticles(obs.x, obs.y, '#ff6600', 1); // Orange particles for moving orbs
+                    } else {
+                        addParticles(obs.x, obs.y, '#ff4444', 1); // Red particles for static orbs
+                    }
+                }
+
+                // Remove off-screen obstacles
+                if (obs.y > canvas.height + 50) {
+                    obstacles.splice(i, 1);
+                    score += 10;
+                    continue;
+                }
+
+                // Collision detection
+                const dist = Math.sqrt(
+                    Math.pow(obs.x - player.x, 2) +
+                    Math.pow(obs.y - player.y, 2)
+                );
+
+                if (dist < obs.size + player.size) {
+                    loseLife();
+                    obstacles.splice(i, 1); // Remove the obstacle that hit us
+                    return;
+                }
+            }
+
+            // Update particles
+            for (let i = particles.length - 1; i >= 0; i--) {
+                const p = particles[i];
+                p.x += p.vx;
+                p.y += p.vy;
+                p.life -= 0.02;
+
+                if (p.life <= 0) {
+                    particles.splice(i, 1);
+                }
+            }
+
+            // Spawn obstacles based on current difficulty
+            if (Math.random() < obstacleSpawnRate) {
+                createObstacle();
+            }
+
+            // Check for level completion
+            checkLevelComplete();
+
+            // Much more gradual difficulty increase within level
+            gameSpeed += 0.0005; // Reduced from 0.001 to 0.0005
+
+            // Add player particles occasionally
+            if (Math.random() < 0.2) {
+                addParticles(player.x, player.y, '#00ccff', 1);
+            }
+
+            // Update UI
+            updateUI();
+        }
+
+        function loseLife() {
+            lives--;
+
+            // Animate the heart that was just lost
+            if (lives >= 0 && lives < 3) {
+                const lostHeart = document.getElementById(`heart${lives + 1}`);
+                lostHeart.style.transform = 'scale(1.3)';
+                setTimeout(() => {
+                    lostHeart.style.transform = 'scale(1)';
+                }, 300);
+            }
+
+            // Create death particles
+            for (let i = 0; i < 20; i++) {
+                addParticles(
+                    player.x + (Math.random() - 0.5) * 100,
+                    player.y + (Math.random() - 0.5) * 100,
+                    '#ff0000',
+                    1
+                );
+            }
+
+            if (lives <= 0) {
+                endGame();
+            } else {
+                // Brief invincibility period - reset player position
+                player.x = canvas.width / 2;
+                player.targetX = canvas.width / 2;
+                player.currentLane = 2;
+
+                // Clear nearby obstacles for safety
+                obstacles = obstacles.filter(obs =>
+                    Math.abs(obs.y - player.y) > 100
+                );
+            }
+        }
+
+        function updateUI() {
+            document.getElementById('score').textContent = score;
+            updateHeartsDisplay();
+            document.getElementById('levelDisplay').textContent = `LEVEL ${level}`;
+
+            // Calculate progress for current level
+            let currentLevelStart, currentLevelTarget;
+            if (level === 1) {
+                currentLevelStart = 0;
+                currentLevelTarget = 150;
+            } else {
+                // Calculate what the previous level target was
+                currentLevelStart = levelTarget - (75 + level * 35);
+                currentLevelTarget = 75 + level * 35;
+            }
+
+            const currentProgress = Math.max(0, score - currentLevelStart);
+            document.getElementById('progressDisplay').textContent = `${currentProgress}/${currentLevelTarget}`;
+        }
+
+        function updateHeartsDisplay() {
+            const hearts = ['heart1', 'heart2', 'heart3'];
+
+            hearts.forEach((heartId, index) => {
+                const heart = document.getElementById(heartId);
+                if (index < lives) {
+                    // Alive heart
+                    heart.className = 'heart alive';
+                    heart.textContent = '❤️';
+                } else {
+                    // Dead heart
+                    heart.className = 'heart dead';
+                    heart.textContent = '🖤';
+                }
+            });
+        }
+
+        function draw() {
+            // Clear canvas completely (no trails for obstacles)
+            ctx.fillStyle = '#0a0a2e';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // Draw player trail
+            if (player.trail.length > 1) {
+                ctx.strokeStyle = '#00ffff';
+                ctx.lineWidth = 3;
+                ctx.globalAlpha = 0.5;
+                ctx.beginPath();
+                player.trail.forEach((point, index) => {
+                    ctx.globalAlpha = (index / player.trail.length) * 0.5;
+                    if (index === 0) {
+                        ctx.moveTo(point.x, point.y);
+                    } else {
+                        ctx.lineTo(point.x, point.y);
+                    }
+                });
+                ctx.stroke();
+                ctx.globalAlpha = 1;
+            }
+
+            // Draw player
+            ctx.fillStyle = '#00ffff';
+            ctx.shadowColor = '#00ffff';
+            ctx.shadowBlur = 15;
+            ctx.beginPath();
+            ctx.arc(player.x, player.y, player.size, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.shadowBlur = 0;
+
+            // Draw obstacles with different colors for different types
+            obstacles.forEach(obs => {
+                if (obs.type === 'moving') {
+                    ctx.fillStyle = '#ff6600'; // Orange for moving obstacles
+                    ctx.shadowColor = '#ff6600';
+                } else {
+                    ctx.fillStyle = '#ff4444'; // Red for static obstacles
+                    ctx.shadowColor = '#ff4444';
+                }
+                ctx.shadowBlur = 10;
+                ctx.beginPath();
+                ctx.arc(obs.x, obs.y, obs.size, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.shadowBlur = 0;
+            });
+
+            // Draw particles
+            particles.forEach(p => {
+                ctx.globalAlpha = p.life;
+                ctx.fillStyle = p.color;
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+                ctx.fill();
+            });
+            ctx.globalAlpha = 1;
+        }
+
+        function gameLoop() {
+            update();
+            draw();
+            requestAnimationFrame(gameLoop);
+        }
+
+        function startGame() {
+            gameState = 'playing';
+            score = 0;
+            lives = 3;
+            level = 1;
+            levelProgress = 0;
+            levelTarget = 150; // Longer first level (was 100)
+            gameSpeed = 3;
+            speedMultiplier = 1.0; // Reset speed multiplier
+            obstacleSpawnRate = 0.015;
+            maxObstacleSpeed = 1.0;
+            obstacles = [];
+            particles = [];
+            speedEffect = false;
+            slowEffect = false;
+
+            player.x = canvas.width / 2;
+            player.y = canvas.height * 0.8;
+            player.targetX = canvas.width / 2;
+            player.currentLane = 2;
+            player.trail = [];
+
+            // Initialize difficulty
+            updateDifficulty();
+
+            // Reset all hearts to alive state
+            updateHeartsDisplay();
+
+            document.getElementById('startScreen').classList.add('hidden');
+            document.getElementById('gameOverScreen').classList.add('hidden');
+            document.getElementById('levelComplete').style.display = 'none';
+        }
+
+        function endGame() {
+            gameState = 'gameOver';
+
+            // Check high score
+            if (score > highScore) {
+                highScore = score;
+                try {
+                    localStorage.setItem('orbAttackHigh', highScore);
+                } catch (e) {
+                    // Silent fail for localStorage
+                }
+                document.getElementById('newRecord').style.display = 'block';
+            } else {
+                document.getElementById('newRecord').style.display = 'none';
+            }
+
+            document.getElementById('finalScore').textContent = `Score: ${score}`;
+            document.getElementById('finalLevel').textContent = `Level Reached: ${level}`;
+            document.getElementById('gameOverScreen').classList.remove('hidden');
+        }
+
+        function showMenu() {
+            gameState = 'menu';
+            document.getElementById('startScreen').classList.remove('hidden');
+            document.getElementById('gameOverScreen').classList.add('hidden');
+            document.getElementById('displayHighScore').textContent = `High Score: ${highScore}`;
+        }
+
+        // Create animated stars background
+        function createStars() {
+            const starsContainer = document.getElementById('stars');
+            for (let i = 0; i < 50; i++) {
+                const star = document.createElement('div');
+                star.className = 'star';
+                star.style.left = Math.random() * 100 + '%';
+                star.style.top = Math.random() * 100 + '%';
+                star.style.width = star.style.height = Math.random() * 3 + 1 + 'px';
+                star.style.animationDelay = Math.random() * 2 + 's';
+                starsContainer.appendChild(star);
+            }
+        }
+
+        // Initialize
+        createStars();
+        document.getElementById('displayHighScore').textContent = `High Score: ${highScore}`;
+        gameLoop();
+    </script>
+</body>
+
+</html>
