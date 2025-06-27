@@ -491,8 +491,8 @@
         </div>
 
         <div class="mode-selector">
-            <button class="mode-btn active" onclick="setGameMode('pvp')" id="pvpBtn">2 Players</button>
-            <button class="mode-btn" onclick="setGameMode('ai')" id="aiBtn">vs AI</button>
+            <button class="mode-btn active" onclick="setGameMode('ai')" id="aiBtn">vs AI</button>
+            <button class="mode-btn" onclick="setGameMode('pvp')" id="pvpBtn">2 Players</button>
         </div>
 
         <div class="game-info">
@@ -558,7 +558,7 @@
                 this.currentPlayer = 1;
                 this.gameOver = false;
                 this.winningCells = [];
-                this.gameMode = 'pvp'; // 'pvp' or 'ai'
+                this.gameMode = 'ai'; // 'pvp' or 'ai' - Changed to default to AI mode
                 this.aiPlayer = 2; // AI is always player 2
                 this.isAiThinking = false;
 
