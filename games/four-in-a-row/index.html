@@ -1,0 +1,1077 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>4 in a Row</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            color: white;
+            user-select: none;
+            -webkit-user-select: none;
+            -webkit-touch-callout: none;
+        }
+
+        .game-container {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 20px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            width: 100%;
+            max-width: 400px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .title {
+            font-size: 2rem;
+            font-weight: bold;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .game-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding: 10px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            height: 52px;
+            /* Fixed height to prevent layout shift */
+        }
+
+        .mode-selector {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-bottom: 15px;
+        }
+
+        .mode-btn {
+            padding: 8px 16px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 20px;
+            color: white;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .mode-btn.active {
+            background: rgba(255, 255, 255, 0.3);
+            border-color: rgba(255, 255, 255, 0.7);
+            font-weight: bold;
+        }
+
+        .ai-thinking {
+            color: #ffd700;
+            font-style: italic;
+        }
+
+        .current-player {
+            font-size: 1.1rem;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            height: 32px;
+            /* Fixed height to prevent layout shift */
+            line-height: 1.2;
+            overflow: hidden;
+            white-space: nowrap;
+        }
+
+        .player-indicator {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            border: 2px solid white;
+            transition: all 0.3s ease;
+        }
+
+        .player1 {
+            background: #ff4757;
+        }
+
+        .player2 {
+            background: #ffa502;
+        }
+
+        .board {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 8px;
+            background: #2c3e50;
+            padding: 15px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+            box-shadow: inset 0 4px 8px rgba(0, 0, 0, 0.3);
+        }
+
+        .cell {
+            aspect-ratio: 1;
+            background: #34495e;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .cell:hover {
+            transform: scale(1.05);
+            border-color: rgba(255, 255, 255, 0.3);
+        }
+
+        .cell.filled {
+            cursor: default;
+        }
+
+        .cell.filled:hover {
+            transform: none;
+            border-color: transparent;
+        }
+
+        .piece {
+            width: 80%;
+            height: 80%;
+            border-radius: 50%;
+            transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            transform: translateY(-200px);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+        }
+
+        .piece.dropped {
+            transform: translateY(0);
+        }
+
+        .piece.winning {
+            animation: winPulse 1s infinite alternate;
+            box-shadow: 0 0 20px currentColor;
+        }
+
+        @keyframes winPulse {
+            from {
+                transform: scale(1);
+            }
+
+            to {
+                transform: scale(1.1);
+            }
+        }
+
+        .column-indicator {
+            grid-column: span 1;
+            height: 40px;
+            background: rgba(255, 255, 255, 0.15);
+            border-radius: 8px;
+            margin-bottom: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 1.2rem;
+            opacity: 0.8;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .column-indicator:hover {
+            background: rgba(255, 255, 255, 0.25);
+            opacity: 1;
+            transform: translateY(-3px);
+            border-color: rgba(255, 255, 255, 0.4);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .column-indicator.full {
+            background: rgba(255, 71, 87, 0.3);
+            border-color: rgba(255, 71, 87, 0.5);
+            cursor: not-allowed;
+            opacity: 0.6;
+        }
+
+        .column-indicator.full:hover {
+            background: rgba(255, 71, 87, 0.3);
+            transform: none;
+            opacity: 0.6;
+        }
+
+        .controls {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            flex-wrap: wrap;
+            min-height: 48px;
+            /* Reserve space for button */
+            align-items: center;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            border-radius: 25px;
+            color: white;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .btn.hidden {
+            visibility: hidden;
+            opacity: 0;
+            pointer-events: none;
+        }
+
+
+
+        @media (max-width: 480px) {
+            .game-container {
+                padding: 15px;
+                margin: 10px;
+            }
+
+            .title {
+                font-size: 1.5rem;
+            }
+
+            .board {
+                gap: 6px;
+                padding: 10px;
+            }
+
+            .column-indicator {
+                height: 35px;
+                font-size: 1.1rem;
+                margin-bottom: 6px;
+            }
+
+            #columnIndicators {
+                padding-left: 10px !important;
+                padding-right: 10px !important;
+                gap: 6px !important;
+            }
+
+            /* Maintain fixed heights on mobile */
+            .current-player {
+                height: 30px;
+                font-size: 1rem;
+            }
+        }
+
+        /* Mobile Modal Optimizations */
+        @media (max-width: 480px) {
+            .modal {
+                padding: 15px;
+            }
+
+            .modal-content {
+                padding: 25px 20px;
+                max-width: 95%;
+                border-radius: 15px;
+            }
+
+            .modal-title {
+                font-size: 1.2rem;
+                margin-bottom: 12px;
+                line-height: 1.3;
+            }
+
+            .modal-message {
+                font-size: 0.95rem;
+                margin-bottom: 20px;
+                line-height: 1.4;
+                padding: 0 5px;
+            }
+
+            .winner-title {
+                font-size: 1.1rem !important;
+            }
+
+            .winner-message {
+                font-size: 1rem !important;
+                margin: 10px 0;
+            }
+
+            .modal-buttons {
+                gap: 12px;
+                flex-direction: column-reverse;
+            }
+
+            .modal-btn {
+                padding: 14px 20px;
+                font-size: 1rem;
+                min-width: unset;
+                width: 100%;
+            }
+
+            .game-info {
+                height: 50px;
+            }
+        }
+
+        /* Modal Styles */
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(5px);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            padding: 20px;
+        }
+
+        .modal.show {
+            display: flex;
+        }
+
+        .modal-content {
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            padding: 30px;
+            max-width: 350px;
+            width: 100%;
+            text-align: center;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+
+        .modal-title {
+            font-size: 1.3rem;
+            font-weight: bold;
+            margin-bottom: 15px;
+            color: white;
+        }
+
+        .modal-message {
+            font-size: 1rem;
+            margin-bottom: 25px;
+            color: rgba(255, 255, 255, 0.9);
+            line-height: 1.4;
+        }
+
+        .modal-buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+        }
+
+        .modal-btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 25px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            min-width: 80px;
+            border: 2px solid transparent;
+        }
+
+        .modal-btn.confirm {
+            background: linear-gradient(45deg, #ff4757, #ff6b7a);
+            color: white;
+            border-color: rgba(255, 255, 255, 0.3);
+        }
+
+        .modal-btn.confirm:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(255, 71, 87, 0.4);
+        }
+
+        .modal-btn.cancel {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border-color: rgba(255, 255, 255, 0.4);
+        }
+
+        .modal-btn.cancel:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateY(-2px);
+        }
+
+        .modal-btn:active {
+            transform: translateY(0);
+        }
+
+        /* Game Result Modal Styling */
+        #gameResultModal .modal-content {
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.15), rgba(255, 255, 255, 0.05));
+        }
+
+        .winner-title {
+            color: #ffd700;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+            animation: celebration 2s ease-in-out infinite alternate;
+        }
+
+        .winner-message {
+            font-size: 1.1rem;
+            margin: 15px 0;
+            line-height: 1.3;
+        }
+
+        @keyframes celebration {
+            from {
+                transform: scale(1);
+            }
+
+            to {
+                transform: scale(1.05);
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="game-container">
+        <div class="header">
+            <h1 class="title">4 in a Row</h1>
+        </div>
+
+        <div class="mode-selector">
+            <button class="mode-btn active" onclick="setGameMode('pvp')" id="pvpBtn">2 Players</button>
+            <button class="mode-btn" onclick="setGameMode('ai')" id="aiBtn">vs AI</button>
+        </div>
+
+        <div class="game-info">
+            <div class="current-player">
+                <span class="player-indicator" id="playerIndicator"></span>
+                <span id="currentPlayerText">Player 1's Turn</span>
+            </div>
+        </div>
+
+
+
+        <div class="column-indicators" id="columnIndicators"></div>
+        <div class="board" id="gameBoard"></div>
+
+        <div class="controls">
+            <button class="btn hidden" id="newGameBtn" onclick="showNewGameModal()">New Game</button>
+        </div>
+    </div>
+
+    <!-- Game Result Modals -->
+    <div class="modal" id="gameResultModal">
+        <div class="modal-content">
+            <div class="modal-title" id="gameResultTitle">Game Over</div>
+            <div class="modal-message" id="gameResultMessage">The game has ended.</div>
+            <div class="modal-buttons">
+                <button class="modal-btn cancel" onclick="hideModal('gameResultModal')">Close</button>
+                <button class="modal-btn confirm" onclick="newGameFromResult()">New Game</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Confirmation Modals -->
+    <div class="modal" id="newGameModal">
+        <div class="modal-content">
+            <div class="modal-title">Start New Game?</div>
+            <div class="modal-message">This will clear the current board and start over. Any game in progress will be
+                lost.</div>
+            <div class="modal-buttons">
+                <button class="modal-btn cancel" onclick="hideModal('newGameModal')">Cancel</button>
+                <button class="modal-btn confirm" onclick="confirmNewGame()">New Game</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal" id="switchModeModal">
+        <div class="modal-content">
+            <div class="modal-title">Switch Game Mode?</div>
+            <div class="modal-message" id="switchModeMessage">This will end the current game. Any progress will be lost.
+            </div>
+            <div class="modal-buttons">
+                <button class="modal-btn cancel" onclick="hideModal('switchModeModal')">Cancel</button>
+                <button class="modal-btn confirm" onclick="confirmSwitchMode()">Switch Mode</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        class FourInARow {
+            constructor() {
+                this.rows = 6;
+                this.cols = 7;
+                this.board = [];
+                this.currentPlayer = 1;
+                this.gameOver = false;
+                this.winningCells = [];
+                this.gameMode = 'pvp'; // 'pvp' or 'ai'
+                this.aiPlayer = 2; // AI is always player 2
+                this.isAiThinking = false;
+
+                this.initializeBoard();
+                this.createBoardHTML();
+                this.createColumnIndicators();
+                this.updateUI();
+                this.updateButtonVisibility();
+            }
+
+            initializeBoard() {
+                this.board = Array(this.rows).fill().map(() => Array(this.cols).fill(0));
+                this.gameOver = false;
+                this.winningCells = [];
+            }
+
+            createColumnIndicators() {
+                const container = document.getElementById('columnIndicators');
+                container.innerHTML = '';
+                container.style.display = 'grid';
+                container.style.gridTemplateColumns = 'repeat(7, 1fr)';
+                container.style.gap = '8px';
+                container.style.marginBottom = '8px';
+                container.style.paddingLeft = '15px';
+                container.style.paddingRight = '15px';
+
+                for (let col = 0; col < this.cols; col++) {
+                    const indicator = document.createElement('div');
+                    indicator.className = 'column-indicator';
+                    indicator.textContent = '▼';
+                    indicator.addEventListener('click', () => this.dropPiece(col));
+                    container.appendChild(indicator);
+                }
+            }
+
+            createBoardHTML() {
+                const board = document.getElementById('gameBoard');
+                board.innerHTML = '';
+
+                for (let row = 0; row < this.rows; row++) {
+                    for (let col = 0; col < this.cols; col++) {
+                        const cell = document.createElement('div');
+                        cell.className = 'cell';
+                        cell.dataset.row = row;
+                        cell.dataset.col = col;
+                        cell.addEventListener('click', () => this.dropPiece(col));
+                        board.appendChild(cell);
+                    }
+                }
+            }
+
+            dropPiece(col) {
+                if (this.gameOver || !this.isValidMove(col) || this.isAiThinking) return;
+
+                const row = this.getLowestEmptyRow(col);
+                if (row === -1) return;
+
+                this.makeMove(row, col);
+            }
+
+            makeMove(row, col) {
+                this.board[row][col] = this.currentPlayer;
+                this.animatePieceDrop(row, col);
+
+                // Show new game button after first move
+                this.updateButtonVisibility();
+
+                if (this.checkWin(row, col)) {
+                    this.handleWin();
+                } else if (this.isBoardFull()) {
+                    this.handleDraw();
+                } else {
+                    this.switchPlayer();
+
+                    // If it's AI's turn, make AI move after a delay
+                    if (this.gameMode === 'ai' && this.currentPlayer === this.aiPlayer && !this.gameOver) {
+                        this.makeAiMove();
+                    }
+                }
+
+                this.updateColumnIndicators();
+            }
+
+            updateButtonVisibility() {
+                const newGameBtn = document.getElementById('newGameBtn');
+                if (this.hasMovesBeenMade()) {
+                    newGameBtn.classList.remove('hidden');
+                } else {
+                    newGameBtn.classList.add('hidden');
+                }
+            }
+
+            makeAiMove() {
+                this.isAiThinking = true;
+                this.updateUI();
+
+                // Add delay to make AI feel more natural
+                setTimeout(() => {
+                    const aiCol = this.getAiMove();
+                    const row = this.getLowestEmptyRow(aiCol);
+                    if (row !== -1) {
+                        this.makeMove(row, aiCol);
+                    }
+                    this.isAiThinking = false;
+                    this.updateUI();
+                }, 800 + Math.random() * 1000); // Random delay between 0.8-1.8 seconds
+            }
+
+            getAiMove() {
+                // AI Strategy:
+                // 1. Win if possible
+                // 2. Block player from winning
+                // 3. Create multiple threats
+                // 4. Play center columns
+                // 5. Random valid move
+
+                // Check if AI can win
+                for (let col = 0; col < this.cols; col++) {
+                    if (this.isValidMove(col)) {
+                        const row = this.getLowestEmptyRow(col);
+                        this.board[row][col] = this.aiPlayer;
+                        if (this.checkWin(row, col)) {
+                            this.board[row][col] = 0; // Reset
+                            return col;
+                        }
+                        this.board[row][col] = 0; // Reset
+                    }
+                }
+
+                // Check if AI needs to block player
+                const humanPlayer = this.aiPlayer === 1 ? 2 : 1;
+                for (let col = 0; col < this.cols; col++) {
+                    if (this.isValidMove(col)) {
+                        const row = this.getLowestEmptyRow(col);
+                        this.board[row][col] = humanPlayer;
+                        if (this.checkWin(row, col)) {
+                            this.board[row][col] = 0; // Reset
+                            return col;
+                        }
+                        this.board[row][col] = 0; // Reset
+                    }
+                }
+
+                // Look for strategic moves
+                const strategicMove = this.getStrategicMove();
+                if (strategicMove !== -1) return strategicMove;
+
+                // Prefer center columns
+                const centerCols = [3, 2, 4, 1, 5, 0, 6];
+                for (const col of centerCols) {
+                    if (this.isValidMove(col)) {
+                        return col;
+                    }
+                }
+
+                // Fallback to random valid move
+                const validCols = [];
+                for (let col = 0; col < this.cols; col++) {
+                    if (this.isValidMove(col)) {
+                        validCols.push(col);
+                    }
+                }
+                return validCols[Math.floor(Math.random() * validCols.length)];
+            }
+
+            getStrategicMove() {
+                // Look for moves that create multiple threats
+                let bestScore = -1;
+                let bestCol = -1;
+
+                for (let col = 0; col < this.cols; col++) {
+                    if (this.isValidMove(col)) {
+                        const row = this.getLowestEmptyRow(col);
+                        this.board[row][col] = this.aiPlayer;
+
+                        const score = this.evaluatePosition(row, col);
+
+                        this.board[row][col] = 0; // Reset
+
+                        if (score > bestScore) {
+                            bestScore = score;
+                            bestCol = col;
+                        }
+                    }
+                }
+
+                return bestScore > 2 ? bestCol : -1;
+            }
+
+            evaluatePosition(row, col) {
+                let score = 0;
+                const directions = [[0, 1], [1, 0], [1, 1], [1, -1]];
+
+                for (const [dr, dc] of directions) {
+                    const connected = this.getConnectedCells(row, col, dr, dc);
+                    if (connected.length >= 3) {
+                        score += connected.length;
+                    }
+                }
+
+                // Bonus for center columns
+                if (col >= 2 && col <= 4) score += 1;
+
+                return score;
+            }
+
+            hasMovesBeenMade() {
+                // Check if any pieces have been placed on the board
+                for (let row = 0; row < this.rows; row++) {
+                    for (let col = 0; col < this.cols; col++) {
+                        if (this.board[row][col] !== 0) {
+                            return true;
+                        }
+                    }
+                }
+                return false;
+            }
+
+            setGameMode(mode) {
+                this.gameMode = mode;
+                if (mode === 'ai') {
+                    this.scores = { player1: 0, ai: 0 };
+                } else {
+                    this.scores = { player1: 0, player2: 0 };
+                }
+                this.reset();
+            }
+
+            animatePieceDrop(row, col) {
+                const cell = document.querySelector(`[data-row="${row}"][data-col="${col}"]`);
+                const piece = document.createElement('div');
+                piece.className = `piece player${this.currentPlayer}`;
+
+                cell.appendChild(piece);
+                cell.classList.add('filled');
+
+                // Trigger animation
+                setTimeout(() => piece.classList.add('dropped'), 10);
+            }
+
+            isValidMove(col) {
+                return this.board[0][col] === 0;
+            }
+
+            getLowestEmptyRow(col) {
+                for (let row = this.rows - 1; row >= 0; row--) {
+                    if (this.board[row][col] === 0) {
+                        return row;
+                    }
+                }
+                return -1;
+            }
+
+            checkWin(row, col) {
+                const directions = [
+                    [0, 1],   // horizontal
+                    [1, 0],   // vertical
+                    [1, 1],   // diagonal \
+                    [1, -1]   // diagonal /
+                ];
+
+                for (const [dr, dc] of directions) {
+                    const cells = this.getConnectedCells(row, col, dr, dc);
+                    if (cells.length >= 4) {
+                        this.winningCells = cells;
+                        return true;
+                    }
+                }
+                return false;
+            }
+
+            getConnectedCells(row, col, dr, dc) {
+                const cells = [[row, col]];
+                const player = this.board[row][col];
+
+                // Check in positive direction
+                let r = row + dr, c = col + dc;
+                while (r >= 0 && r < this.rows && c >= 0 && c < this.cols && this.board[r][c] === player) {
+                    cells.push([r, c]);
+                    r += dr;
+                    c += dc;
+                }
+
+                // Check in negative direction
+                r = row - dr;
+                c = col - dc;
+                while (r >= 0 && r < this.rows && c >= 0 && c < this.cols && this.board[r][c] === player) {
+                    cells.unshift([r, c]);
+                    r -= dr;
+                    c -= dc;
+                }
+
+                return cells;
+            }
+
+            handleWin() {
+                this.gameOver = true;
+                this.highlightWinningCells();
+                this.updateUI();
+
+                setTimeout(() => {
+                    let winTitle, winMessage;
+                    if (this.gameMode === 'ai') {
+                        if (this.currentPlayer === 1) {
+                            winTitle = '🎉 You Win! 🎉';
+                            winMessage = 'Great job! You beat the AI!';
+                        } else {
+                            winTitle = '🤖 AI Wins 🤖';
+                            winMessage = 'Better luck next time!';
+                        }
+                    } else {
+                        winTitle = `🎉 Player ${this.currentPlayer} Wins! 🎉`;
+                        winMessage = `Four in a row!`;
+                    }
+
+                    document.getElementById('gameResultTitle').innerHTML = `<span class="winner-title">${winTitle}</span>`;
+                    document.getElementById('gameResultMessage').innerHTML = `<span class="winner-message">${winMessage}</span>`;
+                    showModal('gameResultModal');
+                }, 500);
+            }
+
+            handleDraw() {
+                this.gameOver = true;
+                this.updateUI();
+
+                setTimeout(() => {
+                    document.getElementById('gameResultTitle').textContent = "It's a Draw!";
+                    document.getElementById('gameResultMessage').textContent = "Board full - no winner this time!";
+                    showModal('gameResultModal');
+                }, 300);
+            }
+
+            highlightWinningCells() {
+                this.winningCells.forEach(([row, col]) => {
+                    const cell = document.querySelector(`[data-row="${row}"][data-col="${col}"]`);
+                    const piece = cell.querySelector('.piece');
+                    if (piece) {
+                        piece.classList.add('winning');
+                    }
+                });
+            }
+
+            isBoardFull() {
+                return this.board[0].every(cell => cell !== 0);
+            }
+
+            switchPlayer() {
+                this.currentPlayer = this.currentPlayer === 1 ? 2 : 1;
+                this.updateUI();
+            }
+
+            updateUI() {
+                const indicator = document.getElementById('playerIndicator');
+                const text = document.getElementById('currentPlayerText');
+
+                indicator.className = `player-indicator player${this.currentPlayer}`;
+
+                if (this.gameOver) {
+                    text.textContent = 'Game Over';
+                } else if (this.isAiThinking) {
+                    text.innerHTML = '<span class="ai-thinking">🤖 AI is thinking...</span>';
+                } else {
+                    if (this.gameMode === 'ai') {
+                        text.textContent = this.currentPlayer === 1 ? 'Your Turn' : "AI's Turn";
+                    } else {
+                        text.textContent = `Player ${this.currentPlayer}'s Turn`;
+                    }
+                }
+            }
+
+            updateColumnIndicators() {
+                const indicators = document.querySelectorAll('.column-indicator');
+                indicators.forEach((indicator, col) => {
+                    if (!this.isValidMove(col)) {
+                        indicator.classList.add('full');
+                        indicator.textContent = '✖';
+                    } else {
+                        indicator.classList.remove('full');
+                        indicator.textContent = '▼';
+                    }
+                });
+            }
+
+            reset() {
+                this.initializeBoard();
+                this.currentPlayer = 1;
+                this.createBoardHTML();
+                this.updateUI();
+                this.updateColumnIndicators();
+                this.updateButtonVisibility();
+            }
+
+            resetScores() {
+                if (this.gameMode === 'ai') {
+                    this.scores = { player1: 0, ai: 0 };
+                } else {
+                    this.scores = { player1: 0, player2: 0 };
+                }
+                this.updateUI();
+                this.saveScores();
+            }
+
+            saveScores() {
+                try {
+                    // Save to memory only (localStorage not available in Claude artifacts)
+                    this.savedScores = { ...this.scores };
+                } catch (e) {
+                    // Silently fail if storage not available
+                }
+            }
+
+            loadScores() {
+                try {
+                    if (this.savedScores) {
+                        this.scores = { ...this.savedScores };
+                        this.updateUI();
+                    }
+                } catch (e) {
+                    // Silently fail if storage not available
+                }
+            }
+        }
+
+        // Initialize game
+        let game = new FourInARow();
+
+        // Modal functions
+        let pendingModeSwitch = null;
+
+        function showModal(modalId) {
+            document.getElementById(modalId).classList.add('show');
+        }
+
+        function hideModal(modalId) {
+            document.getElementById(modalId).classList.remove('show');
+        }
+
+        function showNewGameModal() {
+            // Only show confirmation if moves have been made and game is still in progress
+            if (!game.hasMovesBeenMade() || game.gameOver) {
+                game.reset();
+            } else {
+                showModal('newGameModal');
+            }
+        }
+
+        function showSwitchModeModal(newMode) {
+            pendingModeSwitch = newMode;
+
+            // Only show confirmation if moves have been made and game is still in progress
+            if (game.hasMovesBeenMade() && !game.gameOver) {
+                const message = 'This will end the current game. Any progress will be lost.';
+                document.getElementById('switchModeMessage').textContent = message;
+                showModal('switchModeModal');
+            } else {
+                // No moves made yet or game is finished, switch directly
+                performModeSwitch(newMode);
+                pendingModeSwitch = null;
+            }
+        }
+
+        function confirmNewGame() {
+            hideModal('newGameModal');
+            game.reset();
+        }
+
+        function confirmSwitchMode() {
+            hideModal('switchModeModal');
+            if (pendingModeSwitch) {
+                performModeSwitch(pendingModeSwitch);
+                pendingModeSwitch = null;
+            }
+        }
+
+        function newGameFromResult() {
+            hideModal('gameResultModal');
+            game.reset();
+        }
+
+        function performModeSwitch(mode) {
+            // Update button styles
+            document.getElementById('pvpBtn').classList.toggle('active', mode === 'pvp');
+            document.getElementById('aiBtn').classList.toggle('active', mode === 'ai');
+
+            game.setGameMode(mode);
+            game.updateButtonVisibility();
+        }
+
+        // Close modal when clicking outside of it
+        document.addEventListener('click', function (event) {
+            if (event.target.classList.contains('modal')) {
+                const modalId = event.target.id;
+                hideModal(modalId);
+
+                // Clear pending mode switch if modal was closed
+                if (modalId === 'switchModeModal') {
+                    pendingModeSwitch = null;
+                }
+            }
+        });
+
+        // Prevent modal from closing when clicking inside modal content
+        document.querySelectorAll('.modal-content').forEach(content => {
+            content.addEventListener('click', function (event) {
+                event.stopPropagation();
+            });
+        });
+
+        function setGameMode(mode) {
+            // Don't switch if already in that mode
+            if (game.gameMode === mode) return;
+
+            showSwitchModeModal(mode);
+        }
+
+        // Prevent zoom on double tap
+        let lastTouchEnd = 0;
+        document.addEventListener('touchend', function (event) {
+            const now = (new Date()).getTime();
+            if (now - lastTouchEnd <= 300) {
+                event.preventDefault();
+            }
+            lastTouchEnd = now;
+        }, false);
+    </script>
+</body>
+
+</html>
