@@ -561,6 +561,7 @@
                 this.gameMode = 'ai'; // 'pvp' or 'ai' - Changed to default to AI mode
                 this.aiPlayer = 2; // AI is always player 2
                 this.isAiThinking = false;
+                this.moveCount = 0; // Track number of moves for AI personality
 
                 this.initializeBoard();
                 this.createBoardHTML();
@@ -621,6 +622,7 @@
 
             makeMove(row, col) {
                 this.board[row][col] = this.currentPlayer;
+                this.moveCount++;
                 this.animatePieceDrop(row, col);
 
                 // Show new game button after first move
@@ -667,15 +669,25 @@
                 }, 800 + Math.random() * 1000); // Random delay between 0.8-1.8 seconds
             }
 
-            getAiMove() {
-                // AI Strategy:
-                // 1. Win if possible
-                // 2. Block player from winning
-                // 3. Create multiple threats
-                // 4. Play center columns
-                // 5. Random valid move
+            // Helper function to shuffle an array
+            shuffleArray(array) {
+                const shuffled = [...array];
+                for (let i = shuffled.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+                }
+                return shuffled;
+            }
 
-                // Check if AI can win
+            getAiMove() {
+                // AI Strategy with added randomness:
+                // 1. Win if possible (always do this)
+                // 2. Block player from winning (always do this)
+                // 3. Sometimes make a strategic move, sometimes play more casually
+                // 4. Varied opening play
+                // 5. Random preference for center vs edges
+
+                // Check if AI can win (always prioritize this)
                 for (let col = 0; col < this.cols; col++) {
                     if (this.isValidMove(col)) {
                         const row = this.getLowestEmptyRow(col);
@@ -688,7 +700,7 @@
                     }
                 }
 
-                // Check if AI needs to block player
+                // Check if AI needs to block player (always do this)
                 const humanPlayer = this.aiPlayer === 1 ? 2 : 1;
                 for (let col = 0; col < this.cols; col++) {
                     if (this.isValidMove(col)) {
@@ -702,50 +714,204 @@
                     }
                 }
 
-                // Look for strategic moves
-                const strategicMove = this.getStrategicMove();
-                if (strategicMove !== -1) return strategicMove;
+                // Early game: Add some opening variety
+                if (this.moveCount <= 4) {
+                    return this.getOpeningMove();
+                }
 
-                // Prefer center columns
-                const centerCols = [3, 2, 4, 1, 5, 0, 6];
-                for (const col of centerCols) {
-                    if (this.isValidMove(col)) {
-                        return col;
+                // Mid to late game: Mix strategic and random play
+                const playStrategically = Math.random() < 0.7; // 70% chance to play strategically
+                
+                if (playStrategically) {
+                    const strategicMove = this.getStrategicMove();
+                    if (strategicMove !== -1) {
+                        // Sometimes still pick a different good move instead of the "best" one
+                        if (Math.random() < 0.2) { // 20% chance to ignore the best strategic move
+                            return this.getAlternativeGoodMove(strategicMove);
+                        }
+                        return strategicMove;
                     }
                 }
 
-                // Fallback to random valid move
+                // Get all valid moves and add some randomness to preference
                 const validCols = [];
                 for (let col = 0; col < this.cols; col++) {
                     if (this.isValidMove(col)) {
                         validCols.push(col);
                     }
                 }
+
+                // Randomly decide between preferring center or edges
+                const preferCenter = Math.random() < 0.6; // 60% chance to prefer center
+                
+                if (preferCenter) {
+                    // Randomized center column preference
+                    const centerCols = this.shuffleArray([3, 2, 4, 1, 5]);
+                    for (const col of centerCols) {
+                        if (validCols.includes(col)) {
+                            return col;
+                        }
+                    }
+                } else {
+                    // Sometimes prefer edges for variety
+                    const edgeCols = this.shuffleArray([0, 6, 1, 5]);
+                    for (const col of edgeCols) {
+                        if (validCols.includes(col)) {
+                            return col;
+                        }
+                    }
+                }
+
+                // Fallback to random valid move
                 return validCols[Math.floor(Math.random() * validCols.length)];
             }
 
+            getOpeningMove() {
+                const validCols = [];
+                for (let col = 0; col < this.cols; col++) {
+                    if (this.isValidMove(col)) {
+                        validCols.push(col);
+                    }
+                }
+
+                // First move patterns - mix it up
+                if (this.moveCount === 1) {
+                    const openingPatterns = [
+                        [3], // Classic center
+                        [2, 4], // Slightly off center
+                        [1, 5], // More aggressive
+                        [3, 2, 4] // Center with fallbacks
+                    ];
+                    
+                    const pattern = openingPatterns[Math.floor(Math.random() * openingPatterns.length)];
+                    for (const col of pattern) {
+                        if (validCols.includes(col)) {
+                            return col;
+                        }
+                    }
+                }
+
+                // For AI's first move (move 2), add some variety
+                if (this.moveCount === 2) {
+                    // Sometimes respond to player's move, sometimes play independently
+                    if (Math.random() < 0.4) { // 40% chance to play near player
+                        const playerCol = this.findLastPlayerMove();
+                        if (playerCol !== -1) {
+                            const nearbyMoves = [playerCol - 1, playerCol + 1, playerCol].filter(col => 
+                                col >= 0 && col < this.cols && validCols.includes(col)
+                            );
+                            if (nearbyMoves.length > 0) {
+                                return nearbyMoves[Math.floor(Math.random() * nearbyMoves.length)];
+                            }
+                        }
+                    }
+                    
+                    // Otherwise play a randomized center preference
+                    const centerOptions = this.shuffleArray([3, 2, 4]);
+                    for (const col of centerOptions) {
+                        if (validCols.includes(col)) {
+                            return col;
+                        }
+                    }
+                }
+
+                // Default opening behavior
+                const openingPreference = this.shuffleArray([3, 2, 4, 1, 5]);
+                for (const col of openingPreference) {
+                    if (validCols.includes(col)) {
+                        return col;
+                    }
+                }
+
+                return validCols[Math.floor(Math.random() * validCols.length)];
+            }
+
+            findLastPlayerMove() {
+                // Find the most recent human player move
+                for (let row = 0; row < this.rows; row++) {
+                    for (let col = 0; col < this.cols; col++) {
+                        if (this.board[row][col] === (this.aiPlayer === 1 ? 2 : 1)) {
+                            // Check if this is the topmost piece in this column
+                            if (row === 0 || this.board[row - 1][col] === 0) {
+                                return col;
+                            }
+                        }
+                    }
+                }
+                return -1;
+            }
+
+            getAlternativeGoodMove(excludeCol) {
+                // Find alternative moves that are still reasonable
+                const moveScores = [];
+                
+                for (let col = 0; col < this.cols; col++) {
+                    if (this.isValidMove(col) && col !== excludeCol) {
+                        const row = this.getLowestEmptyRow(col);
+                        this.board[row][col] = this.aiPlayer;
+                        const score = this.evaluatePosition(row, col);
+                        this.board[row][col] = 0; // Reset
+                        moveScores.push({ col, score });
+                    }
+                }
+
+                // Sort by score and pick from top alternatives
+                moveScores.sort((a, b) => b.score - a.score);
+                
+                if (moveScores.length > 0) {
+                    // Pick from top 3 alternatives randomly
+                    const topMoves = moveScores.slice(0, Math.min(3, moveScores.length));
+                    return topMoves[Math.floor(Math.random() * topMoves.length)].col;
+                }
+
+                // Fallback
+                const validCols = [];
+                for (let col = 0; col < this.cols; col++) {
+                    if (this.isValidMove(col) && col !== excludeCol) {
+                        validCols.push(col);
+                    }
+                }
+                return validCols.length > 0 ? validCols[Math.floor(Math.random() * validCols.length)] : excludeCol;
+            }
+
             getStrategicMove() {
-                // Look for moves that create multiple threats
-                let bestScore = -1;
-                let bestCol = -1;
+                // Look for moves that create multiple threats with some randomness
+                const moveScores = [];
 
                 for (let col = 0; col < this.cols; col++) {
                     if (this.isValidMove(col)) {
                         const row = this.getLowestEmptyRow(col);
                         this.board[row][col] = this.aiPlayer;
 
-                        const score = this.evaluatePosition(row, col);
+                        let score = this.evaluatePosition(row, col);
+                        
+                        // Add small random factor to make AI less predictable
+                        score += Math.random() * 0.5;
+                        
+                        // Bonus for center columns (with randomness)
+                        if (col >= 2 && col <= 4) {
+                            score += 0.5 + Math.random() * 0.3;
+                        }
 
                         this.board[row][col] = 0; // Reset
-
-                        if (score > bestScore) {
-                            bestScore = score;
-                            bestCol = col;
-                        }
+                        moveScores.push({ col, score });
                     }
                 }
 
-                return bestScore > 2 ? bestCol : -1;
+                // Sort by score
+                moveScores.sort((a, b) => b.score - a.score);
+
+                // Instead of always picking the best, sometimes pick from top few moves
+                if (moveScores.length > 0) {
+                    const bestScore = moveScores[0].score;
+                    if (bestScore > 2) {
+                        // Pick from moves within 0.8 points of the best score
+                        const goodMoves = moveScores.filter(move => move.score >= bestScore - 0.8);
+                        return goodMoves[Math.floor(Math.random() * goodMoves.length)].col;
+                    }
+                }
+
+                return -1;
             }
 
             evaluatePosition(row, col) {
@@ -757,12 +923,40 @@
                     if (connected.length >= 3) {
                         score += connected.length;
                     }
+                    
+                    // Look for potential future connections
+                    score += this.evaluatePotential(row, col, dr, dc) * 0.3;
                 }
 
-                // Bonus for center columns
-                if (col >= 2 && col <= 4) score += 1;
-
                 return score;
+            }
+
+            evaluatePotential(row, col, dr, dc) {
+                // Evaluate potential for future connections in this direction
+                let potential = 0;
+                const player = this.board[row][col];
+                
+                // Check both directions for empty spaces that could continue the line
+                for (let direction of [-1, 1]) {
+                    let r = row + (dr * direction);
+                    let c = col + (dc * direction);
+                    let spaces = 0;
+                    
+                    while (r >= 0 && r < this.rows && c >= 0 && c < this.cols && spaces < 3) {
+                        if (this.board[r][c] === 0) {
+                            potential += 0.1;
+                        } else if (this.board[r][c] === player) {
+                            potential += 0.2;
+                        } else {
+                            break; // Blocked by opponent
+                        }
+                        r += dr * direction;
+                        c += dc * direction;
+                        spaces++;
+                    }
+                }
+                
+                return potential;
             }
 
             hasMovesBeenMade() {
@@ -945,6 +1139,7 @@
             reset() {
                 this.initializeBoard();
                 this.currentPlayer = 1;
+                this.moveCount = 0;
                 this.createBoardHTML();
                 this.updateUI();
                 this.updateColumnIndicators();
