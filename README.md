@@ -164,6 +164,10 @@ This project showcases the possibilities of AI-assisted development, with all ga
 
 The collection is designed to be easily expandable, allowing for new games to be added while maintaining consistent design and user experience.
 
+## License
+
+[MIT License](LICENSE)
+
 ---
 
 _Created with AI assistance - Demonstrating the potential of AI in game development_
