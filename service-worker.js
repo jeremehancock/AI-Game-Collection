@@ -9,6 +9,7 @@ const urlsToCache = [
   "games/soccer-juggle/index.html",
   "games/water-ring-toss/index.html",
   "games/waveform/index.html",
+  "games/block-drop/index.html",
   "games/bubble-pop/index.html",
   "games/breakout/index.html",
   "games/space-shooter/index.html",

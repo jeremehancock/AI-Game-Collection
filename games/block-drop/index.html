@@ -101,31 +101,16 @@
             background: linear-gradient(135deg, rgba(0, 212, 255, 0.1) 0%, rgba(124, 58, 237, 0.1) 100%);
             border: 1px solid rgba(0, 212, 255, 0.2);
             border-radius: 12px;
-            padding: 12px 8px;
+            padding: 16px 8px;
             color: white;
-            font-size: 10px;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
+            font-size: 28px;
             cursor: pointer;
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             backdrop-filter: blur(10px);
             display: flex;
-            flex-direction: column;
+            justify-content: center;
             align-items: center;
-            gap: 4px;
-            min-height: 50px;
-        }
-
-        .control-btn span:first-child {
-            font-size: 16px;
-            line-height: 1;
-        }
-
-        .control-btn span:last-child {
-            font-size: 9px;
-            opacity: 0.8;
-            line-height: 1;
+            min-height: 60px;
         }
 
         .control-btn:hover {
@@ -412,16 +397,9 @@
             }
 
             .control-btn {
-                padding: 10px 6px;
-                min-height: 45px;
-            }
-
-            .control-btn span:first-child {
-                font-size: 14px;
-            }
-
-            .control-btn span:last-child {
-                font-size: 8px;
+                padding: 14px 6px;
+                min-height: 55px;
+                font-size: 24px;
             }
 
             .logo {
@@ -611,11 +589,9 @@
             <div id="gameControls">
                 <button id="pauseBtn" class="control-btn">
                     <span id="pauseIcon">⏸️</span>
-                    <span id="pauseText">PAUSE</span>
                 </button>
                 <button id="restartGameBtn" class="control-btn">
                     <span>🔄</span>
-                    <span>RESTART</span>
                 </button>
             </div>
         </div>
@@ -1211,18 +1187,15 @@
             }
 
             updatePauseButton(isPaused) {
-                const pauseBtn = document.getElementById('pauseBtn');
                 const pauseIcon = document.getElementById('pauseIcon');
-                const pauseText = document.getElementById('pauseText');
+                const pauseBtn = document.getElementById('pauseBtn');
 
                 if (isPaused) {
                     pauseBtn.classList.add('paused');
                     pauseIcon.textContent = '▶️';
-                    pauseText.textContent = 'RESUME';
                 } else {
                     pauseBtn.classList.remove('paused');
                     pauseIcon.textContent = '⏸️';
-                    pauseText.textContent = 'PAUSE';
                 }
             }
 
