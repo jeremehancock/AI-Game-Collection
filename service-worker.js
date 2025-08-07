@@ -1,4 +1,4 @@
-const CACHE_NAME = "pwa-cache-v9.5";
+const CACHE_NAME = "pwa-cache-v9.6";
 const urlsToCache = [
   "index.html",
   "games/nerdle/index.html",
