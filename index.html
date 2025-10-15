@@ -2591,6 +2591,62 @@ if ('serviceWorker' in navigator) {
             statusDiv.style.background = '#f44336';
             statusDiv.innerHTML = `⚠️ Registration failed<br><small>${error.message}</small>`;
             console.error('Service Worker registration failed:', error);
+if ('serviceWorker' in navigator) {
+    window.addEventListener('load', async () => {
+        // Create status display
+        const statusDiv = document.createElement('div');
+        statusDiv.id = 'cache-status';
+        statusDiv.style.cssText = `
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: #2196F3;
+            color: white;
+            padding: 15px;
+            text-align: center;
+            z-index: 99999;
+            font-family: Arial, sans-serif;
+            font-size: 14px;
+            line-height: 1.4;
+        `;
+        statusDiv.innerHTML = '📥 Installing games for offline play...';
+        document.body.insertBefore(statusDiv, document.body.firstChild);
+
+        try {
+            const registration = await navigator.serviceWorker.register('/service-worker.js');
+
+            // Listen for messages from service worker
+            navigator.serviceWorker.addEventListener('message', (event) => {
+                if (event.data.type === 'CACHE_COMPLETE') {
+                    statusDiv.style.background = '#4CAF50';
+                    statusDiv.innerHTML = '✓ All games ready for offline play!';
+                    setTimeout(() => {
+                        statusDiv.style.transition = 'opacity 0.5s';
+                        statusDiv.style.opacity = '0';
+                        setTimeout(() => statusDiv.remove(), 500);
+                    }, 2000);
+                }
+                
+                if (event.data.type === 'CACHE_ERROR') {
+                    statusDiv.style.background = '#FF9800';
+                    statusDiv.innerHTML = `⚠️ ${event.data.cached} of ${event.data.total} games ready. Some may require internet.`;
+                    setTimeout(() => {
+                        statusDiv.style.transition = 'opacity 0.5s';
+                        statusDiv.style.opacity = '0';
+                        setTimeout(() => statusDiv.remove(), 500);
+                    }, 4000);
+                }
+            });
+
+            // Wait for service worker to be ready
+            await navigator.serviceWorker.ready;
+
+        } catch (error) {
+            statusDiv.style.background = '#f44336';
+            statusDiv.innerHTML = '⚠️ Offline mode unavailable';
+            console.error('Service Worker registration failed:', error);
+            setTimeout(() => statusDiv.remove(), 3000);
         }
     });
 } else {
@@ -2609,6 +2665,7 @@ if ('serviceWorker' in navigator) {
     `;
     statusDiv.innerHTML = '⚠️ Your browser does not support offline mode';
     document.body.insertBefore(statusDiv, document.body.firstChild);
+    setTimeout(() => statusDiv.remove(), 3000);
 }
 	</script>
 
