@@ -2518,60 +2518,80 @@ m489 -117 c31 -26 31 -78 -1 -104 -22 -18 -39 -19 -226 -16 -220 3 -226 5
 
 if ('serviceWorker' in navigator) {
     window.addEventListener('load', async () => {
-        // Create status display
-        const statusDiv = document.createElement('div');
-        statusDiv.id = 'cache-status';
-        statusDiv.style.cssText = `
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            background: #2196F3;
-            color: white;
-            padding: 15px;
-            text-align: center;
-            z-index: 99999;
-            font-family: Arial, sans-serif;
-            font-size: 14px;
-            line-height: 1.4;
-        `;
-        statusDiv.innerHTML = '📥 Installing games for offline play...';
-        document.body.insertBefore(statusDiv, document.body.firstChild);
-
         try {
             const registration = await navigator.serviceWorker.register('/service-worker.js');
+            
+            // Check if service worker is already active (games already cached)
+            if (registration.active) {
+                // Service worker already installed, don't show loading message
+                console.log('Service worker already active');
+                return;
+            }
+            
+            // Only show loading if service worker is installing
+            if (registration.installing || registration.waiting) {
+                // Create status display
+                const statusDiv = document.createElement('div');
+                statusDiv.id = 'cache-status';
+                statusDiv.style.cssText = `
+                    position: fixed;
+                    top: 0;
+                    left: 0;
+                    right: 0;
+                    background: #2196F3;
+                    color: white;
+                    padding: 15px;
+                    text-align: center;
+                    z-index: 99999;
+                    font-family: Arial, sans-serif;
+                    font-size: 14px;
+                    line-height: 1.4;
+                `;
+                statusDiv.innerHTML = '📥 Installing games for offline play...';
+                document.body.insertBefore(statusDiv, document.body.firstChild);
 
-            // Listen for messages from service worker
-            navigator.serviceWorker.addEventListener('message', (event) => {
-                if (event.data.type === 'CACHE_COMPLETE') {
-                    statusDiv.style.background = '#4CAF50';
-                    statusDiv.innerHTML = '✓ All games ready for offline play!';
-                    setTimeout(() => {
+                // Listen for messages from service worker
+                navigator.serviceWorker.addEventListener('message', (event) => {
+                    if (event.data.type === 'CACHE_COMPLETE') {
+                        statusDiv.style.background = '#4CAF50';
+                        statusDiv.innerHTML = '✓ All games ready for offline play!';
+                        setTimeout(() => {
+                            statusDiv.style.transition = 'opacity 0.5s';
+                            statusDiv.style.opacity = '0';
+                            setTimeout(() => statusDiv.remove(), 500);
+                        }, 2000);
+                    }
+                    
+                    if (event.data.type === 'CACHE_ERROR') {
+                        statusDiv.style.background = '#FF9800';
+                        statusDiv.innerHTML = `⚠️ ${event.data.cached} of ${event.data.total} games ready. Some may require internet.`;
+                        setTimeout(() => {
+                            statusDiv.style.transition = 'opacity 0.5s';
+                            statusDiv.style.opacity = '0';
+                            setTimeout(() => statusDiv.remove(), 500);
+                        }, 4000);
+                    }
+                });
+
+                // Safety timeout - remove message after 10 seconds if no response
+                setTimeout(() => {
+                    if (statusDiv && statusDiv.parentNode) {
                         statusDiv.style.transition = 'opacity 0.5s';
                         statusDiv.style.opacity = '0';
-                        setTimeout(() => statusDiv.remove(), 500);
-                    }, 2000);
-                }
-                
-                if (event.data.type === 'CACHE_ERROR') {
-                    statusDiv.style.background = '#FF9800';
-                    statusDiv.innerHTML = `⚠️ ${event.data.cached} of ${event.data.total} games ready. Some may require internet.`;
-                    setTimeout(() => {
-                        statusDiv.style.transition = 'opacity 0.5s';
-                        statusDiv.style.opacity = '0';
-                        setTimeout(() => statusDiv.remove(), 500);
-                    }, 4000);
-                }
-            });
+                        setTimeout(() => {
+                            if (statusDiv.parentNode) {
+                                statusDiv.remove();
+                            }
+                        }, 500);
+                    }
+                }, 10000);
+            }
 
             // Wait for service worker to be ready
             await navigator.serviceWorker.ready;
 
         } catch (error) {
-            statusDiv.style.background = '#f44336';
-            statusDiv.innerHTML = '⚠️ Offline mode unavailable';
             console.error('Service Worker registration failed:', error);
-            setTimeout(() => statusDiv.remove(), 3000);
         }
     });
 } else {
