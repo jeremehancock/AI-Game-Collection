@@ -2516,13 +2516,40 @@ m489 -117 c31 -26 31 -78 -1 -104 -22 -18 -39 -19 -226 -16 -220 3 -226 5
 			}
 		});
 
-		if ('serviceWorker' in navigator) {
-			window.addEventListener('load', () => {
-				navigator.serviceWorker.register('service-worker.js')
-					.then(registration => console.log('Service Worker registered with scope:', registration.scope))
-					.catch(error => console.error('Service Worker registration failed:', error));
-			});
-		}
+if ('serviceWorker' in navigator) {
+    window.addEventListener('load', async () => {
+        try {
+            // Show loading indicator (you can style this however you want)
+            const loadingDiv = document.createElement('div');
+            loadingDiv.id = 'sw-loading';
+            loadingDiv.style.cssText = 'position:fixed;top:0;left:0;right:0;background:#4CAF50;color:white;padding:10px;text-align:center;z-index:9999;';
+            loadingDiv.textContent = 'Loading games for offline play...';
+            document.body.insertBefore(loadingDiv, document.body.firstChild);
+
+            const registration = await navigator.serviceWorker.register('service-worker.js');
+            console.log('Service Worker registered with scope:', registration.scope);
+
+            // Wait for the service worker to be ready (all games cached)
+            await navigator.serviceWorker.ready;
+            
+            // Give it a moment to ensure caching is complete
+            setTimeout(() => {
+                loadingDiv.textContent = '✓ All games ready for offline play!';
+                setTimeout(() => {
+                    loadingDiv.remove();
+                }, 2000);
+            }, 500);
+
+            // Check for updates periodically
+            setInterval(() => {
+                registration.update();
+            }, 60 * 60 * 1000); // Check every hour
+
+        } catch (error) {
+            console.error('Service Worker registration failed:', error);
+        }
+    });
+}
 	</script>
 
 	<!-- Default Statcounter code for AI Game Collection https://aigamecollection.com/ -->
