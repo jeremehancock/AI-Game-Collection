@@ -1,4 +1,4 @@
-const CACHE_NAME = "pwa-cache-v10.6";
+const CACHE_NAME = "pwa-cache-v10.7";
 
 const urlsToCache = [
   "/",
@@ -40,7 +40,7 @@ async function sendMessageToClients(message) {
 
 // Install event - cache all games
 self.addEventListener("install", (event) => {
-  console.log('[SW v10.6] Installing...');
+  console.log('[SW v10.7] Installing...');
   
   event.waitUntil(
     (async () => {
@@ -50,13 +50,11 @@ self.addEventListener("install", (event) => {
         let failed = 0;
         const total = urlsToCache.length;
         
-        // Cache each file individually
         for (const url of urlsToCache) {
           try {
             await cache.add(url);
             cached++;
             
-            // Send progress update
             await sendMessageToClients({
               type: 'CACHE_PROGRESS',
               cached: cached,
@@ -69,7 +67,6 @@ self.addEventListener("install", (event) => {
           }
         }
         
-        // Send completion message
         if (failed === 0) {
           await sendMessageToClients({
             type: 'CACHE_COMPLETE',
@@ -86,7 +83,6 @@ self.addEventListener("install", (event) => {
           console.log(`[SW] Cached ${cached}/${total} files. ${failed} failed.`);
         }
         
-        // Skip waiting to activate immediately
         await self.skipWaiting();
         
       } catch (error) {
@@ -97,7 +93,7 @@ self.addEventListener("install", (event) => {
   );
 });
 
-// Activate event - clean up old caches
+// Activate event
 self.addEventListener("activate", (event) => {
   console.log('[SW] Activating...');
   
@@ -106,7 +102,6 @@ self.addEventListener("activate", (event) => {
       try {
         const cacheNames = await caches.keys();
         
-        // Delete old caches
         await Promise.all(
           cacheNames.map(cacheName => {
             if (cacheName !== CACHE_NAME) {
@@ -116,7 +111,6 @@ self.addEventListener("activate", (event) => {
           })
         );
         
-        // Take control of all pages
         await self.clients.claim();
         console.log('[SW] Activated and ready!');
         
@@ -127,30 +121,63 @@ self.addEventListener("activate", (event) => {
   );
 });
 
-// Fetch event - serve from cache, fallback to network
+// Enhanced fetch handler with URL variations
 self.addEventListener("fetch", (event) => {
-  // Skip non-GET requests
   if (event.request.method !== 'GET') return;
-  
-  // Skip non-http requests
   if (!event.request.url.startsWith('http')) return;
   
   event.respondWith(
     (async () => {
       try {
-        // Try cache first
-        const cachedResponse = await caches.match(event.request);
-        if (cachedResponse) {
-          return cachedResponse;
+        const url = new URL(event.request.url);
+        
+        // Try exact match first
+        let response = await caches.match(event.request);
+        if (response) {
+          console.log('[SW] ✓ Cache hit:', url.pathname);
+          return response;
         }
         
-        // Not in cache, fetch from network
+        // If no match and URL ends with /, try adding index.html
+        if (url.pathname.endsWith('/')) {
+          const indexUrl = url.pathname + 'index.html';
+          response = await caches.match(indexUrl);
+          if (response) {
+            console.log('[SW] ✓ Cache hit (index.html):', indexUrl);
+            return response;
+          }
+        }
+        
+        // If URL doesn't have extension, try adding /index.html
+        if (!url.pathname.includes('.')) {
+          const indexUrl = url.pathname + '/index.html';
+          response = await caches.match(indexUrl);
+          if (response) {
+            console.log('[SW] ✓ Cache hit (added /index.html):', indexUrl);
+            return response;
+          }
+        }
+        
+        // Try without trailing slash
+        if (url.pathname.endsWith('/') && url.pathname !== '/') {
+          const noSlashUrl = url.pathname.slice(0, -1);
+          response = await caches.match(noSlashUrl);
+          if (response) {
+            console.log('[SW] ✓ Cache hit (no slash):', noSlashUrl);
+            return response;
+          }
+        }
+        
+        console.log('[SW] ✗ Cache miss, fetching:', url.pathname);
+        
+        // Not in cache - fetch from network
         const networkResponse = await fetch(event.request);
         
         // Cache successful responses
         if (networkResponse && networkResponse.status === 200) {
           const cache = await caches.open(CACHE_NAME);
           cache.put(event.request, networkResponse.clone());
+          console.log('[SW] Cached from network:', url.pathname);
         }
         
         return networkResponse;
