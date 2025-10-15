@@ -1,43 +1,45 @@
-const CACHE_NAME = "pwa-cache-v10.1";
+const CACHE_NAME = "pwa-cache-v10.3";
+
+// Get the base URL for proper path resolution
+const BASE_URL = self.location.origin;
+
 const urlsToCache = [
-  "/",
-  "./",
-  "index.html",
-  "./index.html",
-  "games/nerdle/index.html",
-  "games/pipes/index.html",
-  "games/memory/index.html",
-  "games/minesweeper/index.html",
-  "games/snake/index.html",
-  "games/soccer-juggle/index.html",
-  "games/water-ring-toss/index.html",
-  "games/waveform/index.html",
-  "games/block-drop/index.html",
-  "games/bubble-pop/index.html",
-  "games/breakout/index.html",
-  "games/space-shooter/index.html",
-  "games/space-shooter-2/index.html",
-  "games/deep-sea-escape/index.html",
-  "games/circles-and-squares/index.html",
-  "games/fruit-slice/index.html",
-  "games/orb-attack/index.html",
-  "games/four-in-a-row/index.html",
-  "games/flapping-bird/index.html",
-  "images/icons/web-app-manifest-192x192.png",
-  "images/icons/web-app-manifest-512x512.png",
+  `${BASE_URL}/`,
+  `${BASE_URL}/index.html`,
+  `${BASE_URL}/games/nerdle/index.html`,
+  `${BASE_URL}/games/pipes/index.html`,
+  `${BASE_URL}/games/memory/index.html`,
+  `${BASE_URL}/games/minesweeper/index.html`,
+  `${BASE_URL}/games/snake/index.html`,
+  `${BASE_URL}/games/soccer-juggle/index.html`,
+  `${BASE_URL}/games/water-ring-toss/index.html`,
+  `${BASE_URL}/games/waveform/index.html`,
+  `${BASE_URL}/games/block-drop/index.html`,
+  `${BASE_URL}/games/bubble-pop/index.html`,
+  `${BASE_URL}/games/breakout/index.html`,
+  `${BASE_URL}/games/space-shooter/index.html`,
+  `${BASE_URL}/games/space-shooter-2/index.html`,
+  `${BASE_URL}/games/deep-sea-escape/index.html`,
+  `${BASE_URL}/games/circles-and-squares/index.html`,
+  `${BASE_URL}/games/fruit-slice/index.html`,
+  `${BASE_URL}/games/orb-attack/index.html`,
+  `${BASE_URL}/games/four-in-a-row/index.html`,
+  `${BASE_URL}/games/flapping-bird/index.html`,
+  `${BASE_URL}/images/icons/web-app-manifest-192x192.png`,
+  `${BASE_URL}/images/icons/web-app-manifest-512x512.png`,
 ];
 
-// Install the service worker and cache ALL resources
+// Install - cache all game files
 self.addEventListener("install", (event) => {
-  console.log('[SW] Installing and caching all games...');
+  console.log('[SW] Installing...');
   event.waitUntil(
     caches.open(CACHE_NAME)
       .then((cache) => {
-        console.log('[SW] Caching files...');
+        console.log('[SW] Caching files:', urlsToCache);
         return cache.addAll(urlsToCache);
       })
       .then(() => {
-        console.log('[SW] All games cached!');
+        console.log('[SW] All files cached successfully!');
         return self.skipWaiting();
       })
       .catch((error) => {
@@ -47,7 +49,7 @@ self.addEventListener("install", (event) => {
   );
 });
 
-// Activate and clean up old caches
+// Activate - clean up old caches
 self.addEventListener("activate", (event) => {
   console.log('[SW] Activating...');
   event.waitUntil(
@@ -61,44 +63,67 @@ self.addEventListener("activate", (event) => {
         })
       );
     }).then(() => {
-      console.log('[SW] Activated and claiming clients');
+      console.log('[SW] Activated!');
       return self.clients.claim();
     })
   );
 });
 
-// Fetch handler - cache-first strategy with network fallback
+// Fetch - serve from cache or network
 self.addEventListener("fetch", (event) => {
   // Skip non-GET requests
   if (event.request.method !== 'GET') return;
   
-  // Skip chrome-extension and other non-http requests
+  // Skip non-http(s) requests
   if (!event.request.url.startsWith('http')) return;
+  
+  const requestUrl = new URL(event.request.url);
+  console.log('[SW] Fetch request for:', requestUrl.href);
   
   event.respondWith(
     caches.match(event.request)
       .then((cachedResponse) => {
         if (cachedResponse) {
-          console.log('[SW] Serving from cache:', event.request.url);
+          console.log('[SW] ✓ CACHE HIT:', requestUrl.href);
           return cachedResponse;
         }
         
-        console.log('[SW] Fetching from network:', event.request.url);
-        return fetch(event.request).then((networkResponse) => {
-          // Cache successful responses
-          if (networkResponse && networkResponse.status === 200) {
-            const responseToCache = networkResponse.clone();
-            caches.open(CACHE_NAME).then((cache) => {
-              console.log('[SW] Caching new resource:', event.request.url);
-              cache.put(event.request, responseToCache);
+        // Not in cache - try different URL variations
+        console.log('[SW] ✗ CACHE MISS - trying variations for:', requestUrl.href);
+        
+        // Try with trailing slash
+        return caches.match(event.request.url + '/')
+          .then(response => {
+            if (response) {
+              console.log('[SW] ✓ Found with trailing slash');
+              return response;
+            }
+            
+            // Try without trailing slash
+            return caches.match(event.request.url.replace(/\/$/, ''));
+          })
+          .then(response => {
+            if (response) {
+              console.log('[SW] ✓ Found without trailing slash');
+              return response;
+            }
+            
+            // Still not found - fetch from network
+            console.log('[SW] → Fetching from network:', requestUrl.href);
+            return fetch(event.request).then((networkResponse) => {
+              if (networkResponse && networkResponse.status === 200) {
+                const responseToCache = networkResponse.clone();
+                caches.open(CACHE_NAME).then((cache) => {
+                  console.log('[SW] Caching new resource:', requestUrl.href);
+                  cache.put(event.request, responseToCache);
+                });
+              }
+              return networkResponse;
             });
-          }
-          return networkResponse;
-        });
+          });
       })
       .catch((error) => {
-        console.error('[SW] Fetch failed:', error);
-        // You could return a custom offline page here
+        console.error('[SW] ✗ FETCH FAILED:', requestUrl.href, error);
         throw error;
       })
   );
