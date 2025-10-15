@@ -1,6 +1,5 @@
-const CACHE_NAME = "pwa-cache-v10.4";
+const CACHE_NAME = "pwa-cache-v10.5";
 
-// Simplified URLs - relative paths
 const urlsToCache = [
   "/",
   "/index.html",
@@ -27,45 +26,99 @@ const urlsToCache = [
   "/images/icons/web-app-manifest-512x512.png",
 ];
 
-// Install - cache files ONE BY ONE to see which fails
+// Send message to all clients
+function sendMessageToClients(message) {
+  self.clients.matchAll().then(clients => {
+    clients.forEach(client => client.postMessage(message));
+  });
+}
+
+// Install - cache files with visual progress
 self.addEventListener("install", (event) => {
-  console.log('[SW v10.4] Installing...');
+  console.log('[SW v10.5] Installing...');
   event.waitUntil(
     caches.open(CACHE_NAME)
       .then(async (cache) => {
-        console.log('[SW] Starting to cache files...');
+        let cached = 0;
+        let failed = 0;
+        const total = urlsToCache.length;
         
-        // Cache files one by one to identify failures
+        // Cache files one by one
         for (const url of urlsToCache) {
           try {
-            console.log(`[SW] Caching: ${url}`);
             await cache.add(url);
-            console.log(`[SW] ✓ Cached: ${url}`);
+            cached++;
+            sendMessageToClients({
+              type: 'CACHE_PROGRESS',
+              cached: cached,
+              total: total
+            });
           } catch (error) {
-            console.error(`[SW] ✗ FAILED to cache: ${url}`, error);
+            failed++;
+            console.error(`Failed to cache: ${url}`, error);
           }
         }
         
-        console.log('[SW] Caching complete!');
+        // Send completion message
+        if (failed === 0) {
+          sendMessageToClients({
+            type: 'CACHE_COMPLETE',
+            total: cached
+          });
+        } else {
+          sendMessageToClients({
+            type: 'CACHE_ERROR',
+            cached: cached,
+            total: total,
+            failed: failed
+          });
+        }
+        
+        console.log(`[SW] Cached ${cached}/${total} files. Failed: ${failed}`);
       })
       .then(() => self.skipWaiting())
-      .catch((error) => {
-        console.error('[SW] Cache process failed:', error);
-      })
   );
 });
 
 // Activate - clean up old caches
 self.addEventListener("activate", (event) => {
-  console.log('[SW] Activating...');
   event.waitUntil(
     caches.keys().then((cacheNames) => {
       return Promise.all(
         cacheNames.map((cacheName) => {
           if (cacheName !== CACHE_NAME) {
-            console.log('[SW] Deleting old cache:', cacheName);
             return caches.delete(cacheName);
           }
+        })
+      );
+    }).then(() => self.clients.claim())
+  );
+});
+
+// Fetch - serve from cache or network
+self.addEventListener("fetch", (event) => {
+  if (event.request.method !== 'GET') return;
+  if (!event.request.url.startsWith('http')) return;
+  
+  event.respondWith(
+    caches.match(event.request)
+      .then((cachedResponse) => {
+        if (cachedResponse) {
+          return cachedResponse;
+        }
+        
+        return fetch(event.request).then((networkResponse) => {
+          if (networkResponse && networkResponse.status === 200) {
+            const responseToCache = networkResponse.clone();
+            caches.open(CACHE_NAME).then((cache) => {
+              cache.put(event.request, responseToCache);
+            });
+          }
+          return networkResponse;
+        });
+      })
+  );
+});          }
         })
       );
     }).then(() => {
