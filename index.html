@@ -2535,81 +2535,6 @@ if ('serviceWorker' in navigator) {
             font-size: 14px;
             line-height: 1.4;
         `;
-        statusDiv.innerHTML = '📥 Registering service worker...';
-        document.body.insertBefore(statusDiv, document.body.firstChild);
-
-        try {
-            statusDiv.innerHTML = '📥 Installing games for offline use...<br><span id="cache-progress">Starting...</span>';
-            
-            const registration = await navigator.serviceWorker.register('/service-worker.js');
-            
-            statusDiv.innerHTML = '📥 Service worker registered!<br><span id="cache-progress">Caching games...</span>';
-
-            // Listen for messages from service worker
-            navigator.serviceWorker.addEventListener('message', (event) => {
-                const progress = document.getElementById('cache-progress');
-                
-                if (event.data.type === 'CACHE_PROGRESS') {
-                    if (progress) {
-                        progress.textContent = `${event.data.cached}/${event.data.total} games cached`;
-                    }
-                }
-                
-                if (event.data.type === 'CACHE_COMPLETE') {
-                    statusDiv.style.background = '#4CAF50';
-                    statusDiv.innerHTML = `✓ All ${event.data.total} games ready for offline play!`;
-                    setTimeout(() => {
-                        statusDiv.style.transition = 'opacity 0.5s';
-                        statusDiv.style.opacity = '0';
-                        setTimeout(() => statusDiv.remove(), 500);
-                    }, 3000);
-                }
-                
-                if (event.data.type === 'CACHE_ERROR') {
-                    statusDiv.style.background = '#f44336';
-                    statusDiv.innerHTML = `⚠️ ${event.data.cached} of ${event.data.total} games cached.<br>Some games may not work offline.`;
-                }
-            });
-
-            // Wait for service worker to be ready
-            await navigator.serviceWorker.ready;
-            
-            // If no message received after 5 seconds, show status
-            setTimeout(() => {
-                if (statusDiv && statusDiv.style.background === 'rgb(33, 150, 243)') {
-                    statusDiv.style.background = '#4CAF50';
-                    statusDiv.innerHTML = '✓ Service worker active! Games caching in background...';
-                    setTimeout(() => {
-                        statusDiv.style.transition = 'opacity 0.5s';
-                        statusDiv.style.opacity = '0';
-                        setTimeout(() => statusDiv.remove(), 500);
-                    }, 3000);
-                }
-            }, 5000);
-
-        } catch (error) {
-            statusDiv.style.background = '#f44336';
-            statusDiv.innerHTML = `⚠️ Registration failed<br><small>${error.message}</small>`;
-            console.error('Service Worker registration failed:', error);
-if ('serviceWorker' in navigator) {
-    window.addEventListener('load', async () => {
-        // Create status display
-        const statusDiv = document.createElement('div');
-        statusDiv.id = 'cache-status';
-        statusDiv.style.cssText = `
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            background: #2196F3;
-            color: white;
-            padding: 15px;
-            text-align: center;
-            z-index: 99999;
-            font-family: Arial, sans-serif;
-            font-size: 14px;
-            line-height: 1.4;
-        `;
         statusDiv.innerHTML = '📥 Installing games for offline play...';
         document.body.insertBefore(statusDiv, document.body.firstChild);
 
@@ -2667,6 +2592,7 @@ if ('serviceWorker' in navigator) {
     document.body.insertBefore(statusDiv, document.body.firstChild);
     setTimeout(() => statusDiv.remove(), 3000);
 }
+
 	</script>
 
 	<!-- Default Statcounter code for AI Game Collection https://aigamecollection.com/ -->
