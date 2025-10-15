@@ -1,4 +1,4 @@
-const CACHE_NAME = "pwa-cache-v10.5";
+const CACHE_NAME = "pwa-cache-v10.6";
 
 const urlsToCache = [
   "/",
@@ -26,136 +26,139 @@ const urlsToCache = [
   "/images/icons/web-app-manifest-512x512.png",
 ];
 
-// Send message to all clients
-function sendMessageToClients(message) {
-  self.clients.matchAll().then(clients => {
-    clients.forEach(client => client.postMessage(message));
-  });
+// Helper to send messages to clients
+async function sendMessageToClients(message) {
+  try {
+    const clients = await self.clients.matchAll({ includeUncontrolled: true });
+    clients.forEach(client => {
+      client.postMessage(message);
+    });
+  } catch (error) {
+    console.error('Error sending message to clients:', error);
+  }
 }
 
-// Install - cache files with visual progress
+// Install event - cache all games
 self.addEventListener("install", (event) => {
-  console.log('[SW v10.5] Installing...');
+  console.log('[SW v10.6] Installing...');
+  
   event.waitUntil(
-    caches.open(CACHE_NAME)
-      .then(async (cache) => {
+    (async () => {
+      try {
+        const cache = await caches.open(CACHE_NAME);
         let cached = 0;
         let failed = 0;
         const total = urlsToCache.length;
         
-        // Cache files one by one
+        // Cache each file individually
         for (const url of urlsToCache) {
           try {
             await cache.add(url);
             cached++;
-            sendMessageToClients({
+            
+            // Send progress update
+            await sendMessageToClients({
               type: 'CACHE_PROGRESS',
               cached: cached,
               total: total
             });
+            
           } catch (error) {
             failed++;
-            console.error(`Failed to cache: ${url}`, error);
+            console.error(`[SW] Failed to cache: ${url}`, error);
           }
         }
         
         // Send completion message
         if (failed === 0) {
-          sendMessageToClients({
+          await sendMessageToClients({
             type: 'CACHE_COMPLETE',
             total: cached
           });
+          console.log(`[SW] Successfully cached all ${cached} files`);
         } else {
-          sendMessageToClients({
+          await sendMessageToClients({
             type: 'CACHE_ERROR',
             cached: cached,
             total: total,
             failed: failed
           });
+          console.log(`[SW] Cached ${cached}/${total} files. ${failed} failed.`);
         }
         
-        console.log(`[SW] Cached ${cached}/${total} files. Failed: ${failed}`);
-      })
-      .then(() => self.skipWaiting())
+        // Skip waiting to activate immediately
+        await self.skipWaiting();
+        
+      } catch (error) {
+        console.error('[SW] Install failed:', error);
+        throw error;
+      }
+    })()
   );
 });
 
-// Activate - clean up old caches
+// Activate event - clean up old caches
 self.addEventListener("activate", (event) => {
+  console.log('[SW] Activating...');
+  
   event.waitUntil(
-    caches.keys().then((cacheNames) => {
-      return Promise.all(
-        cacheNames.map((cacheName) => {
-          if (cacheName !== CACHE_NAME) {
-            return caches.delete(cacheName);
-          }
-        })
-      );
-    }).then(() => self.clients.claim())
+    (async () => {
+      try {
+        const cacheNames = await caches.keys();
+        
+        // Delete old caches
+        await Promise.all(
+          cacheNames.map(cacheName => {
+            if (cacheName !== CACHE_NAME) {
+              console.log('[SW] Deleting old cache:', cacheName);
+              return caches.delete(cacheName);
+            }
+          })
+        );
+        
+        // Take control of all pages
+        await self.clients.claim();
+        console.log('[SW] Activated and ready!');
+        
+      } catch (error) {
+        console.error('[SW] Activation failed:', error);
+      }
+    })()
   );
 });
 
-// Fetch - serve from cache or network
+// Fetch event - serve from cache, fallback to network
 self.addEventListener("fetch", (event) => {
+  // Skip non-GET requests
   if (event.request.method !== 'GET') return;
+  
+  // Skip non-http requests
   if (!event.request.url.startsWith('http')) return;
   
   event.respondWith(
-    caches.match(event.request)
-      .then((cachedResponse) => {
+    (async () => {
+      try {
+        // Try cache first
+        const cachedResponse = await caches.match(event.request);
         if (cachedResponse) {
           return cachedResponse;
         }
         
-        return fetch(event.request).then((networkResponse) => {
-          if (networkResponse && networkResponse.status === 200) {
-            const responseToCache = networkResponse.clone();
-            caches.open(CACHE_NAME).then((cache) => {
-              cache.put(event.request, responseToCache);
-            });
-          }
-          return networkResponse;
-        });
-      })
-  );
-});          }
-        })
-      );
-    }).then(() => {
-      console.log('[SW] Activated!');
-      return self.clients.claim();
-    })
-  );
-});
-
-// Fetch - serve from cache
-self.addEventListener("fetch", (event) => {
-  if (event.request.method !== 'GET') return;
-  if (!event.request.url.startsWith('http')) return;
-  
-  event.respondWith(
-    caches.match(event.request)
-      .then((cachedResponse) => {
-        if (cachedResponse) {
-          console.log('[SW] ✓ Serving from cache:', event.request.url);
-          return cachedResponse;
+        // Not in cache, fetch from network
+        const networkResponse = await fetch(event.request);
+        
+        // Cache successful responses
+        if (networkResponse && networkResponse.status === 200) {
+          const cache = await caches.open(CACHE_NAME);
+          cache.put(event.request, networkResponse.clone());
         }
         
-        console.log('[SW] → Fetching from network:', event.request.url);
-        return fetch(event.request).then((networkResponse) => {
-          if (networkResponse && networkResponse.status === 200) {
-            const responseToCache = networkResponse.clone();
-            caches.open(CACHE_NAME).then((cache) => {
-              console.log('[SW] Caching new resource:', event.request.url);
-              cache.put(event.request, responseToCache);
-            });
-          }
-          return networkResponse;
-        });
-      })
-      .catch((error) => {
+        return networkResponse;
+        
+      } catch (error) {
         console.error('[SW] Fetch failed:', event.request.url, error);
         throw error;
-      })
+      }
+    })()
   );
 });
