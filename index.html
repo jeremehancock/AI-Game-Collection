@@ -2518,35 +2518,40 @@ m489 -117 c31 -26 31 -78 -1 -104 -22 -18 -39 -19 -226 -16 -220 3 -226 5
 
 if ('serviceWorker' in navigator) {
     window.addEventListener('load', async () => {
-        try {
-            // Create a status display
-            const statusDiv = document.createElement('div');
-            statusDiv.id = 'cache-status';
-            statusDiv.style.cssText = `
-                position: fixed;
-                top: 0;
-                left: 0;
-                right: 0;
-                background: #2196F3;
-                color: white;
-                padding: 15px;
-                text-align: center;
-                z-index: 99999;
-                font-family: Arial, sans-serif;
-                font-size: 14px;
-            `;
-            statusDiv.innerHTML = '📥 Installing games for offline use...<br><span id="cache-progress">0/20</span>';
-            document.body.insertBefore(statusDiv, document.body.firstChild);
+        // Create status display
+        const statusDiv = document.createElement('div');
+        statusDiv.id = 'cache-status';
+        statusDiv.style.cssText = `
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: #2196F3;
+            color: white;
+            padding: 15px;
+            text-align: center;
+            z-index: 99999;
+            font-family: Arial, sans-serif;
+            font-size: 14px;
+            line-height: 1.4;
+        `;
+        statusDiv.innerHTML = '📥 Registering service worker...';
+        document.body.insertBefore(statusDiv, document.body.firstChild);
 
-            const registration = await navigator.serviceWorker.register('service-worker.js');
-            console.log('Service Worker registered');
+        try {
+            statusDiv.innerHTML = '📥 Installing games for offline use...<br><span id="cache-progress">Starting...</span>';
+            
+            const registration = await navigator.serviceWorker.register('/service-worker.js');
+            
+            statusDiv.innerHTML = '📥 Service worker registered!<br><span id="cache-progress">Caching games...</span>';
 
             // Listen for messages from service worker
             navigator.serviceWorker.addEventListener('message', (event) => {
+                const progress = document.getElementById('cache-progress');
+                
                 if (event.data.type === 'CACHE_PROGRESS') {
-                    const progress = document.getElementById('cache-progress');
                     if (progress) {
-                        progress.textContent = `${event.data.cached}/${event.data.total}`;
+                        progress.textContent = `${event.data.cached}/${event.data.total} games cached`;
                     }
                 }
                 
@@ -2562,22 +2567,48 @@ if ('serviceWorker' in navigator) {
                 
                 if (event.data.type === 'CACHE_ERROR') {
                     statusDiv.style.background = '#f44336';
-                    statusDiv.innerHTML = `⚠️ Some games failed to cache. ${event.data.cached} of ${event.data.total} cached.<br>You may need to be online to play some games.`;
+                    statusDiv.innerHTML = `⚠️ ${event.data.cached} of ${event.data.total} games cached.<br>Some games may not work offline.`;
                 }
             });
 
             // Wait for service worker to be ready
             await navigator.serviceWorker.ready;
+            
+            // If no message received after 5 seconds, show status
+            setTimeout(() => {
+                if (statusDiv && statusDiv.style.background === 'rgb(33, 150, 243)') {
+                    statusDiv.style.background = '#4CAF50';
+                    statusDiv.innerHTML = '✓ Service worker active! Games caching in background...';
+                    setTimeout(() => {
+                        statusDiv.style.transition = 'opacity 0.5s';
+                        statusDiv.style.opacity = '0';
+                        setTimeout(() => statusDiv.remove(), 500);
+                    }, 3000);
+                }
+            }, 5000);
 
         } catch (error) {
+            statusDiv.style.background = '#f44336';
+            statusDiv.innerHTML = `⚠️ Registration failed<br><small>${error.message}</small>`;
             console.error('Service Worker registration failed:', error);
-            const statusDiv = document.getElementById('cache-status');
-            if (statusDiv) {
-                statusDiv.style.background = '#f44336';
-                statusDiv.innerHTML = '⚠️ Offline mode unavailable';
-            }
         }
     });
+} else {
+    // Browser doesn't support service workers
+    const statusDiv = document.createElement('div');
+    statusDiv.style.cssText = `
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        background: #f44336;
+        color: white;
+        padding: 15px;
+        text-align: center;
+        z-index: 99999;
+    `;
+    statusDiv.innerHTML = '⚠️ Your browser does not support offline mode';
+    document.body.insertBefore(statusDiv, document.body.firstChild);
 }
 	</script>
 
