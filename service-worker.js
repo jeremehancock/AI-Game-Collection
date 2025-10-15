@@ -1,4 +1,4 @@
-const CACHE_NAME = "pwa-cache-v9.9";
+const CACHE_NAME = "pwa-cache-v10.0";
 const urlsToCache = [
   "/",
   "index.html",
@@ -20,21 +20,34 @@ const urlsToCache = [
   "games/fruit-slice/index.html",
   "games/orb-attack/index.html",
   "games/four-in-a-row/index.html",
+  "games/flapping-bird/index.html",
   "images/icons/web-app-manifest-192x192.png",
   "images/icons/web-app-manifest-512x512.png",
 ];
 
-// Install the service worker and cache resources
+// Install the service worker and cache ALL resources immediately
 self.addEventListener("install", (event) => {
+  console.log('Service Worker installing, caching all games...');
   event.waitUntil(
     caches.open(CACHE_NAME)
-      .then((cache) => cache.addAll(urlsToCache))
-      .then(() => self.skipWaiting())
+      .then((cache) => {
+        console.log('Caching all game files...');
+        return cache.addAll(urlsToCache);
+      })
+      .then(() => {
+        console.log('All games cached successfully!');
+        return self.skipWaiting();
+      })
+      .catch((error) => {
+        console.error('Failed to cache games:', error);
+        throw error;
+      })
   );
 });
 
 // Activate and clean up old caches
 self.addEventListener("activate", (event) => {
+  console.log('Service Worker activating...');
   event.waitUntil(
     caches.keys().then((cacheNames) => {
       return Promise.all(
@@ -45,7 +58,10 @@ self.addEventListener("activate", (event) => {
           }
         })
       );
-    }).then(() => self.clients.claim())
+    }).then(() => {
+      console.log('Service Worker activated and ready!');
+      return self.clients.claim();
+    })
   );
 });
 
