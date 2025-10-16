@@ -157,6 +157,24 @@
             border-radius: 50%;
         }
 
+        .square.last-move {
+            position: relative;
+            animation: lastMoveGlow 2s;
+        }
+
+        @keyframes lastMoveGlow {
+
+            0%,
+            100% {
+                box-shadow: none;
+            }
+
+            50% {
+                box-shadow: inset 0 0 0 4px #ff8c42,
+                    0 0 20px rgba(255, 140, 66, 0.8);
+            }
+        }
+
         .square.must-jump {
             animation: jumpPulse 1s infinite;
         }
@@ -341,6 +359,7 @@
                 this.isProcessing = false;
                 this.pendingAction = null;
                 this.moveCount = 0;
+                this.lastMove = null;
 
                 this.initUI();
                 this.render();
@@ -460,6 +479,7 @@
                 this.validMoves = [];
                 this.isProcessing = false;
                 this.moveCount = 0;
+                this.lastMove = null;
                 document.getElementById('winnerModal').classList.remove('show');
                 this.render();
             }
@@ -482,6 +502,13 @@
                         // Highlight pieces that must jump
                         if (piecesWithJumps.has(`${row},${col}`)) {
                             square.classList.add('must-jump');
+                        }
+
+                        // Highlight last move
+                        if (this.lastMove &&
+                            ((this.lastMove.from.row === row && this.lastMove.from.col === col) ||
+                                (this.lastMove.to.row === row && this.lastMove.to.col === col))) {
+                            square.classList.add('last-move');
                         }
 
                         if (this.selectedPiece && this.selectedPiece.row === row && this.selectedPiece.col === col) {
@@ -522,6 +549,9 @@
                     this.makeMove(this.selectedPiece.row, this.selectedPiece.col, row, col);
                     return;
                 }
+
+                // Clear AI move highlight when player starts their turn
+                this.lastMove = null;
 
                 // If clicking on own piece
                 if (piece && piece.color === this.currentPlayer) {
@@ -620,6 +650,14 @@
                 const piece = this.board[fromRow][fromCol];
                 const move = this.validMoves.find(m => m.row === toRow && m.col === toCol);
 
+                // Track this move for highlighting (only for AI moves)
+                if (this.aiMode && this.currentPlayer === 'black') {
+                    this.lastMove = {
+                        from: { row: fromRow, col: fromCol },
+                        to: { row: toRow, col: toCol }
+                    };
+                }
+
                 this.board[toRow][toCol] = piece;
                 this.board[fromRow][fromCol] = null;
 
@@ -677,7 +715,7 @@
                                 }
 
                                 this.makeMove(toRow, toCol, nextMove.toRow, nextMove.toCol);
-                            }, 300);
+                            }, 800);
                             return;
                         }
                     }
@@ -702,7 +740,7 @@
 
                     if (this.aiMode && this.currentPlayer === 'black') {
                         this.isProcessing = true;
-                        setTimeout(() => this.makeAIMove(), 500);
+                        setTimeout(() => this.makeAIMove(), 800);
                     }
                 }
 
