@@ -1,4 +1,4 @@
-const CACHE_NAME = "pwa-cache-v10.8";
+const CACHE_NAME = "pwa-cache-v11.0";
 
 const urlsToCache = [
   "/",
@@ -23,6 +23,8 @@ const urlsToCache = [
   "/games/four-in-a-row/index.html",
   "/games/flapping-bird/index.html",
   "/games/water-ring-toss/index.html",
+  "/games/tic-tac-toe/index.html",
+  "/games/checkers/index.html",
   "/images/icons/web-app-manifest-192x192.png",
   "/images/icons/web-app-manifest-512x512.png",
 ];
@@ -31,18 +33,18 @@ const urlsToCache = [
 async function sendMessageToClients(message) {
   try {
     const clients = await self.clients.matchAll({ includeUncontrolled: true });
-    clients.forEach(client => {
+    clients.forEach((client) => {
       client.postMessage(message);
     });
   } catch (error) {
-    console.error('Error sending message to clients:', error);
+    console.error("Error sending message to clients:", error);
   }
 }
 
 // Install event - cache all games
 self.addEventListener("install", (event) => {
-  console.log('[SW v10.7] Installing...');
-  
+  console.log("[SW v10.7] Installing...");
+
   event.waitUntil(
     (async () => {
       try {
@@ -50,44 +52,44 @@ self.addEventListener("install", (event) => {
         let cached = 0;
         let failed = 0;
         const total = urlsToCache.length;
-        
+
         for (const url of urlsToCache) {
           try {
             await cache.add(url);
             cached++;
-            
+
             await sendMessageToClients({
-              type: 'CACHE_PROGRESS',
+              type: "CACHE_PROGRESS",
               cached: cached,
-              total: total
+              total: total,
             });
-            
           } catch (error) {
             failed++;
             console.error(`[SW] Failed to cache: ${url}`, error);
           }
         }
-        
+
         if (failed === 0) {
           await sendMessageToClients({
-            type: 'CACHE_COMPLETE',
-            total: cached
+            type: "CACHE_COMPLETE",
+            total: cached,
           });
           console.log(`[SW] Successfully cached all ${cached} files`);
         } else {
           await sendMessageToClients({
-            type: 'CACHE_ERROR',
+            type: "CACHE_ERROR",
             cached: cached,
             total: total,
-            failed: failed
+            failed: failed,
           });
-          console.log(`[SW] Cached ${cached}/${total} files. ${failed} failed.`);
+          console.log(
+            `[SW] Cached ${cached}/${total} files. ${failed} failed.`
+          );
         }
-        
+
         await self.skipWaiting();
-        
       } catch (error) {
-        console.error('[SW] Install failed:', error);
+        console.error("[SW] Install failed:", error);
         throw error;
       }
     })()
@@ -96,27 +98,26 @@ self.addEventListener("install", (event) => {
 
 // Activate event
 self.addEventListener("activate", (event) => {
-  console.log('[SW] Activating...');
-  
+  console.log("[SW] Activating...");
+
   event.waitUntil(
     (async () => {
       try {
         const cacheNames = await caches.keys();
-        
+
         await Promise.all(
-          cacheNames.map(cacheName => {
+          cacheNames.map((cacheName) => {
             if (cacheName !== CACHE_NAME) {
-              console.log('[SW] Deleting old cache:', cacheName);
+              console.log("[SW] Deleting old cache:", cacheName);
               return caches.delete(cacheName);
             }
           })
         );
-        
+
         await self.clients.claim();
-        console.log('[SW] Activated and ready!');
-        
+        console.log("[SW] Activated and ready!");
       } catch (error) {
-        console.error('[SW] Activation failed:', error);
+        console.error("[SW] Activation failed:", error);
       }
     })()
   );
@@ -124,67 +125,66 @@ self.addEventListener("activate", (event) => {
 
 // Enhanced fetch handler with URL variations
 self.addEventListener("fetch", (event) => {
-  if (event.request.method !== 'GET') return;
-  if (!event.request.url.startsWith('http')) return;
-  
+  if (event.request.method !== "GET") return;
+  if (!event.request.url.startsWith("http")) return;
+
   event.respondWith(
     (async () => {
       try {
         const url = new URL(event.request.url);
-        
+
         // Try exact match first
         let response = await caches.match(event.request);
         if (response) {
-          console.log('[SW] ✓ Cache hit:', url.pathname);
+          console.log("[SW] ✓ Cache hit:", url.pathname);
           return response;
         }
-        
+
         // If no match and URL ends with /, try adding index.html
-        if (url.pathname.endsWith('/')) {
-          const indexUrl = url.pathname + 'index.html';
+        if (url.pathname.endsWith("/")) {
+          const indexUrl = url.pathname + "index.html";
           response = await caches.match(indexUrl);
           if (response) {
-            console.log('[SW] ✓ Cache hit (index.html):', indexUrl);
+            console.log("[SW] ✓ Cache hit (index.html):", indexUrl);
             return response;
           }
         }
-        
+
         // If URL doesn't have extension, try adding /index.html
-        if (!url.pathname.includes('.')) {
-          const indexUrl = url.pathname + '/index.html';
+        if (!url.pathname.includes(".")) {
+          const indexUrl = url.pathname + "/index.html";
           response = await caches.match(indexUrl);
           if (response) {
-            console.log('[SW] ✓ Cache hit (added /index.html):', indexUrl);
+            console.log("[SW] ✓ Cache hit (added /index.html):", indexUrl);
             return response;
           }
         }
-        
+
         // Try without trailing slash
-        if (url.pathname.endsWith('/') && url.pathname !== '/') {
+        if (url.pathname.endsWith("/") && url.pathname !== "/") {
           const noSlashUrl = url.pathname.slice(0, -1);
           response = await caches.match(noSlashUrl);
           if (response) {
-            console.log('[SW] ✓ Cache hit (no slash):', noSlashUrl);
+            console.log("[SW] ✓ Cache hit (no slash):", noSlashUrl);
             return response;
           }
         }
-        
-        console.log('[SW] ✗ Cache miss, fetching:', url.pathname);
-        
+
+        console.log("[SW] ✗ Cache miss, fetching:", url.pathname);
+
         // Not in cache - fetch from network
         const networkResponse = await fetch(event.request);
-        
+
         // Cache successful responses
         if (networkResponse && networkResponse.status === 200) {
           const cache = await caches.open(CACHE_NAME);
           cache.put(event.request, networkResponse.clone());
-          console.log('[SW] Cached from network:', url.pathname);
+          console.log("[SW] Cached from network:", url.pathname);
         }
-        
+
         return networkResponse;
-        
       } catch (error) {
-        console.error('[SW] Fetch failed:', event.request.url, error);
+        console.error("[SW] Fetch failed:", event.request.url, error);
         throw error;
       }
     })()

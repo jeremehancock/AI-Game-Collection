@@ -1,0 +1,860 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Checkers Game</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #8b6f47 0%, #6b4423 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 10px;
+            touch-action: manipulation;
+        }
+
+        .container {
+            max-width: 500px;
+            width: 100%;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #f5e6d3 0%, #e8d4b8 100%);
+            padding: 15px;
+            border-radius: 15px 15px 0 0;
+            text-align: center;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            font-size: 24px;
+            color: #3d2817;
+            margin-bottom: 10px;
+        }
+
+        .status {
+            font-size: 16px;
+            color: #5d4a3a;
+            margin: 5px 0;
+            font-weight: 500;
+        }
+
+        .controls {
+            display: flex;
+            gap: 8px;
+            margin-top: 10px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        button {
+            padding: 10px 16px;
+            font-size: 14px;
+            border: none;
+            border-radius: 8px;
+            background: linear-gradient(135deg, #a67c52, #8b6239);
+            color: white;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+            touch-action: manipulation;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        button:active {
+            transform: scale(0.95);
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+        }
+
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .difficulty-select {
+            display: flex;
+            gap: 5px;
+            margin-top: 10px;
+        }
+
+        .difficulty-btn {
+            flex: 1;
+            padding: 8px;
+            font-size: 13px;
+            background: #d4c4b0;
+            color: #3d2817;
+        }
+
+        .difficulty-btn.active {
+            background: linear-gradient(135deg, #c9a882, #b58863);
+            color: white;
+        }
+
+        .board-container {
+            background: linear-gradient(135deg, #f5e6d3 0%, #e8d4b8 100%);
+            padding: 10px;
+            border-radius: 0 0 15px 15px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        .board {
+            display: grid;
+            grid-template-columns: repeat(8, 1fr);
+            gap: 2px;
+            background: #000;
+            border: 3px solid #000;
+            aspect-ratio: 1;
+            width: 100%;
+            max-width: 480px;
+            margin: 0 auto;
+        }
+
+        .square {
+            aspect-ratio: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            position: relative;
+        }
+
+        .square.light {
+            background: #f0d9b5;
+        }
+
+        .square.dark {
+            background: #b58863;
+        }
+
+        .square.selected {
+            background: #7fc97f !important;
+            box-shadow: inset 0 0 0 3px #4a9;
+        }
+
+        .square.valid-move {
+            background: #ffffcc !important;
+        }
+
+        .square.valid-move::after {
+            content: '';
+            position: absolute;
+            width: 30%;
+            height: 30%;
+            background: rgba(0, 200, 0, 0.5);
+            border-radius: 50%;
+        }
+
+        .square.must-jump {
+            animation: jumpPulse 1s infinite;
+        }
+
+        @keyframes jumpPulse {
+
+            0%,
+            100% {
+                box-shadow: inset 0 0 0 4px rgba(255, 100, 100, 0.8);
+            }
+
+            50% {
+                box-shadow: inset 0 0 0 4px rgba(255, 200, 100, 1),
+                    0 0 15px rgba(255, 100, 100, 0.6);
+            }
+        }
+
+        .square.valid-jump::after {
+            content: '⚡';
+            position: absolute;
+            font-size: 20px;
+            animation: bounce 0.6s infinite;
+        }
+
+        @keyframes bounce {
+
+            0%,
+            100% {
+                transform: translateY(0);
+            }
+
+            50% {
+                transform: translateY(-5px);
+            }
+        }
+
+        .piece {
+            width: 75%;
+            height: 75%;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+            transition: transform 0.2s;
+        }
+
+        .piece.red {
+            background: radial-gradient(circle at 30% 30%, #ff6b6b, #c92a2a);
+            border: 2px solid #a61e1e;
+        }
+
+        .piece.black {
+            background: radial-gradient(circle at 30% 30%, #495057, #212529);
+            border: 2px solid #000;
+        }
+
+        .piece.king::after {
+            content: '♔';
+            font-size: 24px;
+            color: gold;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+        }
+
+        .winner-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.8);
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        .winner-modal.show {
+            display: flex;
+        }
+
+        .modal-content {
+            background: linear-gradient(135deg, #f5e6d3 0%, #e8d4b8 100%);
+            padding: 30px;
+            border-radius: 15px;
+            text-align: center;
+            max-width: 300px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+        }
+
+        .modal-content h2 {
+            font-size: 28px;
+            margin-bottom: 15px;
+            color: #3d2817;
+        }
+
+        .modal-content p {
+            font-size: 16px;
+            color: #5d4a3a;
+            margin-bottom: 20px;
+        }
+
+        .modal-buttons {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+        }
+
+        .modal-content button {
+            margin-top: 0;
+            flex: 1;
+        }
+
+        .cancel-btn {
+            background: linear-gradient(135deg, #d4c4b0, #c9a882) !important;
+        }
+
+        @media (max-width: 400px) {
+            h1 {
+                font-size: 20px;
+            }
+
+            .status {
+                font-size: 14px;
+            }
+
+            button {
+                padding: 8px 12px;
+                font-size: 13px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>👑 Checkers</h1>
+            <div class="status" id="status">Red's Turn</div>
+            <div class="controls">
+                <button id="newGame">New Game</button>
+                <button id="vsAI">Play vs AI</button>
+            </div>
+            <div class="difficulty-select" id="difficultySelect" style="display: none;">
+                <button class="difficulty-btn active" data-level="easy">Easy</button>
+                <button class="difficulty-btn" data-level="medium">Medium</button>
+                <button class="difficulty-btn" data-level="hard">Hard</button>
+            </div>
+        </div>
+        <div class="board-container">
+            <div class="board" id="board"></div>
+        </div>
+    </div>
+
+    <div class="winner-modal" id="winnerModal">
+        <div class="modal-content">
+            <h2 id="winnerText">Red Wins! 🎉</h2>
+            <button id="playAgain">Play Again</button>
+        </div>
+    </div>
+
+    <div class="winner-modal" id="confirmModal">
+        <div class="modal-content">
+            <h2>⚠️ Confirm</h2>
+            <p id="confirmText">Start a new game?</p>
+            <div class="modal-buttons">
+                <button class="cancel-btn" id="cancelBtn">Cancel</button>
+                <button id="confirmBtn">Confirm</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        class CheckersGame {
+            constructor() {
+                this.board = this.initBoard();
+                this.currentPlayer = 'red';
+                this.selectedPiece = null;
+                this.validMoves = [];
+                this.aiMode = false;
+                this.aiDifficulty = 'easy';
+                this.isProcessing = false;
+                this.pendingAction = null;
+                this.moveCount = 0;
+
+                this.initUI();
+                this.render();
+            }
+
+            initBoard() {
+                const board = Array(8).fill(null).map(() => Array(8).fill(null));
+
+                // Place black pieces (top - AI side)
+                for (let row = 0; row < 3; row++) {
+                    for (let col = 0; col < 8; col++) {
+                        if ((row + col) % 2 === 1) {
+                            board[row][col] = { color: 'black', king: false };
+                        }
+                    }
+                }
+
+                // Place red pieces (bottom - player side)
+                for (let row = 5; row < 8; row++) {
+                    for (let col = 0; col < 8; col++) {
+                        if ((row + col) % 2 === 1) {
+                            board[row][col] = { color: 'red', king: false };
+                        }
+                    }
+                }
+
+                return board;
+            }
+
+            initUI() {
+                document.getElementById('newGame').addEventListener('click', () => this.confirmAction('newGame'));
+                document.getElementById('vsAI').addEventListener('click', () => this.confirmAction('toggleAI'));
+                document.getElementById('playAgain').addEventListener('click', () => this.newGame());
+
+                document.getElementById('confirmBtn').addEventListener('click', () => this.executeAction());
+                document.getElementById('cancelBtn').addEventListener('click', () => this.hideConfirmModal());
+
+                // Close modal when clicking outside
+                document.getElementById('confirmModal').addEventListener('click', (e) => {
+                    if (e.target.id === 'confirmModal') {
+                        this.hideConfirmModal();
+                    }
+                });
+
+                document.querySelectorAll('.difficulty-btn').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        document.querySelectorAll('.difficulty-btn').forEach(b => b.classList.remove('active'));
+                        e.target.classList.add('active');
+                        this.aiDifficulty = e.target.dataset.level;
+                    });
+                });
+            }
+
+            confirmAction(action) {
+                // Don't allow actions while AI is processing
+                if (this.isProcessing) {
+                    return;
+                }
+
+                // Don't show confirmation if no moves have been made yet
+                if (this.moveCount === 0) {
+                    if (action === 'newGame') {
+                        this.newGame();
+                    } else if (action === 'toggleAI') {
+                        this.toggleAI();
+                    }
+                    return;
+                }
+
+                // Show confirmation for any game in progress
+                this.pendingAction = action;
+                const confirmText = document.getElementById('confirmText');
+
+                if (action === 'newGame') {
+                    confirmText.textContent = 'Start a new game? Current game will be lost.';
+                } else if (action === 'toggleAI') {
+                    const newMode = this.aiMode ? 'Human vs Human' : 'vs AI';
+                    confirmText.textContent = `Switch to ${newMode} mode? Current game will be lost.`;
+                }
+
+                document.getElementById('confirmModal').classList.add('show');
+            }
+
+            hideConfirmModal() {
+                document.getElementById('confirmModal').classList.remove('show');
+                this.pendingAction = null;
+            }
+
+            executeAction() {
+                if (this.pendingAction === 'newGame') {
+                    this.newGame();
+                } else if (this.pendingAction === 'toggleAI') {
+                    this.toggleAI();
+                }
+                this.hideConfirmModal();
+            }
+
+            toggleAI() {
+                this.aiMode = !this.aiMode;
+                const btn = document.getElementById('vsAI');
+                const diffSelect = document.getElementById('difficultySelect');
+
+                if (this.aiMode) {
+                    btn.textContent = 'Play vs Human';
+                    diffSelect.style.display = 'flex';
+                } else {
+                    btn.textContent = 'Play vs AI';
+                    diffSelect.style.display = 'none';
+                }
+                this.newGame();
+            }
+
+            newGame() {
+                this.board = this.initBoard();
+                this.currentPlayer = 'red';
+                this.selectedPiece = null;
+                this.validMoves = [];
+                this.isProcessing = false;
+                this.moveCount = 0;
+                document.getElementById('winnerModal').classList.remove('show');
+                this.render();
+            }
+
+            render() {
+                const boardEl = document.getElementById('board');
+                boardEl.innerHTML = '';
+
+                // Find pieces that must jump
+                const allJumps = this.findAllJumps(this.currentPlayer);
+                const piecesWithJumps = new Set(allJumps.map(j => `${j.fromRow},${j.fromCol}`));
+
+                for (let row = 0; row < 8; row++) {
+                    for (let col = 0; col < 8; col++) {
+                        const square = document.createElement('div');
+                        square.className = `square ${(row + col) % 2 === 0 ? 'light' : 'dark'}`;
+                        square.dataset.row = row;
+                        square.dataset.col = col;
+
+                        // Highlight pieces that must jump
+                        if (piecesWithJumps.has(`${row},${col}`)) {
+                            square.classList.add('must-jump');
+                        }
+
+                        if (this.selectedPiece && this.selectedPiece.row === row && this.selectedPiece.col === col) {
+                            square.classList.add('selected');
+                        }
+
+                        if (this.validMoves.some(m => m.row === row && m.col === col)) {
+                            square.classList.add('valid-move');
+                            // Add jump indicator for jump moves
+                            if (this.validMoves.find(m => m.row === row && m.col === col)?.captured) {
+                                square.classList.add('valid-jump');
+                            }
+                        }
+
+                        const piece = this.board[row][col];
+                        if (piece) {
+                            const pieceEl = document.createElement('div');
+                            pieceEl.className = `piece ${piece.color}${piece.king ? ' king' : ''}`;
+                            square.appendChild(pieceEl);
+                        }
+
+                        square.addEventListener('click', () => this.handleSquareClick(row, col));
+                        boardEl.appendChild(square);
+                    }
+                }
+
+                this.updateStatus();
+            }
+
+            handleSquareClick(row, col) {
+                if (this.isProcessing) return;
+                if (this.aiMode && this.currentPlayer === 'black') return;
+
+                const piece = this.board[row][col];
+
+                // If clicking on a valid move
+                if (this.validMoves.some(m => m.row === row && m.col === col)) {
+                    this.makeMove(this.selectedPiece.row, this.selectedPiece.col, row, col);
+                    return;
+                }
+
+                // If clicking on own piece
+                if (piece && piece.color === this.currentPlayer) {
+                    this.selectedPiece = { row, col };
+                    this.validMoves = this.getValidMoves(row, col);
+                    this.render();
+                } else {
+                    this.selectedPiece = null;
+                    this.validMoves = [];
+                    this.render();
+                }
+            }
+
+            getValidMoves(row, col) {
+                const piece = this.board[row][col];
+                if (!piece) return [];
+
+                const moves = [];
+                const jumps = [];
+                const directions = piece.king
+                    ? [[-1, -1], [-1, 1], [1, -1], [1, 1]]
+                    : piece.color === 'red'
+                        ? [[-1, -1], [-1, 1]]  // Red moves up
+                        : [[1, -1], [1, 1]];   // Black moves down
+
+                for (const [dr, dc] of directions) {
+                    const newRow = row + dr;
+                    const newCol = col + dc;
+
+                    // Regular move
+                    if (this.isValidSquare(newRow, newCol) && !this.board[newRow][newCol]) {
+                        moves.push({ row: newRow, col: newCol });
+                    }
+
+                    // Jump move
+                    const jumpRow = row + dr * 2;
+                    const jumpCol = col + dc * 2;
+                    if (this.isValidSquare(jumpRow, jumpCol) && !this.board[jumpRow][jumpCol]) {
+                        const captured = this.board[newRow][newCol];
+                        if (captured && captured.color !== piece.color) {
+                            jumps.push({ row: jumpRow, col: jumpCol, captured: { row: newRow, col: newCol } });
+                        }
+                    }
+                }
+
+                // If this piece can jump, only return jumps
+                if (jumps.length > 0) return jumps;
+
+                // Check if ANY piece can jump - if so, regular moves not allowed
+                const hasJumps = this.findAllJumps(piece.color).length > 0;
+                if (hasJumps) return [];
+
+                return moves;
+            }
+
+            findAllJumps(color) {
+                const jumps = [];
+
+                for (let row = 0; row < 8; row++) {
+                    for (let col = 0; col < 8; col++) {
+                        const piece = this.board[row][col];
+                        if (piece && piece.color === color) {
+                            const directions = piece.king
+                                ? [[-1, -1], [-1, 1], [1, -1], [1, 1]]
+                                : piece.color === 'red'
+                                    ? [[-1, -1], [-1, 1]]  // Red moves up
+                                    : [[1, -1], [1, 1]];   // Black moves down
+
+                            for (const [dr, dc] of directions) {
+                                const midRow = row + dr;
+                                const midCol = col + dc;
+                                const jumpRow = row + dr * 2;
+                                const jumpCol = col + dc * 2;
+
+                                if (this.isValidSquare(jumpRow, jumpCol) && !this.board[jumpRow][jumpCol]) {
+                                    const captured = this.board[midRow][midCol];
+                                    if (captured && captured.color !== color) {
+                                        jumps.push({
+                                            fromRow: row,
+                                            fromCol: col,
+                                            toRow: jumpRow,
+                                            toCol: jumpCol,
+                                            captured: { row: midRow, col: midCol }
+                                        });
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+
+                return jumps;
+            }
+
+            makeMove(fromRow, fromCol, toRow, toCol) {
+                const piece = this.board[fromRow][fromCol];
+                const move = this.validMoves.find(m => m.row === toRow && m.col === toCol);
+
+                this.board[toRow][toCol] = piece;
+                this.board[fromRow][fromCol] = null;
+
+                // Handle capture
+                let continueTurn = false;
+                if (move && move.captured) {
+                    this.board[move.captured.row][move.captured.col] = null;
+
+                    // Check for additional jumps from new position
+                    const directions = piece.king
+                        ? [[-1, -1], [-1, 1], [1, -1], [1, 1]]
+                        : piece.color === 'red'
+                            ? [[-1, -1], [-1, 1]]  // Red moves up
+                            : [[1, -1], [1, 1]];   // Black moves down
+
+                    const additionalJumps = [];
+                    for (const [dr, dc] of directions) {
+                        const midRow = toRow + dr;
+                        const midCol = toCol + dc;
+                        const jumpRow = toRow + dr * 2;
+                        const jumpCol = toCol + dc * 2;
+
+                        if (this.isValidSquare(jumpRow, jumpCol) && !this.board[jumpRow][jumpCol]) {
+                            const captured = this.board[midRow][midCol];
+                            if (captured && captured.color !== piece.color) {
+                                additionalJumps.push({ row: jumpRow, col: jumpCol, captured: { row: midRow, col: midCol } });
+                            }
+                        }
+                    }
+
+                    if (additionalJumps.length > 0) {
+                        this.selectedPiece = { row: toRow, col: toCol };
+                        this.validMoves = additionalJumps;
+                        continueTurn = true;
+
+                        // If AI turn, automatically continue the multi-jump
+                        if (this.aiMode && this.currentPlayer === 'black') {
+                            this.render();
+                            setTimeout(() => {
+                                const jumpMoves = additionalJumps.map(j => ({
+                                    fromRow: toRow,
+                                    fromCol: toCol,
+                                    toRow: j.row,
+                                    toCol: j.col,
+                                    captured: j.captured
+                                }));
+
+                                let nextMove;
+                                if (this.aiDifficulty === 'easy') {
+                                    nextMove = jumpMoves[Math.floor(Math.random() * jumpMoves.length)];
+                                } else if (this.aiDifficulty === 'medium') {
+                                    nextMove = jumpMoves[Math.floor(Math.random() * jumpMoves.length)];
+                                } else {
+                                    nextMove = this.getBestMove(jumpMoves);
+                                }
+
+                                this.makeMove(toRow, toCol, nextMove.toRow, nextMove.toCol);
+                            }, 300);
+                            return;
+                        }
+                    }
+                }
+
+                // Promote to king
+                if ((piece.color === 'red' && toRow === 0) || (piece.color === 'black' && toRow === 7)) {
+                    piece.king = true;
+                }
+
+                if (!continueTurn) {
+                    this.selectedPiece = null;
+                    this.validMoves = [];
+                    this.moveCount++;
+
+                    if (this.checkWinner()) {
+                        this.render();
+                        return;
+                    }
+
+                    this.currentPlayer = this.currentPlayer === 'red' ? 'black' : 'red';
+
+                    if (this.aiMode && this.currentPlayer === 'black') {
+                        this.isProcessing = true;
+                        setTimeout(() => this.makeAIMove(), 500);
+                    }
+                }
+
+                this.render();
+            }
+
+            makeAIMove() {
+                const allMoves = this.getAllPossibleMoves('black');
+                if (allMoves.length === 0) {
+                    this.isProcessing = false;
+                    return;
+                }
+
+                let selectedMove;
+
+                if (this.aiDifficulty === 'easy') {
+                    selectedMove = allMoves[Math.floor(Math.random() * allMoves.length)];
+                } else if (this.aiDifficulty === 'medium') {
+                    // Prefer jumps, otherwise random
+                    const jumps = allMoves.filter(m => m.captured);
+                    selectedMove = jumps.length > 0
+                        ? jumps[Math.floor(Math.random() * jumps.length)]
+                        : allMoves[Math.floor(Math.random() * allMoves.length)];
+                } else {
+                    // Hard: Use evaluation
+                    selectedMove = this.getBestMove(allMoves);
+                }
+
+                this.selectedPiece = { row: selectedMove.fromRow, col: selectedMove.fromCol };
+                this.validMoves = this.getValidMoves(selectedMove.fromRow, selectedMove.fromCol);
+                this.makeMove(selectedMove.fromRow, selectedMove.fromCol, selectedMove.toRow, selectedMove.toCol);
+                this.isProcessing = false;
+            }
+
+            getAllPossibleMoves(color) {
+                const moves = [];
+                const jumps = this.findAllJumps(color);
+
+                // If jumps available, only return jumps
+                if (jumps.length > 0) return jumps;
+
+                // Otherwise return all regular moves
+                for (let row = 0; row < 8; row++) {
+                    for (let col = 0; col < 8; col++) {
+                        const piece = this.board[row][col];
+                        if (piece && piece.color === color) {
+                            const directions = piece.king
+                                ? [[-1, -1], [-1, 1], [1, -1], [1, 1]]
+                                : piece.color === 'red'
+                                    ? [[-1, -1], [-1, 1]]  // Red moves up
+                                    : [[1, -1], [1, 1]];   // Black moves down
+
+                            for (const [dr, dc] of directions) {
+                                const newRow = row + dr;
+                                const newCol = col + dc;
+
+                                if (this.isValidSquare(newRow, newCol) && !this.board[newRow][newCol]) {
+                                    moves.push({
+                                        fromRow: row,
+                                        fromCol: col,
+                                        toRow: newRow,
+                                        toCol: newCol
+                                    });
+                                }
+                            }
+                        }
+                    }
+                }
+
+                return moves;
+            }
+
+            getBestMove(moves) {
+                // Simple evaluation: prefer captures and king pieces
+                let bestMove = moves[0];
+                let bestScore = -Infinity;
+
+                for (const move of moves) {
+                    let score = Math.random() * 10;
+
+                    if (move.captured) score += 50;
+                    if (this.board[move.fromRow][move.fromCol].king) score += 20;
+                    if ((move.toRow === 7 && !this.board[move.fromRow][move.fromCol].king)) score += 30; // Black becoming king
+
+                    // Center control
+                    const centerDist = Math.abs(move.toRow - 3.5) + Math.abs(move.toCol - 3.5);
+                    score += (7 - centerDist) * 5;
+
+                    if (score > bestScore) {
+                        bestScore = score;
+                        bestMove = move;
+                    }
+                }
+
+                return bestMove;
+            }
+
+            checkWinner() {
+                const redPieces = this.countPieces('red');
+                const blackPieces = this.countPieces('black');
+
+                if (redPieces === 0) {
+                    this.showWinner('Black');
+                    return true;
+                }
+                if (blackPieces === 0) {
+                    this.showWinner('Red');
+                    return true;
+                }
+
+                // Check for no valid moves (stalemate = loss)
+                if (this.getAllPossibleMoves(this.currentPlayer).length === 0) {
+                    this.showWinner(this.currentPlayer === 'red' ? 'Black' : 'Red');
+                    return true;
+                }
+
+                return false;
+            }
+
+            countPieces(color) {
+                let count = 0;
+                for (let row = 0; row < 8; row++) {
+                    for (let col = 0; col < 8; col++) {
+                        if (this.board[row][col] && this.board[row][col].color === color) {
+                            count++;
+                        }
+                    }
+                }
+                return count;
+            }
+
+            showWinner(winner) {
+                document.getElementById('winnerText').textContent = `${winner} Wins! 🎉`;
+                document.getElementById('winnerModal').classList.add('show');
+            }
+
+            updateStatus() {
+                const status = document.getElementById('status');
+                const redCount = this.countPieces('red');
+                const blackCount = this.countPieces('black');
+
+                status.textContent = `${this.currentPlayer === 'red' ? 'Red' : 'Black'}'s Turn | Red: ${redCount} | Black: ${blackCount}`;
+            }
+
+            isValidSquare(row, col) {
+                return row >= 0 && row < 8 && col >= 0 && col < 8;
+            }
+        }
+
+        // Initialize game
+        new CheckersGame();
+    </script>
+</body>
+
+</html>
