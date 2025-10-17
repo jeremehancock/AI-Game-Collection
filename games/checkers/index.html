@@ -358,6 +358,7 @@
                 this.aiDifficulty = 'easy';
                 this.isProcessing = false;
                 this.pendingAction = null;
+                this.pendingDifficulty = null;
                 this.moveCount = 0;
                 this.lastMove = null;
 
@@ -406,9 +407,21 @@
 
                 document.querySelectorAll('.difficulty-btn').forEach(btn => {
                     btn.addEventListener('click', (e) => {
-                        document.querySelectorAll('.difficulty-btn').forEach(b => b.classList.remove('active'));
-                        e.target.classList.add('active');
-                        this.aiDifficulty = e.target.dataset.level;
+                        const newDifficulty = e.target.dataset.level;
+
+                        // If game is in progress and in AI mode, show confirmation
+                        if (this.moveCount > 0 && this.aiMode) {
+                            this.pendingDifficulty = newDifficulty;
+                            this.pendingAction = 'changeDifficulty';
+                            const confirmText = document.getElementById('confirmText');
+                            confirmText.textContent = `Change difficulty to ${newDifficulty}? You'll need to start a new game.`;
+                            document.getElementById('confirmModal').classList.add('show');
+                        } else {
+                            // No game in progress or not in AI mode, just change it
+                            document.querySelectorAll('.difficulty-btn').forEach(b => b.classList.remove('active'));
+                            e.target.classList.add('active');
+                            this.aiDifficulty = newDifficulty;
+                        }
                     });
                 });
             }
@@ -446,6 +459,7 @@
             hideConfirmModal() {
                 document.getElementById('confirmModal').classList.remove('show');
                 this.pendingAction = null;
+                this.pendingDifficulty = null;
             }
 
             executeAction() {
@@ -453,6 +467,17 @@
                     this.newGame();
                 } else if (this.pendingAction === 'toggleAI') {
                     this.toggleAI();
+                } else if (this.pendingAction === 'changeDifficulty') {
+                    // Update difficulty buttons visually
+                    document.querySelectorAll('.difficulty-btn').forEach(b => {
+                        b.classList.remove('active');
+                        if (b.dataset.level === this.pendingDifficulty) {
+                            b.classList.add('active');
+                        }
+                    });
+                    this.aiDifficulty = this.pendingDifficulty;
+                    this.newGame();
+                    this.pendingDifficulty = null;
                 }
                 this.hideConfirmModal();
             }
@@ -709,9 +734,9 @@
                                 if (this.aiDifficulty === 'easy') {
                                     nextMove = jumpMoves[Math.floor(Math.random() * jumpMoves.length)];
                                 } else if (this.aiDifficulty === 'medium') {
-                                    nextMove = jumpMoves[Math.floor(Math.random() * jumpMoves.length)];
+                                    nextMove = this.getMediumMove(jumpMoves);
                                 } else {
-                                    nextMove = this.getBestMove(jumpMoves);
+                                    nextMove = this.getHardMove(jumpMoves);
                                 }
 
                                 this.makeMove(toRow, toCol, nextMove.toRow, nextMove.toCol);
@@ -767,22 +792,221 @@
                 let selectedMove;
 
                 if (this.aiDifficulty === 'easy') {
+                    // Easy: Completely random
                     selectedMove = allMoves[Math.floor(Math.random() * allMoves.length)];
                 } else if (this.aiDifficulty === 'medium') {
-                    // Prefer jumps, otherwise random
-                    const jumps = allMoves.filter(m => m.captured);
-                    selectedMove = jumps.length > 0
-                        ? jumps[Math.floor(Math.random() * jumps.length)]
-                        : allMoves[Math.floor(Math.random() * allMoves.length)];
+                    // Medium: Basic evaluation
+                    selectedMove = this.getMediumMove(allMoves);
                 } else {
-                    // Hard: Use evaluation
-                    selectedMove = this.getBestMove(allMoves);
+                    // Hard: Advanced evaluation
+                    selectedMove = this.getHardMove(allMoves);
                 }
 
                 this.selectedPiece = { row: selectedMove.fromRow, col: selectedMove.fromCol };
                 this.validMoves = this.getValidMoves(selectedMove.fromRow, selectedMove.fromCol);
                 this.makeMove(selectedMove.fromRow, selectedMove.fromCol, selectedMove.toRow, selectedMove.toCol);
                 this.isProcessing = false;
+            }
+
+            getMediumMove(moves) {
+                let bestMove = moves[0];
+                let bestScore = -Infinity;
+
+                for (const move of moves) {
+                    let score = 0;
+                    const piece = this.board[move.fromRow][move.fromCol];
+
+                    // Prioritize captures
+                    if (move.captured) score += 100;
+
+                    // Value king pieces more
+                    if (piece.king) score += 15;
+
+                    // Encourage making kings
+                    if (move.toRow === 7 && !piece.king) score += 40;
+
+                    // Prefer center positions
+                    const centerDist = Math.abs(move.toRow - 3.5) + Math.abs(move.toCol - 3.5);
+                    score += (7 - centerDist) * 3;
+
+                    // Basic danger check - avoid obvious traps
+                    const tempBoard = this.simulateMove(move);
+                    if (this.isPieceInDanger(tempBoard, move.toRow, move.toCol, 'black')) {
+                        score -= 100; // Moderate penalty
+                    }
+
+                    // Add some randomness so it's not too predictable
+                    score += Math.random() * 15;
+
+                    if (score > bestScore) {
+                        bestScore = score;
+                        bestMove = move;
+                    }
+                }
+
+                return bestMove;
+            }
+
+            getHardMove(moves) {
+                let bestMove = moves[0];
+                let bestScore = -Infinity;
+                let hasSafeMove = false;
+
+                // First pass - check if there are ANY safe moves
+                for (const move of moves) {
+                    const tempBoard = this.simulateMove(move);
+                    if (!this.isPieceInDanger(tempBoard, move.toRow, move.toCol, 'black')) {
+                        hasSafeMove = true;
+                        break;
+                    }
+                }
+
+                for (const move of moves) {
+                    let score = 0;
+                    const piece = this.board[move.fromRow][move.fromCol];
+
+                    // Check danger FIRST before other considerations
+                    const tempBoard = this.simulateMove(move);
+                    const isInDanger = this.isPieceInDanger(tempBoard, move.toRow, move.toCol, 'black');
+
+                    // If there are safe moves available, heavily penalize dangerous moves
+                    if (hasSafeMove && isInDanger) {
+                        // Check if this is a multi-jump that makes it worth the risk
+                        const nextJumps = this.findJumpsFromPosition(tempBoard, move.toRow, move.toCol, 'black');
+                        if (move.captured && nextJumps.length >= 2) {
+                            // Big multi-jump might be worth the risk
+                            score += 200;
+                        } else {
+                            // Otherwise, massive penalty to avoid this move
+                            score -= 1000;
+                        }
+                    } else if (isInDanger) {
+                        // All moves are dangerous - pick least bad option
+                        score -= 150;
+                    }
+
+                    // Heavily prioritize captures (but danger penalty might override)
+                    if (move.captured) {
+                        score += 150;
+                        // Check if this creates a multi-jump opportunity
+                        const nextJumps = this.findJumpsFromPosition(tempBoard, move.toRow, move.toCol, 'black');
+                        score += nextJumps.length * 80;
+                    }
+
+                    // King pieces are valuable
+                    if (piece.king) score += 35;
+
+                    // Strongly encourage king promotion
+                    if (move.toRow === 7 && !piece.king) score += 90;
+
+                    // Control center of board
+                    const centerDist = Math.abs(move.toRow - 3.5) + Math.abs(move.toCol - 3.5);
+                    score += (7 - centerDist) * 12;
+
+                    // Avoid edges where pieces can be trapped
+                    if (move.toCol === 0 || move.toCol === 7) score -= 20;
+                    if (move.toRow === 0 && piece.king) score -= 15;
+
+                    // Advance pieces forward (for non-kings)
+                    if (!piece.king) {
+                        score += move.toRow * 8;
+                    }
+
+                    // Minimal randomness for consistency
+                    score += Math.random() * 2;
+
+                    if (score > bestScore) {
+                        bestScore = score;
+                        bestMove = move;
+                    }
+                }
+
+                return bestMove;
+            }
+
+            simulateMove(move) {
+                // Create a copy of the board
+                const tempBoard = this.board.map(row => row.map(cell => cell ? { ...cell } : null));
+
+                // Apply the move
+                tempBoard[move.toRow][move.toCol] = tempBoard[move.fromRow][move.fromCol];
+                tempBoard[move.fromRow][move.fromCol] = null;
+
+                // Handle capture
+                if (move.captured) {
+                    tempBoard[move.captured.row][move.captured.col] = null;
+                }
+
+                return tempBoard;
+            }
+
+            findJumpsFromPosition(board, row, col, color) {
+                const piece = board[row][col];
+                if (!piece) return [];
+
+                const jumps = [];
+                const directions = piece.king
+                    ? [[-1, -1], [-1, 1], [1, -1], [1, 1]]
+                    : color === 'red'
+                        ? [[-1, -1], [-1, 1]]
+                        : [[1, -1], [1, 1]];
+
+                for (const [dr, dc] of directions) {
+                    const midRow = row + dr;
+                    const midCol = col + dc;
+                    const jumpRow = row + dr * 2;
+                    const jumpCol = col + dc * 2;
+
+                    if (this.isValidSquare(jumpRow, jumpCol) && !board[jumpRow][jumpCol]) {
+                        const captured = board[midRow][midCol];
+                        if (captured && captured.color !== color) {
+                            jumps.push({ row: jumpRow, col: jumpCol });
+                        }
+                    }
+                }
+
+                return jumps;
+            }
+
+            isPieceInDanger(board, row, col, color) {
+                // Check if opponent can capture this piece on their next turn
+                const opponentColor = color === 'red' ? 'black' : 'red';
+
+                // For each direction this piece could be jumped FROM
+                const jumpDirections = [
+                    { attackRow: row - 1, attackCol: col - 1, landRow: row + 1, landCol: col + 1 }, // NW to SE
+                    { attackRow: row - 1, attackCol: col + 1, landRow: row + 1, landCol: col - 1 }, // NE to SW
+                    { attackRow: row + 1, attackCol: col - 1, landRow: row - 1, landCol: col + 1 }, // SW to NE
+                    { attackRow: row + 1, attackCol: col + 1, landRow: row - 1, landCol: col - 1 }  // SE to NW
+                ];
+
+                for (const jump of jumpDirections) {
+                    if (!this.isValidSquare(jump.attackRow, jump.attackCol) ||
+                        !this.isValidSquare(jump.landRow, jump.landCol)) {
+                        continue;
+                    }
+
+                    const attacker = board[jump.attackRow][jump.attackCol];
+                    const landing = board[jump.landRow][jump.landCol];
+
+                    if (!attacker || attacker.color !== opponentColor || landing) {
+                        continue;
+                    }
+
+                    // Check if attacker can legally make this jump
+                    if (attacker.king) {
+                        return true; // Kings can jump in any direction
+                    }
+
+                    // Non-kings can only jump in their forward direction
+                    // Red moves UP (decreasing row: row gets smaller), so rowDiff should be NEGATIVE
+                    // Black moves DOWN (increasing row: row gets bigger), so rowDiff should be POSITIVE
+                    const rowDiff = jump.landRow - jump.attackRow;
+                    if (opponentColor === 'red' && rowDiff < 0) return true;  // Fixed: was > 0
+                    if (opponentColor === 'black' && rowDiff > 0) return true; // Fixed: was < 0
+                }
+
+                return false;
             }
 
             getAllPossibleMoves(color) {
@@ -823,31 +1047,6 @@
                 return moves;
             }
 
-            getBestMove(moves) {
-                // Simple evaluation: prefer captures and king pieces
-                let bestMove = moves[0];
-                let bestScore = -Infinity;
-
-                for (const move of moves) {
-                    let score = Math.random() * 10;
-
-                    if (move.captured) score += 50;
-                    if (this.board[move.fromRow][move.fromCol].king) score += 20;
-                    if ((move.toRow === 7 && !this.board[move.fromRow][move.fromCol].king)) score += 30; // Black becoming king
-
-                    // Center control
-                    const centerDist = Math.abs(move.toRow - 3.5) + Math.abs(move.toCol - 3.5);
-                    score += (7 - centerDist) * 5;
-
-                    if (score > bestScore) {
-                        bestScore = score;
-                        bestMove = move;
-                    }
-                }
-
-                return bestMove;
-            }
-
             checkWinner() {
                 const redPieces = this.countPieces('red');
                 const blackPieces = this.countPieces('black');
@@ -858,12 +1057,6 @@
                 }
                 if (blackPieces === 0) {
                     this.showWinner('Red');
-                    return true;
-                }
-
-                // Check for no valid moves (stalemate = loss)
-                if (this.getAllPossibleMoves(this.currentPlayer).length === 0) {
-                    this.showWinner(this.currentPlayer === 'red' ? 'Black' : 'Red');
                     return true;
                 }
 
