@@ -2546,7 +2546,8 @@ m489 -117 c31 -26 31 -78 -1 -104 -22 -18 -39 -19 -226 -16 -220 3 -226 5
 		if ('serviceWorker' in navigator) {
 			window.addEventListener('load', async () => {
 				try {
-					const registration = await navigator.serviceWorker.register('/service-worker.js');
+					const today = new Date().toISOString().split('T')[0]; // Returns YYYY-MM-DD
+					const registration = await navigator.serviceWorker.register(`/service-worker.js?v=${today}`);
 
 					// Check if service worker is already active (games already cached)
 					if (registration.active) {
@@ -2574,7 +2575,7 @@ m489 -117 c31 -26 31 -78 -1 -104 -22 -18 -39 -19 -226 -16 -220 3 -226 5
                     font-size: 14px;
                     line-height: 1.4;
                 `;
-						statusDiv.innerHTML = '📥 Installing games for offline play...';
+						statusDiv.innerHTML = '📥 Caching games for offline play...';
 						document.body.insertBefore(statusDiv, document.body.firstChild);
 
 						// Listen for messages from service worker

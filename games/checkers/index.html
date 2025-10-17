@@ -738,6 +738,13 @@
 
                     this.currentPlayer = this.currentPlayer === 'red' ? 'black' : 'red';
 
+                    // Check if new player has any valid moves
+                    if (this.getAllPossibleMoves(this.currentPlayer).length === 0) {
+                        this.showWinner(this.currentPlayer === 'red' ? 'Black' : 'Red');
+                        this.render();
+                        return;
+                    }
+
                     if (this.aiMode && this.currentPlayer === 'black') {
                         this.isProcessing = true;
                         setTimeout(() => this.makeAIMove(), 800);
@@ -749,8 +756,11 @@
 
             makeAIMove() {
                 const allMoves = this.getAllPossibleMoves('black');
+                // Note: if AI has no moves, this should have been caught earlier
+                // but we keep this as a safety check
                 if (allMoves.length === 0) {
                     this.isProcessing = false;
+                    this.showWinner('Red');
                     return;
                 }
 

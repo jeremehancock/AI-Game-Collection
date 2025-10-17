@@ -1,4 +1,4 @@
-const CACHE_NAME = "pwa-cache-v11.7";
+const CACHE_NAME = "pwa-cache-v12.5";
 
 const urlsToCache = [
   "/",
@@ -44,8 +44,6 @@ async function sendMessageToClients(message) {
 
 // Install event - cache all games
 self.addEventListener("install", (event) => {
-  console.log("[SW v10.7] Installing...");
-
   event.waitUntil(
     (async () => {
       try {
