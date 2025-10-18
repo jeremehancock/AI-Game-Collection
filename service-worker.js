@@ -1,4 +1,4 @@
-const CACHE_NAME = "pwa-cache-v12.9";
+const CACHE_NAME = "pwa-cache-v13.0";
 
 const urlsToCache = [
   "/",
@@ -26,6 +26,7 @@ const urlsToCache = [
   "/games/tic-tac-toe/index.html",
   "/games/checkers/index.html",
   "/games/whack-a-mole/index.html",
+  "/games/puzzle-cube/index.html",
   "/images/icons/web-app-manifest-192x192.png",
   "/images/icons/web-app-manifest-512x512.png",
 ];
