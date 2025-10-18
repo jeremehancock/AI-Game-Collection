@@ -155,8 +155,19 @@
         .face-controls {
             display: flex;
             gap: 6px;
-            flex-wrap: wrap;
+            flex-wrap: nowrap;
             justify-content: center;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            scrollbar-width: none;
+            /* Firefox */
+            -ms-overflow-style: none;
+            /* IE and Edge */
+        }
+
+        .face-controls::-webkit-scrollbar {
+            display: none;
+            /* Chrome, Safari, Opera */
         }
 
         .action-controls {
@@ -288,9 +299,17 @@
 
         @media (max-width: 600px) {
             button {
-                padding: 7px 10px;
+                padding: 7px 8px;
                 font-size: 11px;
-                min-width: 45px;
+                min-width: 38px;
+            }
+
+            .face-controls {
+                gap: 4px;
+            }
+
+            .action-controls {
+                gap: 4px;
             }
 
             #scramble-btn {
@@ -340,6 +359,9 @@
                 <button class="face-btn" onclick="rotateFaceByButton('D')">D</button>
                 <button class="face-btn" onclick="rotateFaceByButton('L')">L</button>
                 <button class="face-btn" onclick="rotateFaceByButton('R')">R</button>
+                <button class="face-btn" onclick="rotateFaceByButton('M')">M</button>
+                <button class="face-btn" onclick="rotateFaceByButton('E')">E</button>
+                <button class="face-btn" onclick="rotateFaceByButton('S')">S</button>
             </div>
             <div class="action-controls">
                 <button id="scramble-btn" onclick="scrambleCube()">Scramble</button>
@@ -376,6 +398,9 @@
                     <li>D (Down) = Yellow face</li>
                     <li>L (Left) = Orange face</li>
                     <li>R (Right) = Red face</li>
+                    <li>M (Middle) = Middle layer between L and R (rotates with L direction)</li>
+                    <li>E (Equator) = Middle layer between U and D (rotates with D direction)</li>
+                    <li>S (Standing) = Middle layer between F and B (rotates with F direction)</li>
                 </ul>
 
                 <p><strong>Relative Mode:</strong> Buttons control faces relative to your current view. This is more
@@ -387,6 +412,9 @@
                     <li>D = Face on bottom from your view</li>
                     <li>L = Face on your left</li>
                     <li>R = Face on your right</li>
+                    <li>M = Middle layer between L and R from your view</li>
+                    <li>E = Middle layer between U and D from your view</li>
+                    <li>S = Middle layer between F and B from your view</li>
                 </ul>
 
                 <h3>Face Rotation Buttons</h3>
@@ -405,7 +433,6 @@
             </div>
         </div>
     </div>
-
 
     <!-- https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js -->
     <script>
@@ -427,6 +454,8 @@
         let moveQueue = [];
         let isProcessingQueue = false;
         let controlMode = 'absolute';
+        let cubeQuaternion = new THREE.Quaternion();
+        let targetQuaternion = new THREE.Quaternion();
 
         const colors = {
             white: 0xffffff,
@@ -478,6 +507,11 @@
 
             createCube();
             setupControls();
+
+            // Initialize quaternions from starting Euler angles
+            targetQuaternion.setFromEuler(new THREE.Euler(targetRotation.x, targetRotation.y, 0));
+            cubeQuaternion.copy(targetQuaternion);
+
             animate();
             updateButtonStates();
 
@@ -569,8 +603,12 @@
                 return requestedFace;
             }
 
-            const rotX = cube.rotation.x;
-            const rotY = cube.rotation.y;
+            // Convert quaternion to Euler angles for face mapping
+            const euler = new THREE.Euler();
+            euler.setFromQuaternion(cubeQuaternion, 'XYZ');
+
+            const rotX = euler.x;
+            const rotY = euler.y;
 
             const normalizeAngle = (angle) => {
                 angle = angle % (Math.PI * 2);
@@ -587,28 +625,28 @@
 
             const faceMap = [
                 [
-                    { F: 'F', B: 'B', U: 'U', D: 'D', L: 'L', R: 'R' },
-                    { F: 'D', B: 'U', U: 'F', D: 'B', L: 'L', R: 'R' },
-                    { F: 'B', B: 'F', U: 'D', D: 'U', L: 'L', R: 'R' },
-                    { F: 'U', B: 'D', U: 'B', D: 'F', L: 'L', R: 'R' }
+                    { F: 'F', B: 'B', U: 'U', D: 'D', L: 'L', R: 'R', M: 'M', E: 'E', S: 'S' },
+                    { F: 'D', B: 'U', U: 'F', D: 'B', L: 'L', R: 'R', M: 'M', E: 'S', S: 'E' },
+                    { F: 'B', B: 'F', U: 'D', D: 'U', L: 'L', R: 'R', M: 'M', E: 'E', S: 'S' },
+                    { F: 'U', B: 'D', U: 'B', D: 'F', L: 'L', R: 'R', M: 'M', E: 'S', S: 'E' }
                 ],
                 [
-                    { F: 'L', B: 'R', U: 'U', D: 'D', L: 'B', R: 'F' },
-                    { F: 'D', B: 'U', U: 'L', D: 'R', L: 'B', R: 'F' },
-                    { F: 'R', B: 'L', U: 'D', D: 'U', L: 'B', R: 'F' },
-                    { F: 'U', B: 'D', U: 'R', D: 'L', L: 'B', R: 'F' }
+                    { F: 'L', B: 'R', U: 'U', D: 'D', L: 'B', R: 'F', M: 'S', E: 'E', S: 'M' },
+                    { F: 'D', B: 'U', U: 'L', D: 'R', L: 'B', R: 'F', M: 'E', E: 'M', S: 'S' },
+                    { F: 'R', B: 'L', U: 'D', D: 'U', L: 'B', R: 'F', M: 'S', E: 'E', S: 'M' },
+                    { F: 'U', B: 'D', U: 'R', D: 'L', L: 'B', R: 'F', M: 'E', E: 'M', S: 'S' }
                 ],
                 [
-                    { F: 'B', B: 'F', U: 'U', D: 'D', L: 'R', R: 'L' },
-                    { F: 'D', B: 'U', U: 'B', D: 'F', L: 'R', R: 'L' },
-                    { F: 'F', B: 'B', U: 'D', D: 'U', L: 'R', R: 'L' },
-                    { F: 'U', B: 'D', U: 'F', D: 'B', L: 'R', R: 'L' }
+                    { F: 'B', B: 'F', U: 'U', D: 'D', L: 'R', R: 'L', M: 'M', E: 'E', S: 'S' },
+                    { F: 'D', B: 'U', U: 'B', D: 'F', L: 'R', R: 'L', M: 'M', E: 'S', S: 'E' },
+                    { F: 'F', B: 'B', U: 'D', D: 'U', L: 'R', R: 'L', M: 'M', E: 'E', S: 'S' },
+                    { F: 'U', B: 'D', U: 'F', D: 'B', L: 'R', R: 'L', M: 'M', E: 'S', S: 'E' }
                 ],
                 [
-                    { F: 'R', B: 'L', U: 'U', D: 'D', L: 'F', R: 'B' },
-                    { F: 'D', B: 'U', U: 'R', D: 'L', L: 'F', R: 'B' },
-                    { F: 'L', B: 'R', U: 'D', D: 'U', L: 'F', R: 'B' },
-                    { F: 'U', B: 'D', U: 'L', D: 'R', L: 'F', R: 'B' }
+                    { F: 'R', B: 'L', U: 'U', D: 'D', L: 'F', R: 'B', M: 'S', E: 'E', S: 'M' },
+                    { F: 'D', B: 'U', U: 'R', D: 'L', L: 'F', R: 'B', M: 'E', E: 'M', S: 'S' },
+                    { F: 'L', B: 'R', U: 'D', D: 'U', L: 'F', R: 'B', M: 'S', E: 'E', S: 'M' },
+                    { F: 'U', B: 'D', U: 'L', D: 'R', L: 'F', R: 'B', M: 'E', E: 'M', S: 'S' }
                 ]
             ];
 
@@ -657,6 +695,18 @@
                 case 'R':
                     axis.set(1, 0, 0);
                     filter = c => Math.abs(c.position.x - 1) < 0.1;
+                    break;
+                case 'M':
+                    axis.set(-1, 0, 0);
+                    filter = c => Math.abs(c.position.x) < 0.1;
+                    break;
+                case 'E':
+                    axis.set(0, -1, 0);
+                    filter = c => Math.abs(c.position.y) < 0.1;
+                    break;
+                case 'S':
+                    axis.set(0, 0, 1);
+                    filter = c => Math.abs(c.position.z) < 0.1;
                     break;
             }
 
@@ -746,7 +796,6 @@
 
         function scrambleCube() {
             if (isRotating || isProcessingQueue) return;
-            moveHistory = [];
             moveQueue = [];
             const faces = ['F', 'B', 'U', 'D', 'L', 'R'];
             const moves = 20;
@@ -813,18 +862,16 @@
         function animateViewToStart() {
             const duration = 800;
             const startTime = Date.now();
-            const startRotX = targetRotation.x;
-            const startRotY = targetRotation.y;
-            const targetRotX = -0.5;
-            const targetRotY = 0.8;
+            const startQuat = targetQuaternion.clone();
+            const targetQuat = new THREE.Quaternion();
+            targetQuat.setFromEuler(new THREE.Euler(-0.5, 0.8, 0));
 
             function animate() {
                 const elapsed = Date.now() - startTime;
                 const progress = Math.min(elapsed / duration, 1);
                 const eased = easeInOutCubic(progress);
 
-                targetRotation.x = startRotX + (targetRotX - startRotX) * eased;
-                targetRotation.y = startRotY + (targetRotY - startRotY) * eased;
+                targetQuaternion.slerpQuaternions(startQuat, targetQuat, eased);
 
                 if (progress < 1) {
                     requestAnimationFrame(animate);
@@ -846,11 +893,10 @@
             const fadeInDuration = 400;
             const startTime = Date.now();
 
-            // Store starting view rotation for animation
-            const startRotX = targetRotation.x;
-            const startRotY = targetRotation.y;
-            const targetRotX = -0.5;
-            const targetRotY = 0.8;
+            // Store starting quaternion for animation
+            const startQuat = targetQuaternion.clone();
+            const endQuat = new THREE.Quaternion();
+            endQuat.setFromEuler(new THREE.Euler(-0.5, 0.8, 0));
 
             function animateFadeOut() {
                 const elapsed = Date.now() - startTime;
@@ -860,9 +906,8 @@
                 const scale = 1 - (eased * 0.3);
                 cube.scale.set(scale, scale, scale);
 
-                // Animate view rotation during fade out
-                targetRotation.x = startRotX + (targetRotX - startRotX) * eased * 0.5;
-                targetRotation.y = startRotY + (targetRotY - startRotY) * eased * 0.5;
+                // Animate view rotation during fade out (50% of total rotation)
+                targetQuaternion.slerpQuaternions(startQuat, endQuat, eased * 0.5);
 
                 cubelets.forEach(cubelet => {
                     cubelet.traverse(child => {
@@ -910,10 +955,9 @@
                         const scale = 0.7 + (eased * 0.3);
                         cube.scale.set(scale, scale, scale);
 
-                        // Continue animating view rotation during fade in
+                        // Continue animating view rotation during fade in (remaining 50%)
                         const totalProgress = 0.5 + (eased * 0.5);
-                        targetRotation.x = startRotX + (targetRotX - startRotX) * totalProgress;
-                        targetRotation.y = startRotY + (targetRotY - startRotY) * totalProgress;
+                        targetQuaternion.slerpQuaternions(startQuat, endQuat, totalProgress);
 
                         cubelets.forEach(cubelet => {
                             cubelet.traverse(child => {
@@ -989,8 +1033,7 @@
                 const deltaX = e.touches[0].clientX - touchStart.x;
                 const deltaY = e.touches[0].clientY - touchStart.y;
 
-                targetRotation.y += deltaX * 0.01;
-                targetRotation.x += deltaY * 0.01;
+                applyTrackballRotation(deltaX, deltaY);
 
                 touchStart.x = e.touches[0].clientX;
                 touchStart.y = e.touches[0].clientY;
@@ -1005,8 +1048,7 @@
                     const deltaX = e.clientX - touchStart.x;
                     const deltaY = e.clientY - touchStart.y;
 
-                    targetRotation.y += deltaX * 0.01;
-                    targetRotation.x += deltaY * 0.01;
+                    applyTrackballRotation(deltaX, deltaY);
 
                     touchStart.x = e.clientX;
                     touchStart.y = e.clientY;
@@ -1025,14 +1067,31 @@
             canvas.style.cursor = 'grab';
         }
 
+        function applyTrackballRotation(deltaX, deltaY) {
+            const rotationSpeed = 0.005;
+
+            // Create rotation axis perpendicular to drag direction in screen space
+            // Flip Y to make up drag rotate up (not down)
+            const rotationAxis = new THREE.Vector3(deltaY, deltaX, 0).normalize();
+            const rotationAngle = Math.sqrt(deltaX * deltaX + deltaY * deltaY) * rotationSpeed;
+
+            if (rotationAngle > 0) {
+                // Create a quaternion for this rotation in screen/camera space
+                const rotQuat = new THREE.Quaternion();
+                rotQuat.setFromAxisAngle(rotationAxis, rotationAngle);
+
+                // Apply the rotation in world space (premultiply to rotate in global coords)
+                targetQuaternion.premultiply(rotQuat);
+                targetQuaternion.normalize();
+            }
+        }
+
         function animate() {
             requestAnimationFrame(animate);
 
-            currentRotation.x += (targetRotation.x - currentRotation.x) * 0.1;
-            currentRotation.y += (targetRotation.y - currentRotation.y) * 0.1;
-
-            cube.rotation.x = currentRotation.x;
-            cube.rotation.y = currentRotation.y;
+            // Smoothly interpolate quaternion
+            cubeQuaternion.slerp(targetQuaternion, 0.1);
+            cube.quaternion.copy(cubeQuaternion);
 
             renderer.render(scene, camera);
         }
