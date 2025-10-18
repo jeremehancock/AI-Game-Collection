@@ -36,6 +36,39 @@
             overflow: hidden;
         }
 
+        #mode-indicator {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: rgba(161, 140, 209, 0.9);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            user-select: none;
+            z-index: 100;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        #mode-indicator:hover {
+            background: rgba(161, 140, 209, 1);
+            transform: scale(1.05);
+        }
+
+        #mode-indicator.relative-mode {
+            background: rgba(79, 172, 254, 0.9);
+        }
+
+        #mode-indicator.relative-mode:hover {
+            background: rgba(79, 172, 254, 1);
+        }
+
         #controls {
             background: rgba(0, 0, 0, 0.8);
             padding: 8px;
@@ -83,7 +116,7 @@
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: #ffffff;
             padding: 10px 14px;
-            font-size: 13px;
+            font-size: 16px;
             min-width: 75px;
             font-weight: 700;
             text-shadow: 0 2px 4px rgba(0, 0, 0, 0.4);
@@ -93,7 +126,7 @@
             background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
             color: #ffffff;
             padding: 10px 14px;
-            font-size: 13px;
+            font-size: 16px;
             min-width: 60px;
             font-weight: 700;
             text-shadow: 0 2px 4px rgba(0, 0, 0, 0.4);
@@ -103,7 +136,7 @@
             background: linear-gradient(135deg, #fc6c85 0%, #f8b500 100%);
             color: #ffffff;
             padding: 10px 14px;
-            font-size: 13px;
+            font-size: 16px;
             min-width: 60px;
             font-weight: 700;
             text-shadow: 0 2px 4px rgba(0, 0, 0, 0.4);
@@ -147,7 +180,7 @@
 
         #info {
             color: white;
-            font-size: 12px;
+            font-size: 10px;
             text-align: center;
             width: 100%;
             margin-top: 2px;
@@ -267,8 +300,16 @@
         @media (max-width: 600px) {
             button {
                 padding: 7px 8px;
-                font-size: 18px;
+                font-size: 16px;
                 min-width: 38px;
+            }
+
+            .face-controls {
+                gap: 4px;
+            }
+
+            .action-controls {
+                gap: 4px;
             }
 
             #scramble-btn {
@@ -294,13 +335,22 @@
                 font-size: 18px;
                 min-width: 38px;
             }
+
+            #mode-indicator {
+                top: 10px;
+                right: 10px;
+                padding: 6px 12px;
+                font-size: 14px;
+            }
         }
     </style>
 </head>
 
 <body>
     <div id="container">
-        <div id="canvas-container"></div>
+        <div id="canvas-container">
+            <div id="mode-indicator" onclick="toggleControlMode()">Absolute</div>
+        </div>
         <div id="controls">
             <div class="face-controls">
                 <button class="face-btn" onclick="rotateFaceByButton('F')">F</button>
@@ -337,10 +387,12 @@
                     360° to see all sides.</p>
                 <p><strong>Mouse:</strong> Click and drag to rotate the view.</p>
 
-                <h3>Cube Notation</h3>
+                <h3>Control Modes</h3>
+                <p>You can switch between two control modes by clicking the mode indicator in the top-right corner of
+                    the screen:</p>
 
-                <p>Buttons control fixed faces based on the cube's original orientation. This matches standard puzzle
-                    cube notation used in solving guides and tutorials.</p>
+                <p><strong>Absolute Mode (Default):</strong> Buttons control fixed faces based on the cube's original
+                    orientation. This matches standard puzzle cube notation used in solving guides and tutorials.</p>
                 <ul>
                     <li>F (Front) = Green face</li>
                     <li>B (Back) = Blue face</li>
@@ -353,8 +405,23 @@
                     <li>S (Standing) = Middle layer between F and B (rotates with F direction)</li>
                 </ul>
 
+                <p><strong>Relative Mode:</strong> Buttons control faces relative to your current view. This is more
+                    intuitive but doesn't match standard notation.</p>
+                <ul>
+                    <li>F = Face currently facing you</li>
+                    <li>B = Face on the opposite side</li>
+                    <li>U = Face on top from your view</li>
+                    <li>D = Face on bottom from your view</li>
+                    <li>L = Face on your left</li>
+                    <li>R = Face on your right</li>
+                    <li>M = Middle layer between L and R from your view</li>
+                    <li>E = Middle layer between U and D from your view</li>
+                    <li>S = Middle layer between F and B from your view</li>
+                </ul>
+
                 <h3>Face Rotation Buttons</h3>
-                <p>Each button rotates its corresponding face clockwise by 90 degrees.</p>
+                <p>Each button rotates its corresponding face clockwise by 90 degrees. The meaning of each button
+                    depends on your selected control mode (see above).</p>
 
                 <h3>Action Buttons</h3>
                 <p><strong>Scramble:</strong> Randomly scrambles the puzzle cube with 20 moves</p>
@@ -388,6 +455,7 @@
         let moveHistory = [];
         let moveQueue = [];
         let isProcessingQueue = false;
+        let controlMode = 'absolute';
         let cubeQuaternion = new THREE.Quaternion();
         let targetQuaternion = new THREE.Quaternion();
 
@@ -403,7 +471,7 @@
         function updateButtonStates() {
             const hasMoves = moveHistory.length > 0;
 
-            // Face buttons - only disabled during queue processing (scramble/solve)
+            // Face buttons -  only disabled during queue processing (scramble/solve)
             document.querySelectorAll('.face-btn').forEach(btn => {
                 btn.disabled = isProcessingQueue;
             });
@@ -520,8 +588,132 @@
             }
         }
 
+        function toggleControlMode() {
+            controlMode = controlMode === 'absolute' ? 'relative' : 'absolute';
+            const indicator = document.getElementById('mode-indicator');
+            if (controlMode === 'relative') {
+                indicator.textContent = 'Relative';
+                indicator.classList.add('relative-mode');
+            } else {
+                indicator.textContent = 'Absolute';
+                indicator.classList.remove('relative-mode');
+            }
+        }
+
+        function getViewRelativeFace(requestedFace) {
+            if (controlMode === 'absolute') {
+                return requestedFace;
+            }
+
+            // Define the original face normals in world space (before rotation)
+            const faceNormals = {
+                'F': new THREE.Vector3(0, 0, 1),   // Green
+                'B': new THREE.Vector3(0, 0, -1),  // Blue
+                'U': new THREE.Vector3(0, 1, 0),   // White
+                'D': new THREE.Vector3(0, -1, 0),  // Yellow
+                'L': new THREE.Vector3(-1, 0, 0),  // Orange
+                'R': new THREE.Vector3(1, 0, 0)    // Red
+            };
+
+            // Apply the cube's rotation to each face normal
+            const rotatedNormals = {};
+            for (const [face, normal] of Object.entries(faceNormals)) {
+                rotatedNormals[face] = normal.clone().applyQuaternion(cubeQuaternion);
+            }
+
+            // Define the view-relative directions (from camera's perspective)
+            const viewDirections = {
+                'F': new THREE.Vector3(0, 0, 1),   // Toward camera
+                'B': new THREE.Vector3(0, 0, -1),  // Away from camera
+                'U': new THREE.Vector3(0, 1, 0),   // Up
+                'D': new THREE.Vector3(0, -1, 0),  // Down
+                'L': new THREE.Vector3(-1, 0, 0),  // Left
+                'R': new THREE.Vector3(1, 0, 0)    // Right
+            };
+
+            // Calculate all dot products between view directions and rotated face normals
+            const scores = [];
+            const viewDirs = ['F', 'B', 'U', 'D', 'L', 'R'];
+            const faces = ['F', 'B', 'U', 'D', 'L', 'R'];
+
+            for (const viewDir of viewDirs) {
+                for (const face of faces) {
+                    const dot = rotatedNormals[face].dot(viewDirections[viewDir]);
+                    scores.push({ viewDir, face, dot });
+                }
+            }
+
+            // Sort by dot product (highest first)
+            scores.sort((a, b) => b.dot - a.dot);
+
+            // Assign faces to view directions using greedy matching
+            const viewToFaceMap = {};
+            const usedFaces = new Set();
+            const usedViewDirs = new Set();
+
+            for (const score of scores) {
+                if (!usedViewDirs.has(score.viewDir) && !usedFaces.has(score.face)) {
+                    viewToFaceMap[score.viewDir] = score.face;
+                    usedFaces.add(score.face);
+                    usedViewDirs.add(score.viewDir);
+
+                    // If we've assigned all 6, we're done
+                    if (usedFaces.size === 6) break;
+                }
+            }
+
+            // For middle layers, determine which middle layer to use based on the axis
+            if (requestedFace === 'M' || requestedFace === 'E' || requestedFace === 'S') {
+                let face1, face2;
+
+                if (requestedFace === 'M') {
+                    // M is the middle layer between relative L and R
+                    face1 = viewToFaceMap['L'];
+                    face2 = viewToFaceMap['R'];
+                } else if (requestedFace === 'E') {
+                    // E is the middle layer between relative U and D
+                    face1 = viewToFaceMap['U'];
+                    face2 = viewToFaceMap['D'];
+                } else { // S
+                    // S is the middle layer between relative F and B
+                    face1 = viewToFaceMap['F'];
+                    face2 = viewToFaceMap['B'];
+                }
+
+                // Determine which middle layer based on which outer faces we found
+                if ((face1 === 'L' && face2 === 'R') || (face1 === 'R' && face2 === 'L')) {
+                    return 'M';
+                } else if ((face1 === 'U' && face2 === 'D') || (face1 === 'D' && face2 === 'U')) {
+                    return 'E';
+                } else if ((face1 === 'F' && face2 === 'B') || (face1 === 'B' && face2 === 'F')) {
+                    return 'S';
+                }
+
+                // For mixed axes, pick the middle layer that makes most sense
+                // Check if faces are on X axis (L/R)
+                if ((face1 === 'L' || face1 === 'R') && (face2 === 'L' || face2 === 'R')) {
+                    return 'M';
+                }
+                // Check if faces are on Y axis (U/D)
+                if ((face1 === 'U' || face1 === 'D') && (face2 === 'U' || face2 === 'D')) {
+                    return 'E';
+                }
+                // Check if faces are on Z axis (F/B)
+                if ((face1 === 'F' || face1 === 'B') && (face2 === 'F' || face2 === 'B')) {
+                    return 'S';
+                }
+
+                // Fallback
+                return 'M';
+            }
+
+            // For outer faces, return the mapped face
+            return viewToFaceMap[requestedFace] || 'F';
+        }
+
         function rotateFaceByButton(face) {
-            rotateFace(face);
+            const actualFace = getViewRelativeFace(face);
+            rotateFace(actualFace);
         }
 
         function rotateFace(face, recordMove = true) {
