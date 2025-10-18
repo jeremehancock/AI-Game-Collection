@@ -36,39 +36,6 @@
             overflow: hidden;
         }
 
-        #mode-indicator {
-            position: absolute;
-            top: 15px;
-            right: 15px;
-            background: rgba(161, 140, 209, 0.9);
-            color: white;
-            padding: 8px 16px;
-            border-radius: 20px;
-            font-size: 12px;
-            font-weight: 600;
-            cursor: pointer;
-            user-select: none;
-            z-index: 100;
-            backdrop-filter: blur(10px);
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-            transition: all 0.3s ease;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
-        #mode-indicator:hover {
-            background: rgba(161, 140, 209, 1);
-            transform: scale(1.05);
-        }
-
-        #mode-indicator.relative-mode {
-            background: rgba(79, 172, 254, 0.9);
-        }
-
-        #mode-indicator.relative-mode:hover {
-            background: rgba(79, 172, 254, 1);
-        }
-
         #controls {
             background: rgba(0, 0, 0, 0.8);
             padding: 8px;
@@ -327,22 +294,13 @@
                 font-size: 18px;
                 min-width: 38px;
             }
-
-            #mode-indicator {
-                top: 10px;
-                right: 10px;
-                padding: 6px 12px;
-                font-size: 11px;
-            }
         }
     </style>
 </head>
 
 <body>
     <div id="container">
-        <div id="canvas-container">
-            <div id="mode-indicator" onclick="toggleControlMode()">Absolute</div>
-        </div>
+        <div id="canvas-container"></div>
         <div id="controls">
             <div class="face-controls">
                 <button class="face-btn" onclick="rotateFaceByButton('F')">F</button>
@@ -379,12 +337,10 @@
                     360° to see all sides.</p>
                 <p><strong>Mouse:</strong> Click and drag to rotate the view.</p>
 
-                <h3>Control Modes</h3>
-                <p>You can switch between two control modes by clicking the mode indicator in the top-right corner of
-                    the screen:</p>
+                <h3>Cube Notation</h3>
 
-                <p><strong>Absolute Mode (Default):</strong> Buttons control fixed faces based on the cube's original
-                    orientation. This matches standard puzzle cube notation used in solving guides and tutorials.</p>
+                <p>Buttons control fixed faces based on the cube's original orientation. This matches standard puzzle
+                    cube notation used in solving guides and tutorials.</p>
                 <ul>
                     <li>F (Front) = Green face</li>
                     <li>B (Back) = Blue face</li>
@@ -397,23 +353,8 @@
                     <li>S (Standing) = Middle layer between F and B (rotates with F direction)</li>
                 </ul>
 
-                <p><strong>Relative Mode:</strong> Buttons control faces relative to your current view. This is more
-                    intuitive but doesn't match standard notation.</p>
-                <ul>
-                    <li>F = Face currently facing you</li>
-                    <li>B = Face on the opposite side</li>
-                    <li>U = Face on top from your view</li>
-                    <li>D = Face on bottom from your view</li>
-                    <li>L = Face on your left</li>
-                    <li>R = Face on your right</li>
-                    <li>M = Middle layer between L and R from your view</li>
-                    <li>E = Middle layer between U and D from your view</li>
-                    <li>S = Middle layer between F and B from your view</li>
-                </ul>
-
                 <h3>Face Rotation Buttons</h3>
-                <p>Each button rotates its corresponding face clockwise by 90 degrees. The meaning of each button
-                    depends on your selected control mode (see above).</p>
+                <p>Each button rotates its corresponding face clockwise by 90 degrees.</p>
 
                 <h3>Action Buttons</h3>
                 <p><strong>Scramble:</strong> Randomly scrambles the puzzle cube with 20 moves</p>
@@ -447,7 +388,6 @@
         let moveHistory = [];
         let moveQueue = [];
         let isProcessingQueue = false;
-        let controlMode = 'absolute';
         let cubeQuaternion = new THREE.Quaternion();
         let targetQuaternion = new THREE.Quaternion();
 
@@ -580,76 +520,8 @@
             }
         }
 
-        function toggleControlMode() {
-            controlMode = controlMode === 'absolute' ? 'relative' : 'absolute';
-            const indicator = document.getElementById('mode-indicator');
-            if (controlMode === 'relative') {
-                indicator.textContent = 'Relative';
-                indicator.classList.add('relative-mode');
-            } else {
-                indicator.textContent = 'Absolute';
-                indicator.classList.remove('relative-mode');
-            }
-        }
-
-        function getViewRelativeFace(requestedFace) {
-            if (controlMode === 'absolute') {
-                return requestedFace;
-            }
-
-            // Convert quaternion to Euler angles for face mapping
-            const euler = new THREE.Euler();
-            euler.setFromQuaternion(cubeQuaternion, 'XYZ');
-
-            const rotX = euler.x;
-            const rotY = euler.y;
-
-            const normalizeAngle = (angle) => {
-                angle = angle % (Math.PI * 2);
-                if (angle < 0) angle += Math.PI * 2;
-                return angle;
-            };
-
-            const normX = normalizeAngle(rotX);
-            const normY = normalizeAngle(rotY);
-
-            const roundToQuarter = (angle) => Math.round(angle / (Math.PI / 2)) % 4;
-            const quarterX = roundToQuarter(normX);
-            const quarterY = roundToQuarter(normY);
-
-            const faceMap = [
-                [
-                    { F: 'F', B: 'B', U: 'U', D: 'D', L: 'L', R: 'R', M: 'M', E: 'E', S: 'S' },
-                    { F: 'D', B: 'U', U: 'F', D: 'B', L: 'L', R: 'R', M: 'M', E: 'S', S: 'E' },
-                    { F: 'B', B: 'F', U: 'D', D: 'U', L: 'L', R: 'R', M: 'M', E: 'E', S: 'S' },
-                    { F: 'U', B: 'D', U: 'B', D: 'F', L: 'L', R: 'R', M: 'M', E: 'S', S: 'E' }
-                ],
-                [
-                    { F: 'L', B: 'R', U: 'U', D: 'D', L: 'B', R: 'F', M: 'S', E: 'E', S: 'M' },
-                    { F: 'D', B: 'U', U: 'L', D: 'R', L: 'B', R: 'F', M: 'E', E: 'M', S: 'S' },
-                    { F: 'R', B: 'L', U: 'D', D: 'U', L: 'B', R: 'F', M: 'S', E: 'E', S: 'M' },
-                    { F: 'U', B: 'D', U: 'R', D: 'L', L: 'B', R: 'F', M: 'E', E: 'M', S: 'S' }
-                ],
-                [
-                    { F: 'B', B: 'F', U: 'U', D: 'D', L: 'R', R: 'L', M: 'M', E: 'E', S: 'S' },
-                    { F: 'D', B: 'U', U: 'B', D: 'F', L: 'R', R: 'L', M: 'M', E: 'S', S: 'E' },
-                    { F: 'F', B: 'B', U: 'D', D: 'U', L: 'R', R: 'L', M: 'M', E: 'E', S: 'S' },
-                    { F: 'U', B: 'D', U: 'F', D: 'B', L: 'R', R: 'L', M: 'M', E: 'S', S: 'E' }
-                ],
-                [
-                    { F: 'R', B: 'L', U: 'U', D: 'D', L: 'F', R: 'B', M: 'S', E: 'E', S: 'M' },
-                    { F: 'D', B: 'U', U: 'R', D: 'L', L: 'F', R: 'B', M: 'E', E: 'M', S: 'S' },
-                    { F: 'L', B: 'R', U: 'D', D: 'U', L: 'F', R: 'B', M: 'S', E: 'E', S: 'M' },
-                    { F: 'U', B: 'D', U: 'L', D: 'R', L: 'F', R: 'B', M: 'E', E: 'M', S: 'S' }
-                ]
-            ];
-
-            return faceMap[quarterY][quarterX][requestedFace];
-        }
-
         function rotateFaceByButton(face) {
-            const actualFace = getViewRelativeFace(face);
-            rotateFace(actualFace);
+            rotateFace(face);
         }
 
         function rotateFace(face, recordMove = true) {
