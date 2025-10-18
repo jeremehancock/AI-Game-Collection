@@ -406,6 +406,7 @@
         </div>
     </div>
 
+
     <!-- https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js -->
     <script>
         /**
@@ -802,6 +803,34 @@
 
             moveHistory = [];
             updateButtonStates();
+
+            // Animate view back to starting position after solve completes
+            setTimeout(() => {
+                animateViewToStart();
+            }, moveQueue.length * 350);
+        }
+
+        function animateViewToStart() {
+            const duration = 800;
+            const startTime = Date.now();
+            const startRotX = targetRotation.x;
+            const startRotY = targetRotation.y;
+            const targetRotX = -0.5;
+            const targetRotY = 0.8;
+
+            function animate() {
+                const elapsed = Date.now() - startTime;
+                const progress = Math.min(elapsed / duration, 1);
+                const eased = easeInOutCubic(progress);
+
+                targetRotation.x = startRotX + (targetRotX - startRotX) * eased;
+                targetRotation.y = startRotY + (targetRotY - startRotY) * eased;
+
+                if (progress < 1) {
+                    requestAnimationFrame(animate);
+                }
+            }
+            animate();
         }
 
         function resetCube() {
@@ -817,6 +846,12 @@
             const fadeInDuration = 400;
             const startTime = Date.now();
 
+            // Store starting view rotation for animation
+            const startRotX = targetRotation.x;
+            const startRotY = targetRotation.y;
+            const targetRotX = -0.5;
+            const targetRotY = 0.8;
+
             function animateFadeOut() {
                 const elapsed = Date.now() - startTime;
                 const progress = Math.min(elapsed / fadeOutDuration, 1);
@@ -824,6 +859,10 @@
 
                 const scale = 1 - (eased * 0.3);
                 cube.scale.set(scale, scale, scale);
+
+                // Animate view rotation during fade out
+                targetRotation.x = startRotX + (targetRotX - startRotX) * eased * 0.5;
+                targetRotation.y = startRotY + (targetRotY - startRotY) * eased * 0.5;
 
                 cubelets.forEach(cubelet => {
                     cubelet.traverse(child => {
@@ -870,6 +909,11 @@
 
                         const scale = 0.7 + (eased * 0.3);
                         cube.scale.set(scale, scale, scale);
+
+                        // Continue animating view rotation during fade in
+                        const totalProgress = 0.5 + (eased * 0.5);
+                        targetRotation.x = startRotX + (targetRotX - startRotX) * totalProgress;
+                        targetRotation.y = startRotY + (targetRotY - startRotY) * totalProgress;
 
                         cubelets.forEach(cubelet => {
                             cubelet.traverse(child => {
