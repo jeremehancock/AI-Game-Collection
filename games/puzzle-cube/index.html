@@ -155,7 +155,7 @@
         .face-controls {
             display: flex;
             gap: 6px;
-            flex-wrap: nowrap;
+            flex-wrap: wrap;
             justify-content: center;
             overflow-x: auto;
             -webkit-overflow-scrolling: touch;
@@ -180,7 +180,7 @@
 
         #info {
             color: white;
-            font-size: 10px;
+            font-size: 12px;
             text-align: center;
             width: 100%;
             margin-top: 2px;
@@ -300,39 +300,31 @@
         @media (max-width: 600px) {
             button {
                 padding: 7px 8px;
-                font-size: 11px;
+                font-size: 18px;
                 min-width: 38px;
-            }
-
-            .face-controls {
-                gap: 4px;
-            }
-
-            .action-controls {
-                gap: 4px;
             }
 
             #scramble-btn {
                 padding: 9px 12px;
-                font-size: 12px;
+                font-size: 16px;
                 min-width: 70px;
             }
 
             #solve-btn {
                 padding: 9px 10px;
-                font-size: 12px;
+                font-size: 16px;
                 min-width: 52px;
             }
 
             #reset-btn {
                 padding: 9px 10px;
-                font-size: 12px;
+                font-size: 16px;
                 min-width: 52px;
             }
 
             #help-btn {
                 padding: 9px 10px;
-                font-size: 16px;
+                font-size: 18px;
                 min-width: 38px;
             }
 
@@ -359,6 +351,8 @@
                 <button class="face-btn" onclick="rotateFaceByButton('D')">D</button>
                 <button class="face-btn" onclick="rotateFaceByButton('L')">L</button>
                 <button class="face-btn" onclick="rotateFaceByButton('R')">R</button>
+            </div>
+            <div class="face-controls">
                 <button class="face-btn" onclick="rotateFaceByButton('M')">M</button>
                 <button class="face-btn" onclick="rotateFaceByButton('E')">E</button>
                 <button class="face-btn" onclick="rotateFaceByButton('S')">S</button>
@@ -469,9 +463,9 @@
         function updateButtonStates() {
             const hasMoves = moveHistory.length > 0;
 
-            // Face buttons - disabled when rotating
+            // Face buttons - only disabled during queue processing (scramble/solve)
             document.querySelectorAll('.face-btn').forEach(btn => {
-                btn.disabled = isRotating;
+                btn.disabled = isProcessingQueue;
             });
 
             // Action buttons - only disabled during queue processing (scramble/solve)
