@@ -8,6 +8,10 @@ A collection of browser-based games created using AI assistance, featuring minim
 
 Connect the pipes to create a continuous flow. Test your logical thinking skills with this challenging puzzle game that requires strategic planning and spatial awareness.
 
+### Pipes II
+
+A polished sequel to Pipes. Rotate the pipes to link the source to the drain and watch the water flow through with animated feedback. Features guaranteed-solvable puzzles, three difficulty levels, a move and time tracker, and a win celebration.
+
 ### Soccer Juggle
 
 Keep the soccer ball in the air for as long as possible. Challenge yourself to achieve your highest juggling streak in this addictive skill-based game.
