@@ -21,8 +21,12 @@
             --border-color: rgba(20, 30, 60, 0.10);
             --shadow-color: rgba(30, 50, 90, 0.14);
             --accent: #1e88e5;
+            --accent-2: #7c5cff;
+            --accent-glow: rgba(30, 136, 229, 0.38);
             --pill-bg: #eef2f8;
             --pill-active: #1e88e5;
+            --secondary-bg: #ffffff;
+            --secondary-hover: #f4f7fb;
         }
 
         [data-theme="dark"] {
@@ -35,8 +39,12 @@
             --border-color: rgba(255, 255, 255, 0.08);
             --shadow-color: rgba(0, 0, 0, 0.45);
             --accent: #22d3ee;
+            --accent-2: #7c5cff;
+            --accent-glow: rgba(34, 211, 238, 0.45);
             --pill-bg: rgba(255, 255, 255, 0.06);
             --pill-active: #22d3ee;
+            --secondary-bg: rgba(255, 255, 255, 0.05);
+            --secondary-hover: rgba(255, 255, 255, 0.10);
         }
 
         * {
@@ -214,22 +222,60 @@
 
         button.action {
             flex: 1;
-            padding: 13px 18px;
-            border: none;
-            border-radius: 12px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 9px;
+            padding: 14px 18px;
+            border: 1.5px solid transparent;
+            border-radius: 14px;
             color: white;
             cursor: pointer;
             font-size: clamp(14px, 4vw, 16px);
             font-weight: 700;
-            box-shadow: 0 4px 14px var(--shadow-color);
-            transition: transform 0.15s, filter 0.2s;
+            letter-spacing: 0.2px;
+            transition: transform 0.15s, box-shadow 0.25s, background 0.25s, border-color 0.25s, filter 0.2s;
         }
 
-        button.action:hover { filter: brightness(1.08); transform: translateY(-1px); }
-        button.action:active { transform: scale(0.97); }
+        button.action svg {
+            width: 18px;
+            height: 18px;
+            stroke: currentColor;
+            fill: none;
+            stroke-width: 2;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+            flex-shrink: 0;
+        }
 
-        #newGameBtn { background: linear-gradient(135deg, #4CAF50, #2e9e54); }
-        #shuffleBtn { background: linear-gradient(135deg, #2196F3, #1769d4); }
+        button.action:active { transform: scale(0.96); }
+
+        /* Primary: brand gradient with neon glow */
+        #newGameBtn {
+            background: linear-gradient(135deg, var(--accent), var(--accent-2));
+            box-shadow: 0 6px 18px var(--accent-glow);
+        }
+
+        #newGameBtn:hover {
+            filter: brightness(1.05);
+            transform: translateY(-2px);
+            box-shadow: 0 9px 26px var(--accent-glow);
+        }
+
+        /* Secondary: glass surface that matches the cards and pills */
+        #shuffleBtn {
+            background: var(--secondary-bg);
+            color: var(--accent);
+            border-color: var(--border-color);
+            box-shadow: 0 4px 14px var(--shadow-color);
+        }
+
+        #shuffleBtn:hover {
+            transform: translateY(-2px);
+            background: var(--secondary-hover);
+            border-color: var(--accent);
+            box-shadow: 0 8px 20px var(--shadow-color);
+        }
 
         /* Win modal */
         .overlay {
@@ -398,8 +444,23 @@
         </div>
 
         <div class="controls">
-            <button class="action" id="newGameBtn">New Game</button>
-            <button class="action" id="shuffleBtn">Shuffle</button>
+            <button class="action" id="newGameBtn">
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="M12 3l1.9 4.8L18.7 9.7l-4.8 1.9L12 16.4l-1.9-4.8L5.3 9.7l4.8-1.9z"></path>
+                    <path d="M18.5 14.5l.8 2 2 .8-2 .8-.8 2-.8-2-2-.8 2-.8z"></path>
+                </svg>
+                New Game
+            </button>
+            <button class="action" id="shuffleBtn">
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                    <polyline points="16 3 21 3 21 8"></polyline>
+                    <line x1="4" y1="20" x2="21" y2="3"></line>
+                    <polyline points="21 16 21 21 16 21"></polyline>
+                    <line x1="15" y1="15" x2="21" y2="21"></line>
+                    <line x1="4" y1="4" x2="9" y2="9"></line>
+                </svg>
+                Shuffle
+            </button>
         </div>
     </div>
 
