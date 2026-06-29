@@ -425,9 +425,43 @@
 			display: none;
 		}
 
+		/* Slim top bar that holds the back button so it never
+		   overlaps the game itself */
+		.mobile-game-header {
+			position: absolute;
+			top: 0;
+			left: 0;
+			right: 0;
+			height: calc(54px + env(safe-area-inset-top));
+			padding-top: env(safe-area-inset-top);
+			padding-left: 12px;
+			padding-right: 16px;
+			z-index: 2;
+			display: flex;
+			align-items: center;
+			gap: 10px;
+			background: linear-gradient(180deg, #1a1a2e 0%, #16213e 100%);
+			border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+			box-shadow: 0 2px 12px rgba(0, 0, 0, 0.4);
+		}
+
+		.mobile-game-bar-title {
+			flex: 1 1 auto;
+			min-width: 0;
+			color: #fff;
+			font-size: 1rem;
+			font-weight: 700;
+			white-space: nowrap;
+			overflow: hidden;
+			text-overflow: ellipsis;
+		}
+
 		.game-iframe {
+			position: absolute;
+			top: calc(54px + env(safe-area-inset-top));
+			left: 0;
 			width: 100%;
-			height: 100%;
+			height: calc(100% - 54px - env(safe-area-inset-top));
 			border: none;
 		}
 
@@ -1150,34 +1184,33 @@
 		}
 
 		.mobile-back-button {
-			position: fixed;
-			bottom: max(env(safe-area-inset-bottom), 20px);
-			left: 20px;
-			z-index: 1001;
-			width: 48px;
-			height: 48px;
-			border-radius: 50%;
-			background: rgba(0, 0, 0, 0.8);
-			backdrop-filter: blur(20px);
-			-webkit-backdrop-filter: blur(20px);
-			border: 1px solid rgba(255, 255, 255, 0.2);
-			color: white;
-			display: none;
+			flex: 0 0 auto;
+			display: inline-flex;
 			align-items: center;
-			justify-content: center;
+			gap: 4px;
+			height: 40px;
+			padding: 0 16px 0 8px;
+			border-radius: 20px;
+			background: rgba(255, 255, 255, 0.08);
+			border: 1px solid rgba(255, 255, 255, 0.18);
+			color: white;
+			font-size: 0.95rem;
+			font-weight: 600;
 			cursor: pointer;
-			transition: all 0.3s ease;
+			transition: all 0.2s ease;
+			-webkit-tap-highlight-color: transparent;
 		}
 
 		.mobile-back-button:active {
-			transform: scale(0.9);
-			background: rgba(0, 0, 0, 0.9);
+			transform: scale(0.95);
+			background: rgba(100, 255, 218, 0.15);
+			border-color: rgba(100, 255, 218, 0.4);
 		}
 
 		.mobile-back-button svg {
-			width: 24px;
-			height: 24px;
-		}	
+			width: 22px;
+			height: 22px;
+		}
 
 		.mobile-footer {
 			margin-top: 40px;
@@ -1547,16 +1580,18 @@
 
 	<!-- Mobile Full-screen -->
 	<div class="game-iframe-container" id="gameContainer">
+		<div class="mobile-game-header">
+			<button class="mobile-back-button" id="mobileBackButton" aria-label="Return to game selection">
+				<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+					<path d="M15 18L9 12L15 6" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+						stroke-linejoin="round" />
+				</svg>
+				<span>Back</span>
+			</button>
+			<span class="mobile-game-bar-title" id="mobileGameTitle"></span>
+		</div>
 		<iframe class="game-iframe" id="gameFrame"></iframe>
 	</div>
-
-	<!-- Mobile Back Button -->
-	<button class="mobile-back-button" id="mobileBackButton" aria-label="Return to game selection">
-		<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-			<path d="M15 18L9 12L15 6" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-				stroke-linejoin="round" />
-		</svg>
-	</button>
 
 	<!-- Desktop back button -->
 	<button class="back-button" id="backButton" aria-label="Return to game selection">
@@ -1653,11 +1688,11 @@
 				// Mobile: Use full-screen iframe
 				const container = document.getElementById('gameContainer');
 				const iframe = document.getElementById('gameFrame');
-				const mobileBackButton = document.getElementById('mobileBackButton');
+				const mobileGameTitle = document.getElementById('mobileGameTitle');
 
 				iframe.src = gamePath;
+				if (mobileGameTitle) mobileGameTitle.textContent = gameTitle || '';
 				container.style.display = 'block';
-				mobileBackButton.style.display = 'flex';
 				document.body.style.overflow = 'hidden';
 				document.body.classList.add('game-view');
 			} else {
@@ -1693,13 +1728,11 @@
 		function goBack() {
 			const container = document.getElementById('gameContainer');
 			const iframe = document.getElementById('gameFrame');
-			const mobileBackButton = document.getElementById('mobileBackButton');
 			const backButton = document.getElementById('backButton');
 			const iosInstallPrompt = document.getElementById('iosInstallPrompt');
 
 			iframe.src = '';
 			container.style.display = 'none';
-			mobileBackButton.style.display = 'none';
 			backButton.style.display = 'none';
 			document.body.style.overflow = 'auto';
 			document.body.classList.remove('game-view');
