@@ -235,38 +235,30 @@
         .legend {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 10px 14px;
-            margin: 6px 0 20px;
+            gap: 14px 16px;
+            margin: 10px 0 22px;
             text-align: left;
         }
 
         .legend-item {
             display: flex;
             align-items: center;
-            gap: 10px;
-            font-size: 12.5px;
-            color: rgba(255, 255, 255, 0.82);
+            gap: 11px;
+            font-size: 14px;
+            line-height: 1.3;
+            color: rgba(255, 255, 255, 0.92);
         }
 
-        .legend-dot {
-            width: 26px;
-            height: 26px;
-            border-radius: 50%;
+        .legend-canvas {
+            width: 40px;
+            height: 40px;
             flex-shrink: 0;
-            position: relative;
-            box-shadow: inset -4px -4px 8px rgba(0, 0, 0, 0.3), inset 4px 4px 8px rgba(255, 255, 255, 0.25);
         }
 
         .legend-item b {
             color: #fff;
+            font-weight: 800;
         }
-
-        .dot-normal { background: radial-gradient(circle at 35% 30%, #9be7ff, #2196f3); }
-        .dot-golden { background: radial-gradient(circle at 35% 30%, #fff4c2, #f5a623); box-shadow: inset -3px -3px 6px rgba(0,0,0,.25), 0 0 10px rgba(245,166,35,.7); }
-        .dot-bomb { background: radial-gradient(circle at 35% 30%, #6b7280, #1f2430); }
-        .dot-ice { background: radial-gradient(circle at 35% 30%, #ffffff, #79d0ff); }
-        .dot-rainbow { background: conic-gradient(from 0deg, #ff5e7e, #ffd24c, #54e08a, #36d1dc, #5b86e5, #c471ed, #ff5e7e); }
-        .dot-danger { background: radial-gradient(circle at 35% 30%, #ff6b6b, #7a0d0d); box-shadow: inset -3px -3px 6px rgba(0,0,0,.35), 0 0 10px rgba(255,40,40,.6); }
 
         .btn {
             background: linear-gradient(135deg, #36d1dc 0%, #5b86e5 100%);
@@ -350,8 +342,9 @@
 
         .hint {
             margin-top: 16px;
-            font-size: 12px;
-            color: rgba(255, 255, 255, 0.45);
+            font-size: 13px;
+            line-height: 1.4;
+            color: rgba(255, 255, 255, 0.55);
         }
     </style>
 </head>
@@ -389,12 +382,12 @@
                 <h1 class="title">Bubble Pop II</h1>
                 <p class="subtitle">Pop fast, build combos, master the bubbles.</p>
                 <div class="legend">
-                    <div class="legend-item"><span class="legend-dot dot-normal"></span><span><b>Pop</b> &mdash; smaller = more points</span></div>
-                    <div class="legend-item"><span class="legend-dot dot-golden"></span><span><b>Golden</b> &mdash; big bonus points</span></div>
-                    <div class="legend-item"><span class="legend-dot dot-ice"></span><span><b>Frozen</b> &mdash; tap twice to crack</span></div>
-                    <div class="legend-item"><span class="legend-dot dot-bomb"></span><span><b>Bomb</b> &mdash; blasts nearby bubbles</span></div>
-                    <div class="legend-item"><span class="legend-dot dot-rainbow"></span><span><b>Rainbow</b> &mdash; slow-mo + 2&times; score</span></div>
-                    <div class="legend-item"><span class="legend-dot dot-danger"></span><span><b>Spiked</b> &mdash; don't pop, costs a life!</span></div>
+                    <div class="legend-item"><canvas class="legend-canvas" data-type="normal" data-hue="200"></canvas><span><b>Pop</b> &mdash; smaller = more points</span></div>
+                    <div class="legend-item"><canvas class="legend-canvas" data-type="golden"></canvas><span><b>Golden</b> &mdash; big bonus points</span></div>
+                    <div class="legend-item"><canvas class="legend-canvas" data-type="ice"></canvas><span><b>Frozen</b> &mdash; tap twice to crack</span></div>
+                    <div class="legend-item"><canvas class="legend-canvas" data-type="bomb"></canvas><span><b>Bomb</b> &mdash; blasts nearby bubbles</span></div>
+                    <div class="legend-item"><canvas class="legend-canvas" data-type="rainbow"></canvas><span><b>Rainbow</b> &mdash; slow-mo + 2&times; score</span></div>
+                    <div class="legend-item"><canvas class="legend-canvas" data-type="danger"></canvas><span><b>Spiked</b> &mdash; don't pop, costs a life!</span></div>
                 </div>
                 <button class="btn" id="playBtn">Play Now</button>
                 <p class="hint">Chain pops quickly to raise your multiplier. Don't let bubbles escape the top!</p>
@@ -669,139 +662,171 @@
             }
 
             draw() {
-                const r = this.radius * this.popScale;
                 ctx.save();
                 ctx.globalAlpha = this.alpha;
-                switch (this.type) {
-                    case TYPE.GOLDEN: this.drawSphere('#fff7d6', '#ffd24c', '#c8860b', r, 'rgba(255,200,80,0.55)'); this.drawSparkle(r); break;
-                    case TYPE.BOMB: this.drawBomb(r); break;
-                    case TYPE.ICE: this.drawIce(r); break;
-                    case TYPE.RAINBOW: this.drawRainbow(r); break;
-                    case TYPE.DANGER: this.drawDanger(r); break;
-                    default: {
-                        const c1 = `hsl(${this.hue},100%,88%)`, c2 = `hsl(${this.hue},75%,58%)`, c3 = `hsl(${this.hue},85%,40%)`;
-                        this.drawSphere(c1, c2, c3, r, `hsla(${this.hue},90%,60%,0.4)`);
+                paintBubble(ctx, this.type, this.x, this.y, this.radius * this.popScale, this.spin, this.hue, this.cracked);
+                ctx.restore();
+            }
+        }
+
+        // ---- Shared bubble rendering (used by gameplay AND the menu legend) ----
+        function glossySphere(c, x, y, r, c1, c2, c3, glow) {
+            if (glow) { c.shadowColor = glow; c.shadowBlur = 16; }
+            const g = c.createRadialGradient(x - r * 0.35, y - r * 0.35, r * 0.1, x, y, r);
+            g.addColorStop(0, c1); g.addColorStop(0.45, c2); g.addColorStop(1, c3);
+            c.beginPath(); c.arc(x, y, r, 0, Math.PI * 2); c.fillStyle = g; c.fill();
+            c.shadowBlur = 0;
+            const hg = c.createRadialGradient(x - r * 0.45, y - r * 0.45, 1, x - r * 0.4, y - r * 0.4, r * 0.55);
+            hg.addColorStop(0, 'rgba(255,255,255,0.7)'); hg.addColorStop(1, 'rgba(255,255,255,0)');
+            c.beginPath(); c.arc(x, y, r, 0, Math.PI * 2); c.fillStyle = hg; c.fill();
+            c.beginPath(); c.arc(x, y, r, 0, Math.PI * 2);
+            c.strokeStyle = 'rgba(255,255,255,0.22)'; c.lineWidth = 1.5; c.stroke();
+        }
+
+        function drawSkull(c, cx, cy, R) {
+            c.save();
+            c.translate(cx, cy);
+            // cranium + jaw in bone white
+            c.fillStyle = 'rgba(248,244,240,0.97)';
+            c.beginPath();
+            c.ellipse(0, -R * 0.12, R * 0.98, R * 0.9, 0, 0, Math.PI * 2);
+            c.fill();
+            c.beginPath();
+            c.moveTo(-R * 0.5, R * 0.48);
+            c.quadraticCurveTo(-R * 0.5, R * 0.98, 0, R * 0.98);
+            c.quadraticCurveTo(R * 0.5, R * 0.98, R * 0.5, R * 0.48);
+            c.closePath();
+            c.fill();
+            // eye sockets (angled inward = menacing)
+            c.fillStyle = '#1a0303';
+            c.beginPath(); c.ellipse(-R * 0.42, -R * 0.16, R * 0.27, R * 0.33, 0.4, 0, Math.PI * 2); c.fill();
+            c.beginPath(); c.ellipse(R * 0.42, -R * 0.16, R * 0.27, R * 0.33, -0.4, 0, Math.PI * 2); c.fill();
+            // tiny glints in the sockets
+            c.fillStyle = 'rgba(255,120,120,0.9)';
+            c.beginPath(); c.arc(-R * 0.36, -R * 0.2, R * 0.07, 0, Math.PI * 2); c.fill();
+            c.beginPath(); c.arc(R * 0.48, -R * 0.2, R * 0.07, 0, Math.PI * 2); c.fill();
+            // nose
+            c.fillStyle = '#1a0303';
+            c.beginPath();
+            c.moveTo(0, R * 0.04);
+            c.lineTo(-R * 0.14, R * 0.34);
+            c.lineTo(R * 0.14, R * 0.34);
+            c.closePath();
+            c.fill();
+            // teeth
+            c.strokeStyle = '#1a0303'; c.lineWidth = Math.max(1, R * 0.1);
+            for (let i = -1; i <= 1; i++) {
+                c.beginPath();
+                c.moveTo(i * R * 0.24, R * 0.5);
+                c.lineTo(i * R * 0.24, R * 0.92);
+                c.stroke();
+            }
+            c.restore();
+        }
+
+        function drawDangerBubble(c, x, y, r, t) {
+            const pulse = 0.5 + 0.5 * Math.sin(t * 6);
+            // slowly rotating thorn crown
+            c.shadowColor = `rgba(255,45,45,${0.45 + pulse * 0.4})`; c.shadowBlur = 18;
+            c.beginPath();
+            const spikes = 11;
+            for (let i = 0; i < spikes * 2; i++) {
+                const a = (i / (spikes * 2)) * Math.PI * 2 + t * 0.6;
+                const rad = i % 2 === 0 ? r * (1.32 + pulse * 0.05) : r * 0.95;
+                const px = x + Math.cos(a) * rad, py = y + Math.sin(a) * rad;
+                i === 0 ? c.moveTo(px, py) : c.lineTo(px, py);
+            }
+            c.closePath();
+            const sg = c.createRadialGradient(x, y, r * 0.6, x, y, r * 1.36);
+            sg.addColorStop(0, '#8a0f12'); sg.addColorStop(1, '#360203');
+            c.fillStyle = sg; c.fill();
+            c.shadowBlur = 0;
+            // glossy dark-red body
+            const g = c.createRadialGradient(x - r * 0.32, y - r * 0.32, r * 0.1, x, y, r);
+            g.addColorStop(0, '#ff9a8f'); g.addColorStop(0.5, '#c81e1e'); g.addColorStop(1, '#6e0606');
+            c.beginPath(); c.arc(x, y, r, 0, Math.PI * 2); c.fillStyle = g; c.fill();
+            // highlight
+            const hg = c.createRadialGradient(x - r * 0.4, y - r * 0.4, 1, x - r * 0.35, y - r * 0.35, r * 0.55);
+            hg.addColorStop(0, 'rgba(255,255,255,0.5)'); hg.addColorStop(1, 'rgba(255,255,255,0)');
+            c.beginPath(); c.arc(x, y, r, 0, Math.PI * 2); c.fillStyle = hg; c.fill();
+            // menacing skull
+            drawSkull(c, x, y, r * 0.6);
+        }
+
+        function paintBubble(c, type, x, y, r, t, hue, cracked) {
+            switch (type) {
+                case TYPE.GOLDEN: {
+                    glossySphere(c, x, y, r, '#fff7d6', '#ffd24c', '#c8860b', 'rgba(255,200,80,0.55)');
+                    c.save();
+                    c.translate(x - r * 0.3, y - r * 0.3); c.rotate(t * 4);
+                    c.strokeStyle = 'rgba(255,255,255,0.9)'; c.lineWidth = 1.6;
+                    const s = r * 0.32;
+                    c.beginPath(); c.moveTo(-s, 0); c.lineTo(s, 0); c.moveTo(0, -s); c.lineTo(0, s); c.stroke();
+                    c.restore();
+                    break;
+                }
+                case TYPE.BOMB: {
+                    c.shadowColor = 'rgba(255,80,40,0.6)'; c.shadowBlur = 14;
+                    const g = c.createRadialGradient(x - r * 0.35, y - r * 0.35, r * 0.1, x, y, r);
+                    g.addColorStop(0, '#6b7280'); g.addColorStop(0.5, '#2b313f'); g.addColorStop(1, '#13161f');
+                    c.beginPath(); c.arc(x, y, r, 0, Math.PI * 2); c.fillStyle = g; c.fill();
+                    c.shadowBlur = 0;
+                    const pulse = 0.5 + 0.5 * Math.sin(t * 8);
+                    c.beginPath(); c.arc(x, y, r * 0.6, 0, Math.PI * 2);
+                    c.strokeStyle = `rgba(255,${80 + pulse * 100},40,${0.5 + pulse * 0.4})`;
+                    c.lineWidth = 2.5; c.stroke();
+                    c.beginPath(); c.arc(x, y - r * 0.85, 3 + pulse * 2, 0, Math.PI * 2);
+                    c.fillStyle = `rgba(255,${180 + pulse * 60},80,1)`; c.fill();
+                    const hg = c.createRadialGradient(x - r * 0.45, y - r * 0.45, 1, x - r * 0.4, y - r * 0.4, r * 0.5);
+                    hg.addColorStop(0, 'rgba(255,255,255,0.5)'); hg.addColorStop(1, 'rgba(255,255,255,0)');
+                    c.beginPath(); c.arc(x, y, r, 0, Math.PI * 2); c.fillStyle = hg; c.fill();
+                    break;
+                }
+                case TYPE.ICE: {
+                    c.shadowColor = 'rgba(120,210,255,0.6)'; c.shadowBlur = 14;
+                    const g = c.createRadialGradient(x - r * 0.35, y - r * 0.35, r * 0.1, x, y, r);
+                    g.addColorStop(0, '#ffffff'); g.addColorStop(0.5, '#bfeaff'); g.addColorStop(1, '#5fa8d8');
+                    c.beginPath(); c.arc(x, y, r, 0, Math.PI * 2); c.fillStyle = g; c.fill();
+                    c.shadowBlur = 0;
+                    c.strokeStyle = 'rgba(255,255,255,0.6)'; c.lineWidth = 1.2;
+                    for (let i = 0; i < 6; i++) {
+                        const a = (i / 6) * Math.PI * 2 + t;
+                        c.beginPath(); c.moveTo(x, y);
+                        c.lineTo(x + Math.cos(a) * r * 0.8, y + Math.sin(a) * r * 0.8); c.stroke();
                     }
+                    if (cracked) {
+                        c.strokeStyle = 'rgba(40,90,130,0.85)'; c.lineWidth = 2;
+                        c.beginPath();
+                        c.moveTo(x - r * 0.5, y - r * 0.3);
+                        c.lineTo(x - r * 0.1, y + r * 0.1);
+                        c.lineTo(x + r * 0.3, y - r * 0.2);
+                        c.lineTo(x + r * 0.5, y + r * 0.4);
+                        c.stroke();
+                    }
+                    c.beginPath(); c.arc(x, y, r, 0, Math.PI * 2);
+                    c.strokeStyle = 'rgba(255,255,255,0.5)'; c.lineWidth = 1.5; c.stroke();
+                    break;
                 }
-                ctx.restore();
-            }
-
-            drawSphere(c1, c2, c3, r, glow) {
-                if (glow) { ctx.shadowColor = glow; ctx.shadowBlur = 16; }
-                const g = ctx.createRadialGradient(this.x - r * 0.35, this.y - r * 0.35, r * 0.1, this.x, this.y, r);
-                g.addColorStop(0, c1); g.addColorStop(0.45, c2); g.addColorStop(1, c3);
-                ctx.beginPath(); ctx.arc(this.x, this.y, r, 0, Math.PI * 2);
-                ctx.fillStyle = g; ctx.fill();
-                ctx.shadowBlur = 0;
-                // highlight
-                const hg = ctx.createRadialGradient(this.x - r * 0.45, this.y - r * 0.45, 1, this.x - r * 0.4, this.y - r * 0.4, r * 0.55);
-                hg.addColorStop(0, 'rgba(255,255,255,0.7)'); hg.addColorStop(1, 'rgba(255,255,255,0)');
-                ctx.beginPath(); ctx.arc(this.x, this.y, r, 0, Math.PI * 2);
-                ctx.fillStyle = hg; ctx.fill();
-                // rim
-                ctx.beginPath(); ctx.arc(this.x, this.y, r, 0, Math.PI * 2);
-                ctx.strokeStyle = 'rgba(255,255,255,0.22)'; ctx.lineWidth = 1.5; ctx.stroke();
-            }
-
-            drawSparkle(r) {
-                const t = this.spin * 4;
-                ctx.save();
-                ctx.translate(this.x - r * 0.3, this.y - r * 0.3);
-                ctx.rotate(t);
-                ctx.strokeStyle = 'rgba(255,255,255,0.9)';
-                ctx.lineWidth = 1.6;
-                const s = r * 0.32;
-                ctx.beginPath(); ctx.moveTo(-s, 0); ctx.lineTo(s, 0); ctx.moveTo(0, -s); ctx.lineTo(0, s); ctx.stroke();
-                ctx.restore();
-            }
-
-            drawBomb(r) {
-                ctx.shadowColor = 'rgba(255,80,40,0.6)'; ctx.shadowBlur = 14;
-                const g = ctx.createRadialGradient(this.x - r * 0.35, this.y - r * 0.35, r * 0.1, this.x, this.y, r);
-                g.addColorStop(0, '#6b7280'); g.addColorStop(0.5, '#2b313f'); g.addColorStop(1, '#13161f');
-                ctx.beginPath(); ctx.arc(this.x, this.y, r, 0, Math.PI * 2); ctx.fillStyle = g; ctx.fill();
-                ctx.shadowBlur = 0;
-                // pulsing danger ring
-                const pulse = 0.5 + 0.5 * Math.sin(this.spin * 8);
-                ctx.beginPath(); ctx.arc(this.x, this.y, r * 0.6, 0, Math.PI * 2);
-                ctx.strokeStyle = `rgba(255,${80 + pulse * 100},40,${0.5 + pulse * 0.4})`;
-                ctx.lineWidth = 2.5; ctx.stroke();
-                // fuse spark
-                ctx.beginPath(); ctx.arc(this.x, this.y - r * 0.85, 3 + pulse * 2, 0, Math.PI * 2);
-                ctx.fillStyle = `rgba(255,${180 + pulse * 60},80,1)`; ctx.fill();
-                // highlight
-                const hg = ctx.createRadialGradient(this.x - r * 0.45, this.y - r * 0.45, 1, this.x - r * 0.4, this.y - r * 0.4, r * 0.5);
-                hg.addColorStop(0, 'rgba(255,255,255,0.5)'); hg.addColorStop(1, 'rgba(255,255,255,0)');
-                ctx.beginPath(); ctx.arc(this.x, this.y, r, 0, Math.PI * 2); ctx.fillStyle = hg; ctx.fill();
-            }
-
-            drawIce(r) {
-                ctx.shadowColor = 'rgba(120,210,255,0.6)'; ctx.shadowBlur = 14;
-                const g = ctx.createRadialGradient(this.x - r * 0.35, this.y - r * 0.35, r * 0.1, this.x, this.y, r);
-                g.addColorStop(0, '#ffffff'); g.addColorStop(0.5, '#bfeaff'); g.addColorStop(1, '#5fa8d8');
-                ctx.beginPath(); ctx.arc(this.x, this.y, r, 0, Math.PI * 2); ctx.fillStyle = g; ctx.fill();
-                ctx.shadowBlur = 0;
-                // frosty facets
-                ctx.strokeStyle = 'rgba(255,255,255,0.6)'; ctx.lineWidth = 1.2;
-                for (let i = 0; i < 6; i++) {
-                    const a = (i / 6) * Math.PI * 2 + this.spin;
-                    ctx.beginPath(); ctx.moveTo(this.x, this.y);
-                    ctx.lineTo(this.x + Math.cos(a) * r * 0.8, this.y + Math.sin(a) * r * 0.8); ctx.stroke();
+                case TYPE.RAINBOW: {
+                    c.shadowColor = 'rgba(255,255,255,0.5)'; c.shadowBlur = 16;
+                    const hueBase = (t * 120) % 360;
+                    const g = c.createRadialGradient(x - r * 0.3, y - r * 0.3, r * 0.1, x, y, r);
+                    g.addColorStop(0, `hsla(${hueBase},100%,85%,0.95)`);
+                    g.addColorStop(0.4, `hsla(${(hueBase + 120) % 360},90%,60%,0.9)`);
+                    g.addColorStop(0.7, `hsla(${(hueBase + 240) % 360},90%,55%,0.85)`);
+                    g.addColorStop(1, `hsla(${(hueBase + 60) % 360},90%,45%,0.8)`);
+                    c.beginPath(); c.arc(x, y, r, 0, Math.PI * 2); c.fillStyle = g; c.fill();
+                    c.shadowBlur = 0;
+                    const hg = c.createRadialGradient(x - r * 0.4, y - r * 0.4, 1, x - r * 0.35, y - r * 0.35, r * 0.5);
+                    hg.addColorStop(0, 'rgba(255,255,255,0.8)'); hg.addColorStop(1, 'rgba(255,255,255,0)');
+                    c.beginPath(); c.arc(x, y, r, 0, Math.PI * 2); c.fillStyle = hg; c.fill();
+                    break;
                 }
-                if (this.cracked) {
-                    ctx.strokeStyle = 'rgba(40,90,130,0.85)'; ctx.lineWidth = 2;
-                    ctx.beginPath();
-                    ctx.moveTo(this.x - r * 0.5, this.y - r * 0.3);
-                    ctx.lineTo(this.x - r * 0.1, this.y + r * 0.1);
-                    ctx.lineTo(this.x + r * 0.3, this.y - r * 0.2);
-                    ctx.lineTo(this.x + r * 0.5, this.y + r * 0.4);
-                    ctx.stroke();
-                }
-                ctx.beginPath(); ctx.arc(this.x, this.y, r, 0, Math.PI * 2);
-                ctx.strokeStyle = 'rgba(255,255,255,0.5)'; ctx.lineWidth = 1.5; ctx.stroke();
-            }
-
-            drawRainbow(r) {
-                ctx.shadowColor = 'rgba(255,255,255,0.5)'; ctx.shadowBlur = 16;
-                const hueBase = (this.spin * 120) % 360;
-                const g = ctx.createRadialGradient(this.x - r * 0.3, this.y - r * 0.3, r * 0.1, this.x, this.y, r);
-                g.addColorStop(0, `hsla(${hueBase},100%,85%,0.95)`);
-                g.addColorStop(0.4, `hsla(${(hueBase + 120) % 360},90%,60%,0.9)`);
-                g.addColorStop(0.7, `hsla(${(hueBase + 240) % 360},90%,55%,0.85)`);
-                g.addColorStop(1, `hsla(${(hueBase + 60) % 360},90%,45%,0.8)`);
-                ctx.beginPath(); ctx.arc(this.x, this.y, r, 0, Math.PI * 2); ctx.fillStyle = g; ctx.fill();
-                ctx.shadowBlur = 0;
-                const hg = ctx.createRadialGradient(this.x - r * 0.4, this.y - r * 0.4, 1, this.x - r * 0.35, this.y - r * 0.35, r * 0.5);
-                hg.addColorStop(0, 'rgba(255,255,255,0.8)'); hg.addColorStop(1, 'rgba(255,255,255,0)');
-                ctx.beginPath(); ctx.arc(this.x, this.y, r, 0, Math.PI * 2); ctx.fillStyle = hg; ctx.fill();
-            }
-
-            drawDanger(r) {
-                const pulse = 0.5 + 0.5 * Math.sin(this.spin * 7);
-                ctx.shadowColor = `rgba(255,40,40,${0.5 + pulse * 0.4})`; ctx.shadowBlur = 16;
-                // spikes
-                ctx.beginPath();
-                const spikes = 12;
-                for (let i = 0; i < spikes * 2; i++) {
-                    const a = (i / (spikes * 2)) * Math.PI * 2 + this.spin;
-                    const rad = i % 2 === 0 ? r * 1.25 : r * 0.95;
-                    const px = this.x + Math.cos(a) * rad, py = this.y + Math.sin(a) * rad;
-                    if (i === 0) ctx.moveTo(px, py); else ctx.lineTo(px, py);
-                }
-                ctx.closePath();
-                ctx.fillStyle = '#5a0a0a'; ctx.fill();
-                ctx.shadowBlur = 0;
-                // body
-                const g = ctx.createRadialGradient(this.x - r * 0.3, this.y - r * 0.3, r * 0.1, this.x, this.y, r);
-                g.addColorStop(0, '#ff7a7a'); g.addColorStop(0.5, '#c41616'); g.addColorStop(1, '#6e0606');
-                ctx.beginPath(); ctx.arc(this.x, this.y, r, 0, Math.PI * 2); ctx.fillStyle = g; ctx.fill();
-                // warning mark
-                ctx.strokeStyle = 'rgba(255,255,255,0.92)'; ctx.lineWidth = 3; ctx.lineCap = 'round';
-                const s = r * 0.4;
-                ctx.beginPath();
-                ctx.moveTo(this.x - s, this.y - s); ctx.lineTo(this.x + s, this.y + s);
-                ctx.moveTo(this.x + s, this.y - s); ctx.lineTo(this.x - s, this.y + s);
-                ctx.stroke();
+                case TYPE.DANGER:
+                    drawDangerBubble(c, x, y, r, t);
+                    break;
+                default:
+                    glossySphere(c, x, y, r, `hsl(${hue},100%,88%)`, `hsl(${hue},75%,58%)`, `hsl(${hue},85%,40%)`, `hsla(${hue},90%,60%,0.4)`);
             }
         }
 
@@ -1357,8 +1382,32 @@
                 ctx.fillStyle = g;
                 ctx.beginPath(); ctx.arc(o.x, o.y, o.r, 0, Math.PI * 2); ctx.fill();
             });
+            if (!startScreen.classList.contains('hidden')) renderLegend(ts / 600);
             requestAnimationFrame(idleLoop);
         }
+
+        // ---- Animated legend icons on the start screen (same renderer as gameplay) ----
+        const legendCanvases = Array.from(document.querySelectorAll('.legend-canvas'));
+        function sizeLegend() {
+            const dpr = Math.min(window.devicePixelRatio || 1, 2);
+            legendCanvases.forEach(cv => {
+                cv.width = 40 * dpr; cv.height = 40 * dpr;
+                cv.getContext('2d').setTransform(dpr, 0, 0, dpr, 0, 0);
+            });
+        }
+        function renderLegend(t) {
+            legendCanvases.forEach(cv => {
+                const c = cv.getContext('2d');
+                c.clearRect(0, 0, 40, 40);
+                const type = cv.dataset.type;
+                const hue = parseFloat(cv.dataset.hue || '205');
+                const r = type === TYPE.DANGER ? 13 : 15.5;
+                paintBubble(c, type, 20, 20, r, t, hue, false);
+            });
+        }
+        sizeLegend();
+        renderLegend(0.6);
+
         requestAnimationFrame(idleLoop);
 
         // ===================== Buttons =====================
