@@ -12,6 +12,10 @@ Connect the pipes to create a continuous flow. Test your logical thinking skills
 
 A polished sequel to Pipes. Rotate the pipes to link the source to the drain and watch the water flow through with animated feedback. Features guaranteed-solvable puzzles, three difficulty levels, a move and time tracker, and a win celebration.
 
+### Bubble Pop II
+
+A polished sequel to Bubble Pop. Pop floating bubbles to build combos and multipliers, and master special bubbles &mdash; golden for bonus points, frozen that cracks before popping, bombs that clear a blast radius, and rainbows that trigger slow-motion with double score. Avoid the spiked bubbles, manage your lives, and climb through progressive levels.
+
 ### Soccer Juggle
 
 Keep the soccer ball in the air for as long as possible. Challenge yourself to achieve your highest juggling streak in this addictive skill-based game.

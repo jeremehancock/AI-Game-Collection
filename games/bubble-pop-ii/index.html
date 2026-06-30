@@ -1,0 +1,1391 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="theme-color" content="#0b1026">
+    <title>Bubble Pop II</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            margin: 0;
+            overflow: hidden;
+            touch-action: none;
+            font-family: 'Segoe UI', system-ui, -apple-system, Arial, sans-serif;
+            background: #05060f;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            color: #fff;
+            user-select: none;
+        }
+
+        .game-container {
+            width: 100%;
+            max-width: 700px;
+            height: 100vh;
+            position: relative;
+            overflow: hidden;
+            background: radial-gradient(circle at 30% 20%, #182149 0%, #0b1026 55%, #05060f 100%);
+        }
+
+        #gameCanvas {
+            width: 100%;
+            height: 100%;
+            display: block;
+            touch-action: none;
+        }
+
+        /* ---------- HUD ---------- */
+        .hud {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            padding: 14px 16px 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 10px;
+            pointer-events: none;
+            z-index: 5;
+        }
+
+        .hud-block {
+            background: rgba(255, 255, 255, 0.06);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            border-radius: 14px;
+            padding: 8px 12px;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.35);
+        }
+
+        .hud-left {
+            min-width: 96px;
+        }
+
+        .hud-label {
+            font-size: 10px;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            color: rgba(255, 255, 255, 0.55);
+            font-weight: 700;
+        }
+
+        .hud-score {
+            font-size: 30px;
+            font-weight: 800;
+            line-height: 1;
+            margin-top: 2px;
+            text-shadow: 0 0 18px rgba(120, 180, 255, 0.6);
+            font-variant-numeric: tabular-nums;
+        }
+
+        .hud-best {
+            font-size: 11px;
+            color: rgba(255, 215, 120, 0.85);
+            margin-top: 4px;
+            font-weight: 700;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .hud-center {
+            text-align: center;
+            min-width: 110px;
+        }
+
+        .level-num {
+            font-size: 18px;
+            font-weight: 800;
+            line-height: 1;
+        }
+
+        .level-bar {
+            margin-top: 6px;
+            width: 86px;
+            height: 6px;
+            border-radius: 4px;
+            background: rgba(255, 255, 255, 0.14);
+            overflow: hidden;
+        }
+
+        .level-fill {
+            height: 100%;
+            width: 0%;
+            border-radius: 4px;
+            background: linear-gradient(90deg, #36d1dc, #5b86e5);
+            transition: width 0.25s ease;
+        }
+
+        .hud-right {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            gap: 8px;
+        }
+
+        .controls {
+            display: flex;
+            gap: 8px;
+            pointer-events: auto;
+        }
+
+        .ctrl-btn {
+            width: 38px;
+            height: 38px;
+            border-radius: 12px;
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.14);
+            color: #fff;
+            font-size: 17px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            transition: transform 0.12s, background 0.2s;
+        }
+
+        .ctrl-btn:active {
+            transform: scale(0.9);
+            background: rgba(255, 255, 255, 0.18);
+        }
+
+        .lives {
+            display: flex;
+            gap: 4px;
+            font-size: 20px;
+            line-height: 1;
+        }
+
+        .heart {
+            filter: drop-shadow(0 0 6px rgba(255, 70, 100, 0.7));
+            transition: transform 0.2s;
+        }
+
+        .heart.empty {
+            filter: none;
+            opacity: 0.28;
+        }
+
+        /* ---------- Overlays ---------- */
+        .overlay {
+            position: absolute;
+            inset: 0;
+            background: rgba(5, 6, 15, 0.82);
+            backdrop-filter: blur(6px);
+            -webkit-backdrop-filter: blur(6px);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 20;
+            padding: 20px;
+        }
+
+        .overlay.hidden {
+            display: none;
+        }
+
+        .panel {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            backdrop-filter: blur(14px);
+            -webkit-backdrop-filter: blur(14px);
+            padding: 26px 24px 28px;
+            border-radius: 24px;
+            text-align: center;
+            max-width: 420px;
+            width: 100%;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+            animation: pop-in 0.4s cubic-bezier(0.18, 0.89, 0.32, 1.28);
+        }
+
+        @keyframes pop-in {
+            from { transform: scale(0.85); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+
+        .title {
+            margin: 0;
+            font-size: 2.6rem;
+            font-weight: 900;
+            letter-spacing: -1px;
+            line-height: 1;
+            background: linear-gradient(45deg, #36d1dc, #5b86e5, #c471ed);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            filter: drop-shadow(0 4px 20px rgba(91, 134, 229, 0.5));
+        }
+
+        .subtitle {
+            margin: 6px 0 18px;
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 1rem;
+        }
+
+        .legend {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px 14px;
+            margin: 6px 0 20px;
+            text-align: left;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 12.5px;
+            color: rgba(255, 255, 255, 0.82);
+        }
+
+        .legend-dot {
+            width: 26px;
+            height: 26px;
+            border-radius: 50%;
+            flex-shrink: 0;
+            position: relative;
+            box-shadow: inset -4px -4px 8px rgba(0, 0, 0, 0.3), inset 4px 4px 8px rgba(255, 255, 255, 0.25);
+        }
+
+        .legend-item b {
+            color: #fff;
+        }
+
+        .dot-normal { background: radial-gradient(circle at 35% 30%, #9be7ff, #2196f3); }
+        .dot-golden { background: radial-gradient(circle at 35% 30%, #fff4c2, #f5a623); box-shadow: inset -3px -3px 6px rgba(0,0,0,.25), 0 0 10px rgba(245,166,35,.7); }
+        .dot-bomb { background: radial-gradient(circle at 35% 30%, #6b7280, #1f2430); }
+        .dot-ice { background: radial-gradient(circle at 35% 30%, #ffffff, #79d0ff); }
+        .dot-rainbow { background: conic-gradient(from 0deg, #ff5e7e, #ffd24c, #54e08a, #36d1dc, #5b86e5, #c471ed, #ff5e7e); }
+        .dot-danger { background: radial-gradient(circle at 35% 30%, #ff6b6b, #7a0d0d); box-shadow: inset -3px -3px 6px rgba(0,0,0,.35), 0 0 10px rgba(255,40,40,.6); }
+
+        .btn {
+            background: linear-gradient(135deg, #36d1dc 0%, #5b86e5 100%);
+            border: none;
+            color: #fff;
+            padding: 15px 40px;
+            font-size: 1.05rem;
+            font-weight: 800;
+            letter-spacing: 0.5px;
+            cursor: pointer;
+            border-radius: 30px;
+            box-shadow: 0 8px 24px rgba(91, 134, 229, 0.45);
+            transition: transform 0.15s, box-shadow 0.15s;
+            margin-top: 4px;
+        }
+
+        .btn:active {
+            transform: translateY(2px) scale(0.97);
+            box-shadow: 0 4px 14px rgba(91, 134, 229, 0.4);
+        }
+
+        .btn.secondary {
+            background: rgba(255, 255, 255, 0.1);
+            box-shadow: none;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 13px 28px;
+            font-size: 0.95rem;
+            margin-left: 8px;
+        }
+
+        .final-score {
+            font-size: 3.4rem;
+            font-weight: 900;
+            margin: 8px 0 0;
+            font-variant-numeric: tabular-nums;
+            text-shadow: 0 0 24px rgba(120, 180, 255, 0.6);
+        }
+
+        .stat-row {
+            display: flex;
+            justify-content: center;
+            gap: 26px;
+            margin: 14px 0 18px;
+        }
+
+        .stat {
+            text-align: center;
+        }
+
+        .stat .v {
+            font-size: 1.5rem;
+            font-weight: 800;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .stat .l {
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: rgba(255, 255, 255, 0.55);
+        }
+
+        .record-badge {
+            display: inline-block;
+            margin: 10px 0 2px;
+            padding: 6px 16px;
+            border-radius: 20px;
+            background: linear-gradient(45deg, #f5a623, #ffd24c);
+            color: #3a2600;
+            font-weight: 900;
+            font-size: 0.85rem;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            animation: badge-pulse 1.2s ease-in-out infinite;
+        }
+
+        @keyframes badge-pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.08); }
+        }
+
+        .hint {
+            margin-top: 16px;
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.45);
+        }
+    </style>
+</head>
+
+<body>
+    <div class="game-container">
+        <canvas id="gameCanvas"></canvas>
+
+        <!-- HUD -->
+        <div class="hud" id="hud" style="display:none;">
+            <div class="hud-block hud-left">
+                <div class="hud-label">Score</div>
+                <div class="hud-score" id="scoreVal">0</div>
+                <div class="hud-best">BEST <span id="bestVal">0</span></div>
+            </div>
+            <div class="hud-block hud-center">
+                <div class="hud-label">Level</div>
+                <div class="level-num" id="levelVal">1</div>
+                <div class="level-bar"><div class="level-fill" id="levelFill"></div></div>
+            </div>
+            <div class="hud-right">
+                <div class="controls">
+                    <div class="ctrl-btn" id="muteBtn" title="Sound">&#128266;</div>
+                    <div class="ctrl-btn" id="pauseBtn" title="Pause">&#10073;&#10073;</div>
+                </div>
+                <div class="hud-block" style="padding:6px 10px;">
+                    <div class="lives" id="livesVal"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Start Screen -->
+        <div class="overlay" id="startScreen">
+            <div class="panel">
+                <h1 class="title">Bubble Pop II</h1>
+                <p class="subtitle">Pop fast, build combos, master the bubbles.</p>
+                <div class="legend">
+                    <div class="legend-item"><span class="legend-dot dot-normal"></span><span><b>Pop</b> &mdash; smaller = more points</span></div>
+                    <div class="legend-item"><span class="legend-dot dot-golden"></span><span><b>Golden</b> &mdash; big bonus points</span></div>
+                    <div class="legend-item"><span class="legend-dot dot-ice"></span><span><b>Frozen</b> &mdash; tap twice to crack</span></div>
+                    <div class="legend-item"><span class="legend-dot dot-bomb"></span><span><b>Bomb</b> &mdash; blasts nearby bubbles</span></div>
+                    <div class="legend-item"><span class="legend-dot dot-rainbow"></span><span><b>Rainbow</b> &mdash; slow-mo + 2&times; score</span></div>
+                    <div class="legend-item"><span class="legend-dot dot-danger"></span><span><b>Spiked</b> &mdash; don't pop, costs a life!</span></div>
+                </div>
+                <button class="btn" id="playBtn">Play Now</button>
+                <p class="hint">Chain pops quickly to raise your multiplier. Don't let bubbles escape the top!</p>
+            </div>
+        </div>
+
+        <!-- Pause Screen -->
+        <div class="overlay hidden" id="pauseScreen">
+            <div class="panel">
+                <h1 class="title" style="font-size:2rem;">Paused</h1>
+                <p class="subtitle">Take a breath.</p>
+                <button class="btn" id="resumeBtn">Resume</button>
+                <button class="btn secondary" id="quitBtn">Quit</button>
+            </div>
+        </div>
+
+        <!-- Game Over Screen -->
+        <div class="overlay hidden" id="gameOverScreen">
+            <div class="panel">
+                <h1 class="title" style="font-size:2rem;">Game Over</h1>
+                <div id="recordBadge" class="record-badge" style="display:none;">New Record!</div>
+                <div class="final-score" id="finalScore">0</div>
+                <div class="stat-row">
+                    <div class="stat"><div class="v" id="goLevel">1</div><div class="l">Level</div></div>
+                    <div class="stat"><div class="v" id="goBest">0</div><div class="l">Best</div></div>
+                    <div class="stat"><div class="v" id="goCombo">0</div><div class="l">Top Combo</div></div>
+                </div>
+                <button class="btn" id="againBtn">Play Again</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ===================== Setup =====================
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        const container = document.querySelector('.game-container');
+
+        const hud = document.getElementById('hud');
+        const scoreVal = document.getElementById('scoreVal');
+        const bestVal = document.getElementById('bestVal');
+        const levelVal = document.getElementById('levelVal');
+        const levelFill = document.getElementById('levelFill');
+        const livesVal = document.getElementById('livesVal');
+
+        const startScreen = document.getElementById('startScreen');
+        const pauseScreen = document.getElementById('pauseScreen');
+        const gameOverScreen = document.getElementById('gameOverScreen');
+
+        let W = 0, H = 0;
+        function resize() {
+            const dpr = Math.min(window.devicePixelRatio || 1, 2);
+            W = container.clientWidth;
+            H = container.clientHeight;
+            canvas.width = W * dpr;
+            canvas.height = H * dpr;
+            canvas.style.width = W + 'px';
+            canvas.style.height = H + 'px';
+            ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+        }
+        resize();
+        window.addEventListener('resize', resize);
+
+        const TYPE = { NORMAL: 'normal', GOLDEN: 'golden', BOMB: 'bomb', ICE: 'ice', RAINBOW: 'rainbow', DANGER: 'danger' };
+
+        // ===================== Game State =====================
+        const state = {
+            score: 0,
+            best: parseInt(localStorage.getItem('bubblePop2Best') || '0', 10),
+            level: 1,
+            levelStartScore: 0,
+            nextLevelScore: 600,
+            lives: 3,
+            maxLives: 3,
+            combo: 0,
+            topCombo: 0,
+            comboTimer: 0,
+            multiplierTimer: 0,   // rainbow x2
+            slowmoTimer: 0,       // rainbow slow-mo
+            running: false,
+            paused: false,
+            muted: false,
+            shake: 0,
+            spawnTimer: 0,
+            spawnInterval: 1.4,
+            bgHue: 0,
+            comboPulse: 0,
+            flash: 0,
+            flashColor: '255,60,90'
+        };
+
+        let bubbles = [];
+        let particles = [];
+        let floaters = [];
+        let shockwaves = [];
+        let bokeh = [];
+        let banners = [];
+
+        // ===================== Audio =====================
+        let actx = null, masterGain = null, noiseBuffer = null;
+
+        function initAudio() {
+            if (actx) return;
+            actx = new (window.AudioContext || window.webkitAudioContext)();
+            masterGain = actx.createGain();
+            masterGain.gain.value = 0.5;
+            masterGain.connect(actx.destination);
+            // pre-generate a reusable noise buffer
+            const len = actx.sampleRate * 0.4;
+            noiseBuffer = actx.createBuffer(1, len, actx.sampleRate);
+            const d = noiseBuffer.getChannelData(0);
+            for (let i = 0; i < len; i++) d[i] = Math.random() * 2 - 1;
+        }
+
+        function noiseBurst(dur, freq, gain, decay) {
+            if (!actx) return;
+            const src = actx.createBufferSource();
+            src.buffer = noiseBuffer;
+            const filt = actx.createBiquadFilter();
+            filt.type = 'bandpass';
+            filt.frequency.value = freq;
+            filt.Q.value = 0.8;
+            const g = actx.createGain();
+            g.gain.setValueAtTime(gain, actx.currentTime);
+            g.gain.exponentialRampToValueAtTime(0.001, actx.currentTime + (decay || dur));
+            src.connect(filt); filt.connect(g); g.connect(masterGain);
+            src.start();
+            src.stop(actx.currentTime + dur);
+        }
+
+        function tone(freq, dur, type, gain, freqEnd) {
+            if (!actx) return;
+            const o = actx.createOscillator();
+            const g = actx.createGain();
+            o.type = type || 'sine';
+            o.frequency.setValueAtTime(freq, actx.currentTime);
+            if (freqEnd) o.frequency.exponentialRampToValueAtTime(freqEnd, actx.currentTime + dur);
+            g.gain.setValueAtTime(gain || 0.3, actx.currentTime);
+            g.gain.exponentialRampToValueAtTime(0.001, actx.currentTime + dur);
+            o.connect(g); g.connect(masterGain);
+            o.start();
+            o.stop(actx.currentTime + dur);
+        }
+
+        function playPop(combo) {
+            if (!actx || state.muted) return;
+            const base = 480 + Math.min(combo, 25) * 38;
+            tone(base, 0.16, 'sine', 0.32, base * 0.45);
+            noiseBurst(0.12, 1600, 0.12, 0.1);
+        }
+        function playGolden() {
+            if (!actx || state.muted) return;
+            [523, 659, 784, 1047].forEach((f, i) => setTimeout(() => tone(f, 0.18, 'triangle', 0.25), i * 55));
+        }
+        function playBomb() {
+            if (!actx || state.muted) return;
+            tone(120, 0.5, 'sine', 0.5, 40);
+            noiseBurst(0.4, 320, 0.4, 0.35);
+        }
+        function playRainbow() {
+            if (!actx || state.muted) return;
+            tone(400, 0.6, 'sawtooth', 0.18, 1600);
+            [659, 880, 1175].forEach((f, i) => setTimeout(() => tone(f, 0.25, 'sine', 0.18), i * 70));
+        }
+        function playIce() {
+            if (!actx || state.muted) return;
+            tone(1800, 0.08, 'square', 0.12, 900);
+            noiseBurst(0.1, 4000, 0.1, 0.08);
+        }
+        function playDanger() {
+            if (!actx || state.muted) return;
+            tone(180, 0.25, 'sawtooth', 0.32, 90);
+            tone(90, 0.3, 'square', 0.2);
+        }
+        function playLevelUp() {
+            if (!actx || state.muted) return;
+            [523, 659, 784, 1047, 1319].forEach((f, i) => setTimeout(() => tone(f, 0.22, 'triangle', 0.22), i * 70));
+        }
+        function playLifeLost() {
+            if (!actx || state.muted) return;
+            tone(330, 0.4, 'sine', 0.3, 110);
+        }
+
+        // ===================== Helpers =====================
+        const rand = (a, b) => a + Math.random() * (b - a);
+
+        function pickType() {
+            const lvl = state.level;
+            const r = Math.random();
+            // weighted probabilities scaling with level
+            const danger = lvl >= 3 ? Math.min(0.16, 0.04 + lvl * 0.012) : 0;
+            const bomb = lvl >= 2 ? Math.min(0.10, 0.03 + lvl * 0.008) : 0;
+            const rainbow = lvl >= 2 ? Math.min(0.06, 0.015 + lvl * 0.004) : 0.01;
+            const golden = Math.min(0.09, 0.04 + lvl * 0.004);
+            const ice = lvl >= 2 ? Math.min(0.12, 0.04 + lvl * 0.007) : 0.03;
+            let acc = 0;
+            if (r < (acc += danger)) return TYPE.DANGER;
+            if (r < (acc += bomb)) return TYPE.BOMB;
+            if (r < (acc += rainbow)) return TYPE.RAINBOW;
+            if (r < (acc += golden)) return TYPE.GOLDEN;
+            if (r < (acc += ice)) return TYPE.ICE;
+            return TYPE.NORMAL;
+        }
+
+        function comboMultiplier() {
+            return Math.min(6, 1 + Math.floor(state.combo / 4) * 0.5);
+        }
+
+        // ===================== Entities =====================
+        class Bubble {
+            constructor(x, type) {
+                this.type = type;
+                if (type === TYPE.BOMB) this.radius = rand(30, 38);
+                else if (type === TYPE.DANGER) this.radius = rand(26, 34);
+                else if (type === TYPE.GOLDEN) this.radius = rand(24, 32);
+                else this.radius = rand(22, 50);
+
+                this.x = Math.max(this.radius, Math.min(W - this.radius, x));
+                this.y = H + this.radius + rand(0, 40);
+                this.vx = rand(-1, 1);
+                const lvlSpeed = 1 + (state.level - 1) * 0.08;
+                this.vy = -rand(0.6, 1.1) * lvlSpeed;
+                this.hue = rand(0, 360);
+                this.wobble = rand(0, Math.PI * 2);
+                this.spin = 0;
+                this.active = true;
+                this.popping = false;
+                this.popScale = 1;
+                this.alpha = 1;
+                this.cracked = false; // for ice
+                this.points = this.basePoints();
+            }
+
+            basePoints() {
+                switch (this.type) {
+                    case TYPE.GOLDEN: return 120;
+                    case TYPE.ICE: return Math.ceil((58 - this.radius) * 3.2);
+                    case TYPE.BOMB: return 30;
+                    case TYPE.RAINBOW: return 60;
+                    case TYPE.DANGER: return 0;
+                    default: return Math.ceil((58 - this.radius) * 1.6);
+                }
+            }
+
+            update(f) {
+                if (this.popping) {
+                    this.popScale += 1.6 * f;
+                    this.alpha -= 5 * f;
+                    return this.alpha <= 0;
+                }
+                this.wobble += 0.05 * f;
+                this.spin += 0.02 * f;
+                this.vy -= 0.012 * f; // gentle buoyancy
+                this.vx += Math.sin(this.wobble) * 0.04 * f;
+                this.vx *= Math.pow(0.99, f);
+                this.x += this.vx * f;
+                this.y += this.vy * f;
+
+                if (this.x - this.radius < 0) { this.x = this.radius; this.vx = Math.abs(this.vx) * 0.8; }
+                else if (this.x + this.radius > W) { this.x = W - this.radius; this.vx = -Math.abs(this.vx) * 0.8; }
+
+                return false;
+            }
+
+            escaped() {
+                return this.active && !this.popping && (this.y + this.radius < -4);
+            }
+
+            contains(px, py) {
+                const dx = px - this.x, dy = py - this.y;
+                return dx * dx + dy * dy <= this.radius * this.radius * 1.1;
+            }
+
+            draw() {
+                const r = this.radius * this.popScale;
+                ctx.save();
+                ctx.globalAlpha = this.alpha;
+                switch (this.type) {
+                    case TYPE.GOLDEN: this.drawSphere('#fff7d6', '#ffd24c', '#c8860b', r, 'rgba(255,200,80,0.55)'); this.drawSparkle(r); break;
+                    case TYPE.BOMB: this.drawBomb(r); break;
+                    case TYPE.ICE: this.drawIce(r); break;
+                    case TYPE.RAINBOW: this.drawRainbow(r); break;
+                    case TYPE.DANGER: this.drawDanger(r); break;
+                    default: {
+                        const c1 = `hsl(${this.hue},100%,88%)`, c2 = `hsl(${this.hue},75%,58%)`, c3 = `hsl(${this.hue},85%,40%)`;
+                        this.drawSphere(c1, c2, c3, r, `hsla(${this.hue},90%,60%,0.4)`);
+                    }
+                }
+                ctx.restore();
+            }
+
+            drawSphere(c1, c2, c3, r, glow) {
+                if (glow) { ctx.shadowColor = glow; ctx.shadowBlur = 16; }
+                const g = ctx.createRadialGradient(this.x - r * 0.35, this.y - r * 0.35, r * 0.1, this.x, this.y, r);
+                g.addColorStop(0, c1); g.addColorStop(0.45, c2); g.addColorStop(1, c3);
+                ctx.beginPath(); ctx.arc(this.x, this.y, r, 0, Math.PI * 2);
+                ctx.fillStyle = g; ctx.fill();
+                ctx.shadowBlur = 0;
+                // highlight
+                const hg = ctx.createRadialGradient(this.x - r * 0.45, this.y - r * 0.45, 1, this.x - r * 0.4, this.y - r * 0.4, r * 0.55);
+                hg.addColorStop(0, 'rgba(255,255,255,0.7)'); hg.addColorStop(1, 'rgba(255,255,255,0)');
+                ctx.beginPath(); ctx.arc(this.x, this.y, r, 0, Math.PI * 2);
+                ctx.fillStyle = hg; ctx.fill();
+                // rim
+                ctx.beginPath(); ctx.arc(this.x, this.y, r, 0, Math.PI * 2);
+                ctx.strokeStyle = 'rgba(255,255,255,0.22)'; ctx.lineWidth = 1.5; ctx.stroke();
+            }
+
+            drawSparkle(r) {
+                const t = this.spin * 4;
+                ctx.save();
+                ctx.translate(this.x - r * 0.3, this.y - r * 0.3);
+                ctx.rotate(t);
+                ctx.strokeStyle = 'rgba(255,255,255,0.9)';
+                ctx.lineWidth = 1.6;
+                const s = r * 0.32;
+                ctx.beginPath(); ctx.moveTo(-s, 0); ctx.lineTo(s, 0); ctx.moveTo(0, -s); ctx.lineTo(0, s); ctx.stroke();
+                ctx.restore();
+            }
+
+            drawBomb(r) {
+                ctx.shadowColor = 'rgba(255,80,40,0.6)'; ctx.shadowBlur = 14;
+                const g = ctx.createRadialGradient(this.x - r * 0.35, this.y - r * 0.35, r * 0.1, this.x, this.y, r);
+                g.addColorStop(0, '#6b7280'); g.addColorStop(0.5, '#2b313f'); g.addColorStop(1, '#13161f');
+                ctx.beginPath(); ctx.arc(this.x, this.y, r, 0, Math.PI * 2); ctx.fillStyle = g; ctx.fill();
+                ctx.shadowBlur = 0;
+                // pulsing danger ring
+                const pulse = 0.5 + 0.5 * Math.sin(this.spin * 8);
+                ctx.beginPath(); ctx.arc(this.x, this.y, r * 0.6, 0, Math.PI * 2);
+                ctx.strokeStyle = `rgba(255,${80 + pulse * 100},40,${0.5 + pulse * 0.4})`;
+                ctx.lineWidth = 2.5; ctx.stroke();
+                // fuse spark
+                ctx.beginPath(); ctx.arc(this.x, this.y - r * 0.85, 3 + pulse * 2, 0, Math.PI * 2);
+                ctx.fillStyle = `rgba(255,${180 + pulse * 60},80,1)`; ctx.fill();
+                // highlight
+                const hg = ctx.createRadialGradient(this.x - r * 0.45, this.y - r * 0.45, 1, this.x - r * 0.4, this.y - r * 0.4, r * 0.5);
+                hg.addColorStop(0, 'rgba(255,255,255,0.5)'); hg.addColorStop(1, 'rgba(255,255,255,0)');
+                ctx.beginPath(); ctx.arc(this.x, this.y, r, 0, Math.PI * 2); ctx.fillStyle = hg; ctx.fill();
+            }
+
+            drawIce(r) {
+                ctx.shadowColor = 'rgba(120,210,255,0.6)'; ctx.shadowBlur = 14;
+                const g = ctx.createRadialGradient(this.x - r * 0.35, this.y - r * 0.35, r * 0.1, this.x, this.y, r);
+                g.addColorStop(0, '#ffffff'); g.addColorStop(0.5, '#bfeaff'); g.addColorStop(1, '#5fa8d8');
+                ctx.beginPath(); ctx.arc(this.x, this.y, r, 0, Math.PI * 2); ctx.fillStyle = g; ctx.fill();
+                ctx.shadowBlur = 0;
+                // frosty facets
+                ctx.strokeStyle = 'rgba(255,255,255,0.6)'; ctx.lineWidth = 1.2;
+                for (let i = 0; i < 6; i++) {
+                    const a = (i / 6) * Math.PI * 2 + this.spin;
+                    ctx.beginPath(); ctx.moveTo(this.x, this.y);
+                    ctx.lineTo(this.x + Math.cos(a) * r * 0.8, this.y + Math.sin(a) * r * 0.8); ctx.stroke();
+                }
+                if (this.cracked) {
+                    ctx.strokeStyle = 'rgba(40,90,130,0.85)'; ctx.lineWidth = 2;
+                    ctx.beginPath();
+                    ctx.moveTo(this.x - r * 0.5, this.y - r * 0.3);
+                    ctx.lineTo(this.x - r * 0.1, this.y + r * 0.1);
+                    ctx.lineTo(this.x + r * 0.3, this.y - r * 0.2);
+                    ctx.lineTo(this.x + r * 0.5, this.y + r * 0.4);
+                    ctx.stroke();
+                }
+                ctx.beginPath(); ctx.arc(this.x, this.y, r, 0, Math.PI * 2);
+                ctx.strokeStyle = 'rgba(255,255,255,0.5)'; ctx.lineWidth = 1.5; ctx.stroke();
+            }
+
+            drawRainbow(r) {
+                ctx.shadowColor = 'rgba(255,255,255,0.5)'; ctx.shadowBlur = 16;
+                const hueBase = (this.spin * 120) % 360;
+                const g = ctx.createRadialGradient(this.x - r * 0.3, this.y - r * 0.3, r * 0.1, this.x, this.y, r);
+                g.addColorStop(0, `hsla(${hueBase},100%,85%,0.95)`);
+                g.addColorStop(0.4, `hsla(${(hueBase + 120) % 360},90%,60%,0.9)`);
+                g.addColorStop(0.7, `hsla(${(hueBase + 240) % 360},90%,55%,0.85)`);
+                g.addColorStop(1, `hsla(${(hueBase + 60) % 360},90%,45%,0.8)`);
+                ctx.beginPath(); ctx.arc(this.x, this.y, r, 0, Math.PI * 2); ctx.fillStyle = g; ctx.fill();
+                ctx.shadowBlur = 0;
+                const hg = ctx.createRadialGradient(this.x - r * 0.4, this.y - r * 0.4, 1, this.x - r * 0.35, this.y - r * 0.35, r * 0.5);
+                hg.addColorStop(0, 'rgba(255,255,255,0.8)'); hg.addColorStop(1, 'rgba(255,255,255,0)');
+                ctx.beginPath(); ctx.arc(this.x, this.y, r, 0, Math.PI * 2); ctx.fillStyle = hg; ctx.fill();
+            }
+
+            drawDanger(r) {
+                const pulse = 0.5 + 0.5 * Math.sin(this.spin * 7);
+                ctx.shadowColor = `rgba(255,40,40,${0.5 + pulse * 0.4})`; ctx.shadowBlur = 16;
+                // spikes
+                ctx.beginPath();
+                const spikes = 12;
+                for (let i = 0; i < spikes * 2; i++) {
+                    const a = (i / (spikes * 2)) * Math.PI * 2 + this.spin;
+                    const rad = i % 2 === 0 ? r * 1.25 : r * 0.95;
+                    const px = this.x + Math.cos(a) * rad, py = this.y + Math.sin(a) * rad;
+                    if (i === 0) ctx.moveTo(px, py); else ctx.lineTo(px, py);
+                }
+                ctx.closePath();
+                ctx.fillStyle = '#5a0a0a'; ctx.fill();
+                ctx.shadowBlur = 0;
+                // body
+                const g = ctx.createRadialGradient(this.x - r * 0.3, this.y - r * 0.3, r * 0.1, this.x, this.y, r);
+                g.addColorStop(0, '#ff7a7a'); g.addColorStop(0.5, '#c41616'); g.addColorStop(1, '#6e0606');
+                ctx.beginPath(); ctx.arc(this.x, this.y, r, 0, Math.PI * 2); ctx.fillStyle = g; ctx.fill();
+                // warning mark
+                ctx.strokeStyle = 'rgba(255,255,255,0.92)'; ctx.lineWidth = 3; ctx.lineCap = 'round';
+                const s = r * 0.4;
+                ctx.beginPath();
+                ctx.moveTo(this.x - s, this.y - s); ctx.lineTo(this.x + s, this.y + s);
+                ctx.moveTo(this.x + s, this.y - s); ctx.lineTo(this.x - s, this.y + s);
+                ctx.stroke();
+            }
+        }
+
+        class Particle {
+            constructor(x, y, color, speed) {
+                this.x = x; this.y = y; this.color = color;
+                this.size = rand(2, 5);
+                const a = rand(0, Math.PI * 2);
+                const sp = speed || rand(2, 7);
+                this.vx = Math.cos(a) * sp;
+                this.vy = Math.sin(a) * sp;
+                this.life = 1;
+                this.fade = rand(0.012, 0.03);
+            }
+            update(f) {
+                this.x += this.vx * f; this.y += this.vy * f;
+                this.vy += 0.12 * f; this.vx *= Math.pow(0.96, f);
+                this.life -= this.fade * f;
+                return this.life > 0;
+            }
+            draw() {
+                ctx.globalAlpha = Math.max(0, this.life);
+                ctx.fillStyle = this.color;
+                ctx.beginPath(); ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2); ctx.fill();
+                ctx.globalAlpha = 1;
+            }
+        }
+
+        class Floater {
+            constructor(x, y, text, color, size) {
+                this.x = x; this.y = y; this.text = text; this.color = color;
+                this.size = size || 18; this.life = 1; this.vy = -1.1;
+            }
+            update(f) { this.y += this.vy * f; this.life -= 0.018 * f; return this.life > 0; }
+            draw() {
+                ctx.save();
+                ctx.globalAlpha = Math.max(0, this.life);
+                ctx.font = `800 ${this.size}px 'Segoe UI', sans-serif`;
+                ctx.textAlign = 'center';
+                ctx.lineWidth = 3; ctx.strokeStyle = 'rgba(0,0,0,0.5)';
+                ctx.strokeText(this.text, this.x, this.y);
+                ctx.fillStyle = this.color;
+                ctx.fillText(this.text, this.x, this.y);
+                ctx.restore();
+            }
+        }
+
+        class Shockwave {
+            constructor(x, y, maxR, color) {
+                this.x = x; this.y = y; this.r = 4; this.maxR = maxR;
+                this.color = color; this.life = 1;
+            }
+            update(f) { this.r += (this.maxR - this.r) * 0.18 * f; this.life -= 0.04 * f; return this.life > 0; }
+            draw() {
+                ctx.save();
+                ctx.globalAlpha = Math.max(0, this.life);
+                ctx.strokeStyle = this.color;
+                ctx.lineWidth = 3 * this.life + 1;
+                ctx.beginPath(); ctx.arc(this.x, this.y, this.r, 0, Math.PI * 2); ctx.stroke();
+                ctx.restore();
+            }
+        }
+
+        function initBokeh() {
+            bokeh = [];
+            for (let i = 0; i < 16; i++) {
+                bokeh.push({
+                    x: Math.random() * W, y: Math.random() * H,
+                    r: rand(20, 70), speed: rand(0.1, 0.5),
+                    hue: rand(180, 280), alpha: rand(0.03, 0.1)
+                });
+            }
+        }
+
+        // ===================== Core actions =====================
+        function spawnWave() {
+            const groupX = rand(W * 0.12, W * 0.88);
+            const count = 1 + Math.floor(Math.random() * 3);
+            // sometimes spawn a single special instead of a cluster
+            if (Math.random() < 0.35) {
+                bubbles.push(new Bubble(groupX, pickType()));
+            } else {
+                for (let i = 0; i < count; i++) {
+                    const t = Math.random() < 0.7 ? TYPE.NORMAL : pickType();
+                    bubbles.push(new Bubble(groupX + rand(-50, 50), t));
+                }
+            }
+        }
+
+        function addScore(amount, x, y, color, big) {
+            state.score += amount;
+            scoreVal.textContent = state.score;
+            floaters.push(new Floater(x, y, '+' + amount, color || '#fff', big ? 26 : 16 + Math.min(12, amount / 10)));
+            checkLevelUp();
+        }
+
+        function burst(x, y, color, n, speed) {
+            for (let i = 0; i < n; i++) particles.push(new Particle(x, y, color, speed));
+        }
+
+        function bumpCombo() {
+            state.combo++;
+            state.topCombo = Math.max(state.topCombo, state.combo);
+            state.comboTimer = 1.6;
+            state.comboPulse = 1;
+            if (state.combo > 1 && state.combo % 5 === 0) {
+                banners.push({ text: state.combo + ' COMBO!', life: 1.2, color: '#ffd24c', y: H * 0.34, big: true });
+            }
+        }
+
+        function resetCombo() {
+            state.combo = 0;
+            state.comboTimer = 0;
+        }
+
+        function popBubble(b, chained) {
+            if (!b.active || b.popping) return;
+
+            // Ice needs two hits
+            if (b.type === TYPE.ICE && !b.cracked && !chained) {
+                b.cracked = true;
+                playIce();
+                burst(b.x, b.y, '#bfeaff', 8, 4);
+                shockwaves.push(new Shockwave(b.x, b.y, b.radius * 1.4, 'rgba(190,234,255,0.8)'));
+                return;
+            }
+
+            // Danger bubble = penalty (unless cleared by a bomb blast)
+            if (b.type === TYPE.DANGER && !chained) {
+                b.active = false; b.popping = true; b.popScale = 1;
+                playDanger();
+                loseLife('Spiked!', b.x, b.y);
+                burst(b.x, b.y, '#ff4d4d', 24, 7);
+                shockwaves.push(new Shockwave(b.x, b.y, b.radius * 2, 'rgba(255,60,60,0.9)'));
+                state.shake = Math.max(state.shake, 14);
+                resetCombo();
+                return;
+            }
+
+            b.active = false; b.popping = true; b.popScale = 1;
+
+            const mult = comboMultiplier() * (state.multiplierTimer > 0 ? 2 : 1);
+
+            if (b.type === TYPE.BOMB) {
+                playBomb();
+                detonate(b);
+                bumpCombo();
+                return;
+            }
+
+            if (b.type === TYPE.RAINBOW) {
+                playRainbow();
+                state.multiplierTimer = 6;
+                state.slowmoTimer = 4;
+                banners.push({ text: '2× SLOW-MO!', life: 1.4, color: '#c471ed', y: H * 0.3, big: true });
+                burst(b.x, b.y, `hsl(${rand(0, 360)},90%,65%)`, 30, 6);
+                shockwaves.push(new Shockwave(b.x, b.y, b.radius * 3, 'rgba(255,255,255,0.8)'));
+                bumpCombo();
+                const pts = Math.round(b.points * mult);
+                addScore(pts, b.x, b.y - b.radius, '#fff', true);
+                return;
+            }
+
+            // normal / golden / ice
+            const pts = Math.round(b.points * mult);
+            const color = b.type === TYPE.GOLDEN ? '#ffd24c' : `hsl(${b.hue},80%,65%)`;
+            bumpCombo();
+            if (b.type === TYPE.GOLDEN) {
+                playGolden();
+                burst(b.x, b.y, '#ffd24c', 26, 6);
+                shockwaves.push(new Shockwave(b.x, b.y, b.radius * 2.2, 'rgba(255,210,80,0.85)'));
+                addScore(pts, b.x, b.y - b.radius, '#ffd24c', true);
+            } else {
+                playPop(state.combo);
+                burst(b.x, b.y, color, Math.floor(b.radius / 2), 5);
+                shockwaves.push(new Shockwave(b.x, b.y, b.radius * 1.6, `hsla(${b.hue},90%,65%,0.6)`));
+                addScore(pts, b.x, b.y - b.radius, color);
+            }
+        }
+
+        function detonate(bomb) {
+            state.shake = Math.max(state.shake, 18);
+            burst(bomb.x, bomb.y, '#ffb347', 36, 9);
+            burst(bomb.x, bomb.y, '#ff5e3a', 24, 6);
+            shockwaves.push(new Shockwave(bomb.x, bomb.y, 150, 'rgba(255,140,40,0.9)'));
+            shockwaves.push(new Shockwave(bomb.x, bomb.y, 220, 'rgba(255,80,40,0.5)'));
+            state.flash = 0.5; state.flashColor = '255,140,40';
+
+            const blast = 150;
+            const mult = comboMultiplier() * (state.multiplierTimer > 0 ? 2 : 1);
+            addScore(Math.round(bomb.points * mult), bomb.x, bomb.y - bomb.radius, '#ffb347');
+
+            bubbles.forEach(other => {
+                if (other === bomb || !other.active || other.popping) return;
+                const dx = other.x - bomb.x, dy = other.y - bomb.y;
+                if (dx * dx + dy * dy <= (blast + other.radius) * (blast + other.radius)) {
+                    if (other.type === TYPE.BOMB) {
+                        other.active = false; other.popping = true; other.popScale = 1;
+                        detonate(other); // chain
+                    } else if (other.type === TYPE.DANGER) {
+                        // bomb safely clears spiked bubbles, no penalty
+                        other.active = false; other.popping = true; other.popScale = 1;
+                        burst(other.x, other.y, '#ff4d4d', 14, 5);
+                    } else {
+                        const pts = Math.round(Math.max(5, other.points) * mult);
+                        other.active = false; other.popping = true; other.popScale = 1;
+                        const color = other.type === TYPE.GOLDEN ? '#ffd24c' : `hsl(${other.hue},80%,65%)`;
+                        burst(other.x, other.y, color, Math.floor(other.radius / 2), 5);
+                        addScore(pts, other.x, other.y - other.radius, color);
+                        bumpCombo();
+                    }
+                }
+            });
+        }
+
+        function loseLife(reason, x, y) {
+            state.lives--;
+            updateLives();
+            playLifeLost();
+            state.flash = 0.6; state.flashColor = '255,50,80';
+            state.shake = Math.max(state.shake, 12);
+            if (x !== undefined) floaters.push(new Floater(x, y, '-1 ♥', '#ff4d6d', 20));
+            if (state.lives <= 0) endGame();
+        }
+
+        function updateLives() {
+            let html = '';
+            for (let i = 0; i < state.maxLives; i++) {
+                html += `<span class="heart${i < state.lives ? '' : ' empty'}">${i < state.lives ? '&#10084;' : '&#9825;'}</span>`;
+            }
+            livesVal.innerHTML = html;
+        }
+
+        function checkLevelUp() {
+            if (state.score >= state.nextLevelScore) {
+                state.level++;
+                state.levelStartScore = state.nextLevelScore;
+                state.nextLevelScore += 600 + state.level * 150;
+                state.spawnInterval = Math.max(0.55, 1.4 - state.level * 0.07);
+                levelVal.textContent = state.level;
+                playLevelUp();
+                banners.push({ text: 'LEVEL ' + state.level, life: 1.6, color: '#36d1dc', y: H * 0.28, big: true });
+
+                // reward extra life every 3 levels (cap 5)
+                if (state.level % 3 === 0 && state.maxLives < 5) {
+                    state.maxLives++;
+                    state.lives = Math.min(state.maxLives, state.lives + 1);
+                    updateLives();
+                    banners.push({ text: '+1 LIFE', life: 1.6, color: '#ff4d6d', y: H * 0.38, big: false });
+                }
+            }
+            const span = state.nextLevelScore - state.levelStartScore;
+            const prog = Math.max(0, Math.min(1, (state.score - state.levelStartScore) / span));
+            levelFill.style.width = (prog * 100) + '%';
+        }
+
+        // ===================== Input =====================
+        function handlePointer(e) {
+            if (!state.running || state.paused) return;
+            e.preventDefault();
+            const rect = canvas.getBoundingClientRect();
+            const points = e.touches && e.touches.length ? e.touches : [e];
+            for (const p of points) {
+                const x = p.clientX - rect.left;
+                const y = p.clientY - rect.top;
+                for (let i = bubbles.length - 1; i >= 0; i--) {
+                    const b = bubbles[i];
+                    if (b.active && !b.popping && b.contains(x, y)) {
+                        popBubble(b, false);
+                        break;
+                    }
+                }
+            }
+        }
+        canvas.addEventListener('touchstart', handlePointer, { passive: false });
+        canvas.addEventListener('mousedown', handlePointer);
+
+        // ===================== Game flow =====================
+        function resetState() {
+            state.score = 0;
+            state.level = 1;
+            state.levelStartScore = 0;
+            state.nextLevelScore = 600;
+            state.lives = 3;
+            state.maxLives = 3;
+            state.combo = 0;
+            state.topCombo = 0;
+            state.comboTimer = 0;
+            state.multiplierTimer = 0;
+            state.slowmoTimer = 0;
+            state.spawnTimer = 0;
+            state.spawnInterval = 1.4;
+            state.shake = 0;
+            state.flash = 0;
+            state.comboPulse = 0;
+            bubbles = []; particles = []; floaters = []; shockwaves = []; banners = [];
+            scoreVal.textContent = '0';
+            bestVal.textContent = state.best;
+            levelVal.textContent = '1';
+            levelFill.style.width = '0%';
+            updateLives();
+            initBokeh();
+        }
+
+        function startGame() {
+            initAudio();
+            if (actx && actx.state === 'suspended') actx.resume();
+            resetState();
+            startScreen.classList.add('hidden');
+            gameOverScreen.classList.add('hidden');
+            pauseScreen.classList.add('hidden');
+            hud.style.display = 'flex';
+            state.running = true;
+            state.paused = false;
+            lastTime = performance.now();
+            requestAnimationFrame(loop);
+        }
+
+        function endGame() {
+            state.running = false;
+            if (state.score > state.best) {
+                state.best = state.score;
+                localStorage.setItem('bubblePop2Best', String(state.best));
+                document.getElementById('recordBadge').style.display = 'inline-block';
+            } else {
+                document.getElementById('recordBadge').style.display = 'none';
+            }
+            document.getElementById('finalScore').textContent = state.score;
+            document.getElementById('goLevel').textContent = state.level;
+            document.getElementById('goBest').textContent = state.best;
+            document.getElementById('goCombo').textContent = state.topCombo + '×';
+            bestVal.textContent = state.best;
+            gameOverScreen.classList.remove('hidden');
+            requestAnimationFrame(idleLoop);
+        }
+
+        function togglePause(force) {
+            if (!state.running) return;
+            state.paused = force !== undefined ? force : !state.paused;
+            if (state.paused) {
+                pauseScreen.classList.remove('hidden');
+            } else {
+                pauseScreen.classList.add('hidden');
+                lastTime = performance.now();
+                requestAnimationFrame(loop);
+            }
+        }
+
+        function quitToMenu() {
+            state.running = false;
+            state.paused = false;
+            pauseScreen.classList.add('hidden');
+            hud.style.display = 'none';
+            bestVal.textContent = state.best;
+            startScreen.classList.remove('hidden');
+            requestAnimationFrame(idleLoop);
+        }
+
+        // ===================== Main loop =====================
+        let lastTime = 0;
+        function loop(ts) {
+            if (!state.running || state.paused) return;
+            let dt = (ts - lastTime) / 1000;
+            lastTime = ts;
+            if (dt > 0.05) dt = 0.05;
+
+            const slow = state.slowmoTimer > 0 ? 0.4 : 1;
+            const f = dt * 60 * slow;     // frame factor for entity motion
+            const rf = dt * 60;           // real-time frame factor for timers/fx
+
+            // timers (real time, unaffected by slow-mo so they feel right)
+            if (state.comboTimer > 0) { state.comboTimer -= dt; if (state.comboTimer <= 0) resetCombo(); }
+            if (state.multiplierTimer > 0) state.multiplierTimer -= dt;
+            if (state.slowmoTimer > 0) state.slowmoTimer -= dt;
+            if (state.comboPulse > 0) state.comboPulse = Math.max(0, state.comboPulse - rf * 0.08);
+            if (state.shake > 0) state.shake = Math.max(0, state.shake - rf * 0.8);
+            if (state.flash > 0) state.flash = Math.max(0, state.flash - rf * 0.04);
+
+            // spawning
+            state.spawnTimer += dt;
+            if (state.spawnTimer >= state.spawnInterval && bubbles.length < 26) {
+                spawnWave();
+                state.spawnTimer = 0;
+            }
+
+            // update bubbles
+            for (let i = bubbles.length - 1; i >= 0; i--) {
+                const b = bubbles[i];
+                const done = b.update(f);
+                if (done) { bubbles.splice(i, 1); continue; }
+                if (b.escaped()) {
+                    bubbles.splice(i, 1);
+                    if (b.type === TYPE.DANGER) {
+                        // letting a spiked bubble escape is good — small reward
+                        floaters.push(new Floater(b.x, 24, 'safe', '#7CFC9A', 14));
+                    } else {
+                        loseLife('Escaped!', b.x, 30);
+                        resetCombo();
+                    }
+                }
+            }
+            resolveCollisions(f);
+
+            particles = particles.filter(p => p.update(f));
+            floaters = floaters.filter(fl => fl.update(rf));
+            shockwaves = shockwaves.filter(s => s.update(rf));
+            banners = banners.filter(bn => { bn.life -= dt; return bn.life > 0; });
+
+            render(ts);
+            requestAnimationFrame(loop);
+        }
+
+        function resolveCollisions(f) {
+            for (let i = 0; i < bubbles.length; i++) {
+                const a = bubbles[i];
+                if (a.popping) continue;
+                for (let j = i + 1; j < bubbles.length; j++) {
+                    const b = bubbles[j];
+                    if (b.popping) continue;
+                    const dx = b.x - a.x, dy = b.y - a.y;
+                    const dist = Math.hypot(dx, dy);
+                    const min = a.radius + b.radius;
+                    if (dist > 0 && dist < min) {
+                        const nx = dx / dist, ny = dy / dist;
+                        const overlap = (min - dist) / 2;
+                        a.x -= nx * overlap; a.y -= ny * overlap;
+                        b.x += nx * overlap; b.y += ny * overlap;
+                        const dvx = b.vx - a.vx, dvy = b.vy - a.vy;
+                        const vn = dvx * nx + dvy * ny;
+                        if (vn > 0) continue;
+                        const jImp = -(1.5) * vn / 2;
+                        a.vx -= jImp * nx; a.vy -= jImp * ny;
+                        b.vx += jImp * nx; b.vy += jImp * ny;
+                    }
+                }
+            }
+        }
+
+        // ===================== Render =====================
+        function render(ts) {
+            ctx.clearRect(0, 0, W, H);
+
+            // animated background glow
+            state.bgHue = (state.bgHue + 0.1) % 360;
+            const bg = ctx.createLinearGradient(0, 0, W, H);
+            bg.addColorStop(0, `hsl(${230 + Math.sin(ts / 9000) * 12}, 55%, 12%)`);
+            bg.addColorStop(1, `hsl(${255 + Math.cos(ts / 11000) * 12}, 60%, 7%)`);
+            ctx.fillStyle = bg;
+            ctx.fillRect(0, 0, W, H);
+
+            // bokeh
+            bokeh.forEach(o => {
+                o.y -= o.speed;
+                if (o.y + o.r < 0) { o.y = H + o.r; o.x = Math.random() * W; }
+                const g = ctx.createRadialGradient(o.x, o.y, 0, o.x, o.y, o.r);
+                g.addColorStop(0, `hsla(${o.hue},70%,70%,${o.alpha})`);
+                g.addColorStop(1, `hsla(${o.hue},70%,70%,0)`);
+                ctx.fillStyle = g;
+                ctx.beginPath(); ctx.arc(o.x, o.y, o.r, 0, Math.PI * 2); ctx.fill();
+            });
+
+            ctx.save();
+            if (state.shake > 0.4) {
+                ctx.translate(rand(-state.shake, state.shake) * 0.5, rand(-state.shake, state.shake) * 0.5);
+            }
+
+            shockwaves.forEach(s => s.draw());
+            bubbles.forEach(b => b.draw());
+            particles.forEach(p => p.draw());
+            floaters.forEach(fl => fl.draw());
+
+            // combo indicator
+            if (state.combo > 1) drawCombo();
+
+            // banners
+            banners.forEach(bn => {
+                const a = Math.min(1, bn.life * 1.5);
+                ctx.save();
+                ctx.globalAlpha = a;
+                ctx.textAlign = 'center';
+                const sz = bn.big ? 40 : 24;
+                ctx.font = `900 ${sz}px 'Segoe UI', sans-serif`;
+                ctx.lineWidth = 5; ctx.strokeStyle = 'rgba(0,0,0,0.45)';
+                ctx.strokeText(bn.text, W / 2, bn.y);
+                ctx.fillStyle = bn.color;
+                ctx.shadowColor = bn.color; ctx.shadowBlur = 18;
+                ctx.fillText(bn.text, W / 2, bn.y);
+                ctx.restore();
+            });
+
+            ctx.restore();
+
+            // slow-mo vignette tint
+            if (state.slowmoTimer > 0) {
+                const v = ctx.createRadialGradient(W / 2, H / 2, H * 0.3, W / 2, H / 2, H * 0.7);
+                v.addColorStop(0, 'rgba(120,80,200,0)');
+                v.addColorStop(1, `rgba(120,80,200,${0.18 * Math.min(1, state.slowmoTimer)})`);
+                ctx.fillStyle = v; ctx.fillRect(0, 0, W, H);
+            }
+
+            // damage / event flash
+            if (state.flash > 0.01) {
+                ctx.fillStyle = `rgba(${state.flashColor},${state.flash * 0.35})`;
+                ctx.fillRect(0, 0, W, H);
+            }
+        }
+
+        function drawCombo() {
+            const mult = comboMultiplier() * (state.multiplierTimer > 0 ? 2 : 1);
+            const scale = 1 + state.comboPulse * 0.25;
+            const cx = W / 2, cy = H - 56;
+            ctx.save();
+            ctx.translate(cx, cy);
+            ctx.scale(scale, scale);
+            ctx.textAlign = 'center';
+            // multiplier text
+            ctx.font = `900 30px 'Segoe UI', sans-serif`;
+            const hue = (state.combo * 18) % 360;
+            ctx.lineWidth = 4; ctx.strokeStyle = 'rgba(0,0,0,0.5)';
+            ctx.strokeText(`${mult}×`, 0, 0);
+            ctx.fillStyle = `hsl(${hue},90%,65%)`;
+            ctx.shadowColor = `hsl(${hue},90%,60%)`; ctx.shadowBlur = 16;
+            ctx.fillText(`${mult}×`, 0, 0);
+            ctx.shadowBlur = 0;
+            ctx.font = `700 12px 'Segoe UI', sans-serif`;
+            ctx.fillStyle = 'rgba(255,255,255,0.75)';
+            ctx.fillText(`${state.combo} COMBO`, 0, 18);
+            ctx.restore();
+
+            // combo timer bar
+            const barW = 120, t = Math.max(0, state.comboTimer / 1.6);
+            ctx.fillStyle = 'rgba(255,255,255,0.15)';
+            ctx.fillRect(cx - barW / 2, cy + 26, barW, 4);
+            ctx.fillStyle = `hsl(${hue},90%,60%)`;
+            ctx.fillRect(cx - barW / 2, cy + 26, barW * t, 4);
+        }
+
+        // ===================== Idle background (menu) =====================
+        function idleLoop(ts) {
+            if (state.running) return;
+            ctx.clearRect(0, 0, W, H);
+            const bg = ctx.createLinearGradient(0, 0, W, H);
+            bg.addColorStop(0, `hsl(${230 + Math.sin(ts / 9000) * 12}, 55%, 12%)`);
+            bg.addColorStop(1, `hsl(${255 + Math.cos(ts / 11000) * 12}, 60%, 7%)`);
+            ctx.fillStyle = bg; ctx.fillRect(0, 0, W, H);
+            if (!bokeh.length) initBokeh();
+            bokeh.forEach(o => {
+                o.y -= o.speed;
+                if (o.y + o.r < 0) { o.y = H + o.r; o.x = Math.random() * W; }
+                const g = ctx.createRadialGradient(o.x, o.y, 0, o.x, o.y, o.r);
+                g.addColorStop(0, `hsla(${o.hue},70%,70%,${o.alpha})`);
+                g.addColorStop(1, `hsla(${o.hue},70%,70%,0)`);
+                ctx.fillStyle = g;
+                ctx.beginPath(); ctx.arc(o.x, o.y, o.r, 0, Math.PI * 2); ctx.fill();
+            });
+            requestAnimationFrame(idleLoop);
+        }
+        requestAnimationFrame(idleLoop);
+
+        // ===================== Buttons =====================
+        document.getElementById('playBtn').addEventListener('click', startGame);
+        document.getElementById('againBtn').addEventListener('click', startGame);
+        document.getElementById('resumeBtn').addEventListener('click', () => togglePause(false));
+        document.getElementById('quitBtn').addEventListener('click', quitToMenu);
+        document.getElementById('pauseBtn').addEventListener('click', () => togglePause());
+        document.getElementById('muteBtn').addEventListener('click', () => {
+            state.muted = !state.muted;
+            document.getElementById('muteBtn').innerHTML = state.muted ? '&#128263;' : '&#128266;';
+            if (masterGain) masterGain.gain.value = state.muted ? 0 : 0.5;
+        });
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'p' || e.key === 'P' || e.key === 'Escape') {
+                if (state.running) togglePause();
+            }
+        });
+
+        // pause when tab/app loses focus
+        document.addEventListener('visibilitychange', () => {
+            if (document.hidden && state.running && !state.paused) togglePause(true);
+        });
+
+        bestVal.textContent = state.best;
+    </script>
+</body>
+
+</html>
