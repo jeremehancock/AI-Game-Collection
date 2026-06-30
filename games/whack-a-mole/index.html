@@ -180,6 +180,29 @@
             animation: blink 0.5s steps(1) infinite;
         }
 
+        /* brief red jolt on the timer when a bomb steals time */
+        .gauge.time.penalty {
+            animation: timePenalty 0.45s ease;
+        }
+
+        @keyframes timePenalty {
+
+            0%,
+            100% {
+                box-shadow: inset 0 2px 10px rgba(0, 0, 0, 0.6);
+                transform: translateX(0);
+            }
+
+            20% {
+                box-shadow: inset 0 0 0 2px #ff5b5b, 0 0 16px rgba(255, 91, 91, 0.7);
+                transform: translateX(-3px);
+            }
+
+            60% {
+                transform: translateX(3px);
+            }
+        }
+
         @keyframes blink {
             50% {
                 opacity: 0.35;
@@ -533,8 +556,8 @@
             }
         }
 
-        /* ===== Golden mole variant ===== */
-        .hole.gold .mole-body {
+        /* ===== Golden mole variant (used in-game and in the legend) ===== */
+        .gold .mole-body {
             background: radial-gradient(60% 50% at 50% 30%, #ffe9a8 0%, #ffcb2b 55%, #d99a00 100%);
             box-shadow:
                 inset 0 -8px 14px rgba(120, 80, 0, 0.4),
@@ -542,12 +565,12 @@
                 0 0 18px rgba(255, 203, 43, 0.8);
         }
 
-        .hole.gold .mole-body::before,
-        .hole.gold .mole-body::after {
+        .gold .mole-body::before,
+        .gold .mole-body::after {
             background: radial-gradient(circle at 50% 40%, #ffcb2b, #c98f00);
         }
 
-        .hole.gold .belly {
+        .gold .belly {
             background: radial-gradient(circle at 50% 35%, #fff4d2, #ffe49b);
         }
 
@@ -564,7 +587,7 @@
             display: none;
         }
 
-        .hole.gold .crown {
+        .gold .crown {
             display: block;
         }
 
@@ -827,25 +850,42 @@
             gap: 10px;
         }
 
-        .badge {
-            width: 26px;
-            height: 26px;
-            border-radius: 50%;
+        /* Legend icons reuse the real mole / bomb artwork at badge size,
+           complete with a dirt mound in front so they read like gameplay */
+        .legend-icon {
+            position: relative;
+            width: 38px;
+            height: 40px;
             flex: 0 0 auto;
-            box-shadow: inset 0 -3px 5px rgba(0, 0, 0, 0.35), 0 1px 3px rgba(0, 0, 0, 0.4);
         }
 
-        .badge.mole {
-            background: radial-gradient(circle at 50% 35%, #b07a4a, #6e4324);
+        .mole-mini {
+            position: absolute;
+            left: 50%;
+            bottom: 0;
+            width: 100%;
+            height: 100%;
+            transform: translateX(-50%);
         }
 
-        .badge.gold {
-            background: radial-gradient(circle at 50% 35%, #ffe9a8, #d99a00);
-            box-shadow: 0 0 10px rgba(255, 203, 43, 0.8);
+        .mole-mini .mole-body {
+            display: block;
+            width: 84%;
+            margin: 0 auto;
         }
 
-        .badge.bomb {
-            background: radial-gradient(circle at 35% 30%, #5a5a64, #0c0c12);
+        .legend-icon .bomb {
+            position: absolute;
+            left: 50%;
+            bottom: 6px;
+            width: 76%;
+            margin: 0;
+            transform: translateX(-50%);
+        }
+
+        .legend-icon .mound {
+            height: 46%;
+            z-index: 3;
         }
 
         .best-line {
@@ -977,9 +1017,50 @@
                 <div class="overlay" id="startOverlay">
                     <div class="big"><span class="a">Ready?</span></div>
                     <div class="legend">
-                        <div class="row"><span class="badge mole"></span> Mole — whack for points</div>
-                        <div class="row"><span class="badge gold"></span> Gold — bonus + extra time</div>
-                        <div class="row"><span class="badge bomb"></span> Bomb — don't whack it!</div>
+                        <div class="row">
+                            <span class="legend-icon">
+                                <span class="mole-mini">
+                                    <span class="mole-body">
+                                        <span class="eye l"></span>
+                                        <span class="eye r"></span>
+                                        <span class="snout"></span>
+                                        <span class="nose"></span>
+                                        <span class="tooth"></span>
+                                        <span class="belly"></span>
+                                    </span>
+                                </span>
+                                <span class="mound"></span>
+                            </span>
+                            <span>Mole — whack for points</span>
+                        </div>
+                        <div class="row">
+                            <span class="legend-icon">
+                                <span class="mole-mini gold">
+                                    <span class="crown"></span>
+                                    <span class="mole-body">
+                                        <span class="eye l"></span>
+                                        <span class="eye r"></span>
+                                        <span class="snout"></span>
+                                        <span class="nose"></span>
+                                        <span class="tooth"></span>
+                                        <span class="belly"></span>
+                                    </span>
+                                </span>
+                                <span class="mound"></span>
+                            </span>
+                            <span>Gold — bonus + extra time</span>
+                        </div>
+                        <div class="row">
+                            <span class="legend-icon">
+                                <span class="bomb">
+                                    <span class="fuse"></span>
+                                    <span class="spark">✦</span>
+                                    <span class="shine"></span>
+                                </span>
+                                <span class="mound"></span>
+                            </span>
+                            <span>Bomb — don't whack it!</span>
+                        </div>
                     </div>
                     <div class="best-line">Best: <b id="bestStart">0</b></div>
                     <button class="btn blink" id="startBtn">Press Start</button>
@@ -1237,15 +1318,19 @@
                 field.classList.add('flash');
                 setTimeout(() => cabinet.classList.remove('shake'), 320);
                 setTimeout(() => field.classList.remove('flash'), 360);
-                const penalty = Math.min(20, state.score);
-                state.score = Math.max(0, state.score - 20);
+                const POINT_PENALTY = 25;
+                const TIME_PENALTY = 3;
+                const lost = Math.min(POINT_PENALTY, state.score);
+                state.score = Math.max(0, state.score - POINT_PENALTY);
                 scoreEl.textContent = state.score;
                 breakCombo();
-                popText(clientX, clientY, penalty > 0 ? '-' + penalty : '💥', 'red');
+                popText(clientX, clientY, lost > 0 ? '-' + lost : '💥', 'red');
+                popText(clientX, clientY - 30, '-' + TIME_PENALTY + 's', 'red');
                 burst(clientX, clientY, ['#26262e', '#5a5a64', '#ff5b5b']);
                 h.el.classList.remove('up');
                 h.active = false;
                 h.type = null;
+                penalizeTime(TIME_PENALTY);
                 return;
             }
 
@@ -1300,6 +1385,14 @@
         function addTime(sec) {
             state.timeLeft += sec;
             updateTimer(true);
+        }
+
+        function penalizeTime(sec) {
+            state.timeLeft = Math.max(0, state.timeLeft - sec);
+            updateTimer(true);
+            timeGauge.classList.add('penalty');
+            setTimeout(() => timeGauge.classList.remove('penalty'), 450);
+            if (state.timeLeft <= 0) endGame();
         }
 
         // ---- Particle / score effects ----
