@@ -13,14 +13,21 @@
             -webkit-tap-highlight-color: transparent;
         }
 
+        :root {
+            --x-color: #5eead4;
+            --o-color: #fbbf24;
+            --x-glow: rgba(94, 234, 212, 0.55);
+            --o-glow: rgba(251, 191, 36, 0.55);
+        }
+
         html,
         body {
             height: 100%;
         }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
-            background: white;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             /* Fill the viewport exactly so the game fits without scrolling.
                100dvh tracks the dynamic viewport on mobile browsers. */
             height: 100vh;
@@ -31,50 +38,64 @@
             justify-content: center;
             touch-action: manipulation;
             overflow: hidden;
+            color: #fff;
+            user-select: none;
+            -webkit-user-select: none;
+            -webkit-touch-callout: none;
             padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
         }
 
         .container {
-            background: white;
-            border-radius: 20px;
-            padding: clamp(10px, 3vw, 24px);
-            max-width: 500px;
+            background: rgba(255, 255, 255, 0.12);
+            backdrop-filter: blur(14px);
+            -webkit-backdrop-filter: blur(14px);
+            border: 1px solid rgba(255, 255, 255, 0.18);
+            border-radius: 24px;
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.3);
+            padding: clamp(12px, 3vw, 26px);
+            max-width: 460px;
             width: 100%;
             height: 100%;
             display: flex;
             flex-direction: column;
-            gap: clamp(8px, 1.8vh, 18px);
+            gap: clamp(8px, 1.7vh, 16px);
         }
 
         h1 {
             text-align: center;
-            color: #667eea;
-            font-size: clamp(1.3em, 5vw, 2em);
+            font-size: clamp(1.4em, 5.5vw, 2.1em);
+            font-weight: 800;
+            letter-spacing: 0.5px;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.25);
             flex: 0 0 auto;
         }
 
         .mode-selector {
             display: flex;
-            gap: 10px;
+            gap: 8px;
+            background: rgba(0, 0, 0, 0.18);
+            border-radius: 14px;
+            padding: 5px;
             flex: 0 0 auto;
         }
 
         .mode-btn {
             flex: 1;
-            padding: clamp(8px, 1.6vh, 15px);
-            font-size: clamp(14px, 3.6vw, 16px);
-            border: 2px solid #667eea;
-            background: white;
-            color: #667eea;
+            padding: clamp(8px, 1.6vh, 13px);
+            font-size: clamp(13px, 3.6vw, 15px);
+            border: none;
+            background: transparent;
+            color: rgba(255, 255, 255, 0.75);
             border-radius: 10px;
             cursor: pointer;
-            transition: all 0.3s;
-            font-weight: bold;
+            transition: all 0.25s ease;
+            font-weight: 700;
         }
 
         .mode-btn.active {
-            background: #667eea;
-            color: white;
+            background: rgba(255, 255, 255, 0.95);
+            color: #5a4a8a;
+            box-shadow: 0 4px 14px rgba(0, 0, 0, 0.2);
         }
 
         .difficulty-selector {
@@ -87,30 +108,101 @@
             flex: 1;
             padding: clamp(7px, 1.2vh, 10px);
             font-size: clamp(12px, 3.2vw, 14px);
-            border: 2px solid #764ba2;
-            background: white;
-            color: #764ba2;
-            border-radius: 8px;
+            border: 1.5px solid rgba(255, 255, 255, 0.35);
+            background: rgba(255, 255, 255, 0.08);
+            color: #fff;
+            border-radius: 10px;
             cursor: pointer;
-            transition: all 0.3s;
+            transition: all 0.25s ease;
             font-weight: 600;
         }
 
         .difficulty-btn.active {
-            background: #764ba2;
-            color: white;
+            background: rgba(255, 255, 255, 0.95);
+            border-color: rgba(255, 255, 255, 0.95);
+            color: #5a4a8a;
+            box-shadow: 0 4px 14px rgba(0, 0, 0, 0.18);
         }
 
         .difficulty-selector.hidden {
             display: none;
         }
 
+        .score {
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            background: rgba(0, 0, 0, 0.18);
+            border-radius: 14px;
+            padding: clamp(6px, 1.3vh, 12px) 6px;
+            flex: 0 0 auto;
+        }
+
+        .score-item {
+            text-align: center;
+            flex: 1;
+        }
+
+        .score-item.divider {
+            border-left: 1px solid rgba(255, 255, 255, 0.18);
+            border-right: 1px solid rgba(255, 255, 255, 0.18);
+        }
+
+        .score-label {
+            color: rgba(255, 255, 255, 0.7);
+            font-size: clamp(0.72em, 2.9vw, 0.85em);
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .score-value {
+            font-weight: 800;
+            font-size: clamp(1.3em, 5.5vw, 1.7em);
+            margin-top: 2px;
+        }
+
+        .score-item.x-score .score-value {
+            color: var(--x-color);
+        }
+
+        .score-item.o-score .score-value {
+            color: var(--o-color);
+        }
+
         .status {
             text-align: center;
-            font-size: clamp(1em, 4vw, 1.2em);
-            color: #333;
-            font-weight: 600;
+            font-size: clamp(1em, 4.2vw, 1.25em);
+            font-weight: 700;
+            min-height: 1.4em;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
             flex: 0 0 auto;
+            text-shadow: 0 1px 6px rgba(0, 0, 0, 0.2);
+        }
+
+        .status .turn-dot {
+            width: 0.7em;
+            height: 0.7em;
+            border-radius: 50%;
+            flex: 0 0 auto;
+            transition: background 0.25s ease, box-shadow 0.25s ease;
+        }
+
+        .status.x-turn .turn-dot {
+            background: var(--x-color);
+            box-shadow: 0 0 10px var(--x-glow);
+        }
+
+        .status.o-turn .turn-dot {
+            background: var(--o-color);
+            box-shadow: 0 0 10px var(--o-glow);
+        }
+
+        .status.ended .turn-dot {
+            display: none;
         }
 
         /* Wrapper takes the remaining vertical space and centers a square
@@ -130,17 +222,17 @@
             display: grid;
             grid-template-columns: repeat(3, 1fr);
             grid-template-rows: repeat(3, 1fr);
-            gap: clamp(6px, 2cqmin, 10px);
+            gap: clamp(6px, 2.4cqmin, 12px);
         }
 
         .cell {
-            background: #f0f0f0;
-            border: none;
-            border-radius: clamp(8px, 4cqmin, 15px);
-            font-size: clamp(1.6rem, 16cqmin, 4rem);
-            font-weight: bold;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.14);
+            border-radius: clamp(10px, 5cqmin, 18px);
+            font-size: clamp(1.8rem, 18cqmin, 4.6rem);
+            font-weight: 800;
             cursor: pointer;
-            transition: all 0.2s;
+            transition: background 0.2s ease, transform 0.1s ease, box-shadow 0.2s ease;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -148,24 +240,63 @@
             line-height: 1;
         }
 
+        .cell:hover:not(.x):not(.o) {
+            background: rgba(255, 255, 255, 0.18);
+        }
+
         .cell:active {
-            transform: scale(0.95);
+            transform: scale(0.94);
+        }
+
+        .cell.x,
+        .cell.o {
+            cursor: default;
         }
 
         .cell.x {
-            color: #667eea;
+            color: var(--x-color);
+            text-shadow: 0 0 14px var(--x-glow);
         }
 
         .cell.o {
-            color: #764ba2;
+            color: var(--o-color);
+            text-shadow: 0 0 14px var(--o-glow);
+        }
+
+        /* Pop-in animation when a mark is placed */
+        .cell .mark {
+            display: inline-block;
+            animation: pop-in 0.22s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        @keyframes pop-in {
+            0% {
+                transform: scale(0.2);
+                opacity: 0;
+            }
+            100% {
+                transform: scale(1);
+                opacity: 1;
+            }
         }
 
         .cell.winner {
-            background: #ffd700;
-            animation: pulse 0.5s ease-in-out;
+            background: rgba(255, 255, 255, 0.95);
+            border-color: #fff;
+            animation: winnerPulse 0.6s ease-in-out;
         }
 
-        @keyframes pulse {
+        .cell.winner.x {
+            color: #0d9488;
+            text-shadow: none;
+        }
+
+        .cell.winner.o {
+            color: #d97706;
+            text-shadow: none;
+        }
+
+        @keyframes winnerPulse {
 
             0%,
             100% {
@@ -173,48 +304,34 @@
             }
 
             50% {
-                transform: scale(1.1);
+                transform: scale(1.12);
+                box-shadow: 0 0 24px rgba(255, 255, 255, 0.7);
             }
         }
 
         .reset-btn {
-            padding: clamp(10px, 1.8vh, 15px);
-            font-size: clamp(15px, 4vw, 18px);
-            background: #667eea;
-            color: white;
+            padding: clamp(11px, 1.9vh, 15px);
+            font-size: clamp(15px, 4vw, 17px);
+            background: rgba(255, 255, 255, 0.95);
+            color: #5a4a8a;
             border: none;
-            border-radius: 10px;
+            border-radius: 12px;
             cursor: pointer;
-            font-weight: bold;
-            transition: background 0.3s;
-            align-self: center;
+            font-weight: 800;
+            letter-spacing: 0.3px;
+            transition: transform 0.1s ease, box-shadow 0.2s ease, background 0.2s ease;
+            box-shadow: 0 6px 18px rgba(0, 0, 0, 0.22);
+            align-self: stretch;
             flex: 0 0 auto;
+        }
+
+        .reset-btn:hover {
+            background: #fff;
         }
 
         .reset-btn:active {
-            background: #5568d3;
-        }
-
-        .score {
-            display: flex;
-            justify-content: space-around;
-            font-size: clamp(0.95em, 3.6vw, 1.1em);
-            flex: 0 0 auto;
-        }
-
-        .score-item {
-            text-align: center;
-        }
-
-        .score-label {
-            color: #666;
-            font-size: 0.9em;
-        }
-
-        .score-value {
-            font-weight: bold;
-            font-size: clamp(1.2em, 5vw, 1.5em);
-            color: #333;
+            transform: translateY(1px) scale(0.99);
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
         }
     </style>
 </head>
@@ -235,21 +352,24 @@
         </div>
 
         <div class="score">
-            <div class="score-item">
+            <div class="score-item x-score">
                 <div class="score-label">X Wins</div>
                 <div class="score-value" id="xScore">0</div>
             </div>
-            <div class="score-item">
+            <div class="score-item divider">
                 <div class="score-label">Draws</div>
                 <div class="score-value" id="drawScore">0</div>
             </div>
-            <div class="score-item">
+            <div class="score-item o-score">
                 <div class="score-label">O Wins</div>
                 <div class="score-value" id="oScore">0</div>
             </div>
         </div>
 
-        <div class="status" id="status">X's Turn</div>
+        <div class="status x-turn" id="status">
+            <span class="turn-dot"></span>
+            <span id="statusText">X's Turn</span>
+        </div>
 
         <div class="board-wrapper">
             <div class="board" id="board"></div>
@@ -261,6 +381,7 @@
     <script>
         const board = document.getElementById('board');
         const status = document.getElementById('status');
+        const statusText = document.getElementById('statusText');
         const resetBtn = document.getElementById('resetBtn');
         const aiModeBtn = document.getElementById('aiMode');
         const playerModeBtn = document.getElementById('playerMode');
@@ -285,6 +406,18 @@
             [0, 4, 8], [2, 4, 6] // diagonals
         ];
 
+        function setStatus(text, turn) {
+            statusText.textContent = text;
+            status.classList.remove('x-turn', 'o-turn', 'ended');
+            if (turn === 'X') {
+                status.classList.add('x-turn');
+            } else if (turn === 'O') {
+                status.classList.add('o-turn');
+            } else {
+                status.classList.add('ended');
+            }
+        }
+
         function initBoard() {
             board.innerHTML = '';
             for (let i = 0; i < 9; i++) {
@@ -297,7 +430,9 @@
         }
 
         function handleCellClick(e) {
-            const index = e.target.dataset.index;
+            const cell = e.target.closest('.cell');
+            if (!cell) return;
+            const index = cell.dataset.index;
 
             if (gameBoard[index] !== '' || !gameActive) return;
             if (isAIMode && currentPlayer === 'O') return;
@@ -305,19 +440,20 @@
             makeMove(index, currentPlayer);
 
             if (gameActive && isAIMode && currentPlayer === 'O') {
-                setTimeout(makeAIMove, 300);
+                setStatus('AI is thinking…', 'O');
+                setTimeout(makeAIMove, 350);
             }
         }
 
         function makeMove(index, player) {
             gameBoard[index] = player;
             const cell = board.children[index];
-            cell.textContent = player;
+            cell.innerHTML = `<span class="mark">${player}</span>`;
             cell.classList.add(player.toLowerCase());
 
             if (checkWinner(player)) {
                 gameActive = false;
-                status.textContent = `${player} Wins! 🎉`;
+                setStatus(`${player} Wins! 🎉`, null);
                 scores[player]++;
                 updateScores();
                 highlightWinningCells(player);
@@ -326,14 +462,14 @@
 
             if (gameBoard.every(cell => cell !== '')) {
                 gameActive = false;
-                status.textContent = "It's a Draw!";
+                setStatus("It's a Draw!", null);
                 scores.draw++;
                 updateScores();
                 return;
             }
 
             currentPlayer = currentPlayer === 'X' ? 'O' : 'X';
-            status.textContent = `${currentPlayer}'s Turn`;
+            setStatus(`${currentPlayer}'s Turn`, currentPlayer);
         }
 
         function checkWinner(player) {
@@ -462,7 +598,7 @@
             currentPlayer = 'X';
             gameBoard = ['', '', '', '', '', '', '', '', ''];
             gameActive = true;
-            status.textContent = "X's Turn";
+            setStatus("X's Turn", 'X');
             initBoard();
         }
 
