@@ -1683,6 +1683,55 @@
 			iosInstallPrompt.style.display = 'none';
 		}
 
+		// Keep browser history in sync with the game view so the Android back
+		// gesture (and hardware back button) returns to the main screen
+		let gameHistoryPushed = false;
+
+		function setFrameLocation(iframe, url) {
+			// location.replace keeps iframe navigation out of the browser
+			// history; a plain src change adds an entry, so the back gesture
+			// blanks the game instead of closing it
+			try {
+				iframe.contentWindow.location.replace(url);
+			} catch (e) {
+				iframe.src = url;
+			}
+		}
+
+		function isGameViewOpen() {
+			const container = document.getElementById('gameContainer');
+			const gameModal = document.getElementById('gameModal');
+			return (container && container.style.display === 'block') ||
+				(gameModal && gameModal.style.display === 'flex');
+		}
+
+		function closeGameView() {
+			const container = document.getElementById('gameContainer');
+			if (container && container.style.display === 'block') {
+				goBack();
+			} else {
+				closeModal();
+			}
+		}
+
+		function requestCloseGameView() {
+			if (!isGameViewOpen()) return;
+			if (gameHistoryPushed) {
+				// Pop the entry pushed in loadGame; the popstate handler
+				// closes the view
+				history.back();
+			} else {
+				closeGameView();
+			}
+		}
+
+		window.addEventListener('popstate', () => {
+			gameHistoryPushed = false;
+			if (isGameViewOpen()) {
+				closeGameView();
+			}
+		});
+
 		// Load game function - updated to handle mobile/desktop and different layouts
 		function loadGame(gamePath, gameTitle) {
 			if (isMobile()) {
@@ -1691,7 +1740,7 @@
 				const iframe = document.getElementById('gameFrame');
 				const mobileGameTitle = document.getElementById('mobileGameTitle');
 
-				iframe.src = gamePath;
+				setFrameLocation(iframe, gamePath);
 				if (mobileGameTitle) mobileGameTitle.textContent = gameTitle || '';
 				container.style.display = 'block';
 				document.body.style.overflow = 'hidden';
@@ -1701,9 +1750,16 @@
 				const gameModal = document.getElementById('gameModal');
 				const gameModalFrame = document.getElementById('gameModalFrame');
 
-				gameModalFrame.src = gamePath;
+				setFrameLocation(gameModalFrame, gamePath);
 				gameModal.style.display = 'flex';
 				document.body.style.overflow = 'hidden';
+			}
+
+			// Add a history entry so the browser/system back action closes
+			// the game instead of leaving a blank screen
+			if (!gameHistoryPushed) {
+				history.pushState({ gameView: true }, '');
+				gameHistoryPushed = true;
 			}
 
 			// Hide install buttons when navigating to a game
@@ -1715,7 +1771,7 @@
 			const gameModal = document.getElementById('gameModal');
 			const gameModalFrame = document.getElementById('gameModalFrame');
 
-			gameModalFrame.src = '';
+			setFrameLocation(gameModalFrame, 'about:blank');
 			gameModal.style.display = 'none';
 			document.body.style.overflow = 'auto';
 
@@ -1732,7 +1788,7 @@
 			const backButton = document.getElementById('backButton');
 			const iosInstallPrompt = document.getElementById('iosInstallPrompt');
 
-			iframe.src = '';
+			setFrameLocation(iframe, 'about:blank');
 			container.style.display = 'none';
 			backButton.style.display = 'none';
 			document.body.style.overflow = 'auto';
@@ -2782,21 +2838,21 @@ m489 -117 c31 -26 31 -78 -1 -104 -22 -18 -39 -19 -226 -16 -220 3 -226 5
 			setupViewAllButtons(); // Setup "View All" functionality
 
 			// Event listeners for mobile back button
-			document.getElementById('mobileBackButton').addEventListener('click', goBack);
-			document.getElementById('backButton').addEventListener('click', goBack);
+			document.getElementById('mobileBackButton').addEventListener('click', requestCloseGameView);
+			document.getElementById('backButton').addEventListener('click', requestCloseGameView);
 
 			// Event listeners for desktop modal
-			document.getElementById('gameModalClose').addEventListener('click', closeModal);
+			document.getElementById('gameModalClose').addEventListener('click', requestCloseGameView);
 			document.getElementById('gameModal').addEventListener('click', (e) => {
 				if (e.target === document.getElementById('gameModal')) {
-					closeModal();
+					requestCloseGameView();
 				}
 			});
 
 			// ESC key to close modal
 			document.addEventListener('keydown', (e) => {
 				if (e.key === 'Escape') {
-					closeModal();
+					requestCloseGameView();
 				}
 			});
 
