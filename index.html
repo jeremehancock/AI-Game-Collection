@@ -425,9 +425,9 @@
 			display: none;
 		}
 
-		/* Slim top bar that holds the back button so it never
+		/* Slim bottom bar that holds the back button so it never
 		   overlaps the game itself */
-		.mobile-game-header {
+		.mobile-game-footer {
 			position: absolute;
 			bottom: 0;
 			left: 0;
@@ -442,17 +442,6 @@
 			background: linear-gradient(180deg, #1a1a2e 0%, #16213e 100%);
 			border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 			box-shadow: 0 2px 12px rgba(0, 0, 0, 0.4);
-		}
-
-		.mobile-game-bar-title {
-			flex: 1 1 auto;
-			min-width: 0;
-			color: #fff;
-			font-size: 1rem;
-			font-weight: 700;
-			white-space: nowrap;
-			overflow: hidden;
-			text-overflow: ellipsis;
 		}
 
 		.game-iframe {
@@ -1198,6 +1187,7 @@
 			cursor: pointer;
 			transition: all 0.2s ease;
 			-webkit-tap-highlight-color: transparent;
+			margin-left: 10px;
 		}
 
 		.mobile-back-button:active {
@@ -1580,7 +1570,7 @@
 
 	<!-- Mobile Full-screen -->
 	<div class="game-iframe-container" id="gameContainer">
-		<div class="mobile-game-header">
+		<div class="mobile-game-footer">
 			<button class="mobile-back-button" id="mobileBackButton" aria-label="Return to game selection">
 				<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
 					<path d="M15 18L9 12L15 6" stroke="currentColor" stroke-width="2" stroke-linecap="round"
@@ -1588,7 +1578,6 @@
 				</svg>
 				<span>Back</span>
 			</button>
-			<span class="mobile-game-bar-title" id="mobileGameTitle"></span>
 		</div>
 		<iframe class="game-iframe" id="gameFrame"></iframe>
 	</div>
