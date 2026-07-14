@@ -429,11 +429,10 @@
 		   overlaps the game itself */
 		.mobile-game-header {
 			position: absolute;
-			top: 0;
+			bottom: 0;
 			left: 0;
 			right: 0;
-			height: calc(54px + env(safe-area-inset-top));
-			padding-top: env(safe-area-inset-top);
+			height: 54px;
 			padding-left: 12px;
 			padding-right: 16px;
 			z-index: 2;
@@ -458,10 +457,10 @@
 
 		.game-iframe {
 			position: absolute;
-			top: calc(54px + env(safe-area-inset-top));
+			top: 0;
 			left: 0;
 			width: 100%;
-			height: calc(100% - 54px - env(safe-area-inset-top));
+			height: calc(100% - env(safe-area-inset-top));
 			border: none;
 		}
 
